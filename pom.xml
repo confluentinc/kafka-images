@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.confluent</groupId>
+        <artifactId>common-docker</artifactId>
+        <version>4.1.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>io.confluent.docker</groupId>
+    <artifactId>kafka-images-parent</artifactId>
+    <packaging>pom</packaging>
+
+    <name>${project.artifactId}</name>
+    <description>Build files for Confluent Apache Kafka images</description>
+
+    <modules>
+        <module>cp-kerberos</module>
+        <module>cp-jmxterm</module>
+        <module>cp-kafka</module>
+        <module>cp-enterprise-kafka</module>
+        <module>cp-zookeeper</module>
+    </modules>
+
+    <properties>
+        <docker.registry>368821881613.dkr.ecr.us-west-2.amazonaws.com/</docker.registry>  <!-- Registry for this build. -->
+        <docker.tag>${project.version}</docker.tag>  <!-- Tag for this build -->
+        <docker.upstream-tag>master-latest</docker.upstream-tag>  <!-- Tag for base images -->
+
+        <kafka.commit>unknown</kafka.commit>
+        <packaging.build.label>release</packaging.build.label>
+        <packaging.build.number>latest</packaging.build.number>
+        <packaging.build.download>https://s3-us-west-2.amazonaws.com/kafka-packaging/${packaging.build.label}/${packaging.build.number}/confluent-${project.version}-${kafka.scala.version}.tar.gz</packaging.build.download>
+    </properties>
+
+    <dependencies>
+        <!-- Every child project uses slf4j/log4j for logging, might as well just include them here automatically -->
+        <!-- TODO: Remove after getting this dependency into common -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <!-- Send Kafka packaging metadata to the build. -->
+            <id>docker</id>
+            <activation>
+                <property>
+                    <name>env.BUILD_NUMBER</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.spotify</groupId>
+                        <artifactId>dockerfile-maven-plugin</artifactId>
+                        <version>${dockerfile-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>package</id>
+                                <configuration combine.self="append">
+                                    <buildArgs>
+                                        <PACKAGING_BUILD_DOWNLOAD>${packaging.build.download}</PACKAGING_BUILD_DOWNLOAD>
+                                        <KAFKA_COMMIT>${kafka.commit}</KAFKA_COMMIT>
+                                    </buildArgs>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
