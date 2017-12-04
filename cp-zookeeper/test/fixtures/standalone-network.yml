@@ -48,3 +48,5 @@ services:
       KAFKA_JMX_PORT: 39999
     labels:
     - io.confluent.docker.testing=true
+    extra_hosts:
+    - "moby:127.0.0.1"

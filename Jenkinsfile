@@ -6,7 +6,7 @@ docker_oraclejdk8 {
     dockerRegistry = '368821881613.dkr.ecr.us-west-2.amazonaws.com/'
     dockerRepos = ['confluentinc/cp-kerberos', 'confluentinc/cp-jmxterm', 'confluentinc/cp-kafka', 'confluentinc/cp-enterprise-kafka', 'confluentinc/cp-zookeeper']
     dockerUpstreamRegistry = '368821881613.dkr.ecr.us-west-2.amazonaws.com/'
-    dockerUpstreamTag = 'master-latest'
+    dockerUpstreamTag = '4.0.x-latest'
     mvnPhase = 'package'
     slackChannel = ''
     properties = [
