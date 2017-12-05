@@ -18,6 +18,7 @@
     <description>Build files for Confluent Apache Kafka images</description>
 
     <modules>
+        <module>cp-kafkacat</module>
         <module>cp-kerberos</module>
         <module>cp-jmxterm</module>
         <module>cp-kafka</module>

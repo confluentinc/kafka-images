@@ -19,15 +19,9 @@ KADMIN_KEYTAB_CREATE = """bash -c \
         """
 
 
-def add_registry_and_tag(image):
-    return "{0}{1}:{2}".format(os.environ.get("DOCKER_REGISTRY", ""), image, os.environ.get("DOCKER_TAG", "latest"))
-
-
 class ConfigTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        print("HERE1")
-
         # Create directories with the correct permissions for test with userid and external volumes.
         utils.run_cmd(
             "mkdir -p /tmp/zk-config-kitchen-sink-test/data /tmp/zk-config-kitchen-sink-test/log")
@@ -35,19 +29,13 @@ class ConfigTest(unittest.TestCase):
         # utils.run_cmd(
             # "chown -R 12345 /tmp/zk-config-kitchen-sink-test/data /tmp/zk-config-kitchen-sink-test/log")
 
-        print("HERE2")
-
         # Copy SSL files.
         utils.run_cmd("mkdir -p /tmp/zookeeper-config-test/secrets")
         local_secrets_dir = os.path.join(FIXTURES_DIR, "secrets")
         utils.run_cmd("cp -rf {0} {1}".format(local_secrets_dir, "/tmp/zookeeper-config-test"))
 
-        print("HERE3")
-
         cls.cluster = utils.TestCluster("config-test", FIXTURES_DIR, "standalone-config.yml")
         cls.cluster.start()
-
-        print("HERE4")
 
         # Create keytabs
         cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-config", principal="zookeeper", hostname="sasl-config"))
@@ -191,7 +179,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
         self.is_zk_healthy_for_service("bridge-network", 2181)
         # Test from outside the container
         logs = utils.run_docker_command(
-            image=add_registry_and_tag("confluentinc/cp-zookeeper"),
+            image=utils.add_registry_and_tag("confluentinc/cp-zookeeper"),
             command=HEALTH_CHECK.format(port=22181, host="localhost"),
             host_config={'NetworkMode': 'host'})
         self.assertTrue("PASS" in logs)
@@ -201,7 +189,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
         self.is_zk_healthy_for_service("host-network", 32181)
         # Test from outside the container
         logs = utils.run_docker_command(
-            image=add_registry_and_tag("confluentinc/cp-zookeeper"),
+            image=utils.add_registry_and_tag("confluentinc/cp-zookeeper"),
             command=HEALTH_CHECK.format(port=32181, host="localhost"),
             host_config={'NetworkMode': 'host'})
         self.assertTrue("PASS" in logs)
@@ -210,7 +198,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
 
         # Test from outside the container
         logs = utils.run_docker_command(
-            image=add_registry_and_tag("confluentinc/cp-jmxterm"),
+            image=utils.add_registry_and_tag("confluentinc/cp-jmxterm"),
             command=JMX_CHECK.format(client_port=52181, jmx_hostname="localhost", jmx_port="39999"),
             host_config={'NetworkMode': 'host'})
         self.assertTrue("Version = 3.4." in logs)
@@ -219,7 +207,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
 
         # Test from outside the container
         logs = utils.run_docker_command(
-            image=add_registry_and_tag("confluentinc/cp-jmxterm"),
+            image=utils.add_registry_and_tag("confluentinc/cp-jmxterm"),
             command=JMX_CHECK.format(client_port=2181, jmx_hostname="bridge-network-jmx", jmx_port="9999"),
             host_config={'NetworkMode': 'standalone-network-test_zk'})
         self.assertTrue("Version = 3.4." in logs)
@@ -268,7 +256,7 @@ class ClusterBridgeNetworkTest(unittest.TestCase):
 
         for port in client_ports:
             output = utils.run_docker_command(
-                image=add_registry_and_tag("confluentinc/cp-zookeeper"),
+                image=utils.add_registry_and_tag("confluentinc/cp-zookeeper"),
                 command=MODE_COMMAND.format(port=port),
                 host_config={'NetworkMode': 'host'})
             outputs.append(output)
@@ -339,7 +327,7 @@ class ClusterHostNetworkTest(unittest.TestCase):
         outputs = []
         for port in client_ports:
             output = utils.run_docker_command(
-                image=add_registry_and_tag("confluentinc/cp-zookeeper"),
+                image=utils.add_registry_and_tag("confluentinc/cp-zookeeper"),
                 command=MODE_COMMAND.format(port=port),
                 host_config={'NetworkMode': 'host'})
             outputs.append(output)
