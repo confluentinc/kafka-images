@@ -5,7 +5,7 @@ networks:
     driver: bridge
 services:
   zookeeper-bridge:
-    image: confluentinc/cp-zookeeper:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-zookeeper:${DOCKER_TAG}
     networks:
     - zk
     environment:
@@ -19,7 +19,7 @@ services:
     - io.confluent.docker.testing=true
 
   kafka-bridge:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     networks:
     - zk
     environment:
@@ -32,7 +32,7 @@ services:
     - io.confluent.docker.testing=true
 
   zookeeper-host:
-    image: confluentinc/cp-zookeeper:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-zookeeper:${DOCKER_TAG}
     network_mode: host
     environment:
       ZOOKEEPER_CLIENT_PORT: 32181
@@ -41,7 +41,7 @@ services:
     - io.confluent.docker.testing=true
 
   kafka-host:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     network_mode: host
     environment:
       KAFKA_BROKER_ID: 1
@@ -51,7 +51,7 @@ services:
     - io.confluent.docker.testing=true
 
   kafka-bridged-jmx:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     networks:
     - zk
     environment:
@@ -65,7 +65,7 @@ services:
     - io.confluent.docker.testing=true
 
   kafka-host-jmx:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     network_mode: host
     environment:
       KAFKA_BROKER_ID: 1

@@ -2,7 +2,7 @@
 version: '2'
 services:
   zookeeper-1:
-    image: confluentinc/cp-zookeeper:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-zookeeper:${DOCKER_TAG}
     environment:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 22181
@@ -15,7 +15,7 @@ services:
     - io.confluent.docker.testing=true
 
   zookeeper-2:
-    image: confluentinc/cp-zookeeper:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-zookeeper:${DOCKER_TAG}
     environment:
       ZOOKEEPER_SERVER_ID: 2
       ZOOKEEPER_CLIENT_PORT: 32181
@@ -28,7 +28,7 @@ services:
     - io.confluent.docker.testing=true
 
   zookeeper-3:
-    image: confluentinc/cp-zookeeper:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-zookeeper:${DOCKER_TAG}
     environment:
       ZOOKEEPER_SERVER_ID: 3
       ZOOKEEPER_CLIENT_PORT: 42181
@@ -41,7 +41,7 @@ services:
     - io.confluent.docker.testing=true
 
   kafka-ssl-1:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     network_mode: host
     environment:
       KAFKA_BROKER_ID: 1
@@ -59,7 +59,7 @@ services:
     - io.confluent.docker.testing=true
 
   kafka-ssl-2:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     network_mode: host
     environment:
       KAFKA_BROKER_ID: 2
@@ -77,7 +77,7 @@ services:
     - io.confluent.docker.testing=true
 
   kafka-ssl-3:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     network_mode: host
     environment:
       KAFKA_BROKER_ID: 3

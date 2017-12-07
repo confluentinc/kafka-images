@@ -15,7 +15,7 @@
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
-    <description>Build files for Confluent Apache Kafka images</description>
+    <description>Build files for Confluent's Apache Kafka Docker images</description>
 
     <modules>
         <module>cp-kafkacat</module>

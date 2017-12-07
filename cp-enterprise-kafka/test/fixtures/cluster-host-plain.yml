@@ -41,31 +41,53 @@ services:
     - io.confluent.docker.testing=true
 
   kafka-1:
-    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
+    image: ${DOCKER_REGISTRY}confluentinc/cp-enterprise-kafka:${DOCKER_TAG}
     network_mode: host
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: localhost:22181,localhost:32181,localhost:42181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:19092
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: localhost:19092
+      CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: localhost:22181,localhost:32181,localhost:42181
     labels:
     - io.confluent.docker.testing=true
 
   kafka-2:
-    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
+    image: ${DOCKER_REGISTRY}confluentinc/cp-enterprise-kafka:${DOCKER_TAG}
     network_mode: host
     environment:
       KAFKA_BROKER_ID: 2
       KAFKA_ZOOKEEPER_CONNECT: localhost:22181,localhost:32181,localhost:42181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:29092
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: localhost:29092
+      CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: localhost:22181,localhost:32181,localhost:42181
     labels:
     - io.confluent.docker.testing=true
 
   kafka-3:
-    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
+    image: ${DOCKER_REGISTRY}confluentinc/cp-enterprise-kafka:${DOCKER_TAG}
     network_mode: host
     environment:
       KAFKA_BROKER_ID: 3
       KAFKA_ZOOKEEPER_CONNECT: localhost:22181,localhost:32181,localhost:42181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:39092
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: localhost:39092
+      CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: localhost:22181,localhost:32181,localhost:42181
+    labels:
+    - io.confluent.docker.testing=true
+
+  kafka-4:
+    image: ${DOCKER_REGISTRY}confluentinc/cp-enterprise-kafka:${DOCKER_TAG}
+    network_mode: host
+    environment:
+      KAFKA_BROKER_ID: 4
+      KAFKA_ZOOKEEPER_CONNECT: localhost:22181,localhost:32181,localhost:42181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:49092
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: localhost:49092
+      CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: localhost:22181,localhost:32181,localhost:42181
     labels:
     - io.confluent.docker.testing=true

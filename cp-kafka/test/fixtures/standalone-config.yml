@@ -2,7 +2,7 @@
 version: '2'
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-zookeeper:${DOCKER_TAG}
     environment:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_TICK_TIME: 2000
@@ -11,19 +11,19 @@ services:
     - io.confluent.docker.testing=true
 
   failing-config:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     labels:
     - io.confluent.docker.testing=true
 
   failing-config-zk-connect:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_BROKER_ID: 1
     labels:
     - io.confluent.docker.testing=true
 
   failing-config-adv-listeners:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: something
@@ -31,7 +31,7 @@ services:
     - io.confluent.docker.testing=true
 
   failing-config-adv-port:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -41,7 +41,7 @@ services:
     - io.confluent.docker.testing=true
 
   failing-config-adv-hostname:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -51,7 +51,7 @@ services:
     - io.confluent.docker.testing=true
 
   failing-config-port:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -61,7 +61,7 @@ services:
     - io.confluent.docker.testing=true
 
   failing-config-ssl-keystore:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -70,7 +70,7 @@ services:
     - io.confluent.docker.testing=true
 
   failing-config-ssl-key-password:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -82,7 +82,7 @@ services:
     - io.confluent.docker.testing=true
 
   failing-config-ssl-keystore-password:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -95,7 +95,7 @@ services:
     - io.confluent.docker.testing=true
 
   failing-config-ssl-truststore:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -109,7 +109,7 @@ services:
     - io.confluent.docker.testing=true
 
   failing-config-sasl-jaas:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -118,7 +118,7 @@ services:
     - io.confluent.docker.testing=true
 
   failing-config-sasl-missing-prop:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -128,7 +128,7 @@ services:
     - io.confluent.docker.testing=true
 
   failing-config-ssl-truststore-password:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -143,7 +143,7 @@ services:
     - io.confluent.docker.testing=true
 
   failing-config-host:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -153,7 +153,7 @@ services:
     - io.confluent.docker.testing=true
 
   default-config:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181/defaultconfig
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://default-config:9092
@@ -161,7 +161,7 @@ services:
     - io.confluent.docker.testing=true
 
   full-config:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181/fullconfig
@@ -173,7 +173,7 @@ services:
     - io.confluent.docker.testing=true
 
   external-volumes:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181/externalvolumes
@@ -184,7 +184,7 @@ services:
     - io.confluent.docker.testing=true
 
   random-user:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181/randomuser
@@ -194,7 +194,7 @@ services:
     - io.confluent.docker.testing=true
 
   kitchen-sink:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181/kitchensink
@@ -208,7 +208,7 @@ services:
     - io.confluent.docker.testing=true
 
   ssl-config:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181/sslconfig
@@ -225,7 +225,7 @@ services:
     - io.confluent.docker.testing=true
 
   kerberos:
-    image: confluentinc/cp-kerberos
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kerberos:${DOCKER_TAG}
     environment:
       BOOTSTRAP: 0
     volumes:
@@ -235,7 +235,7 @@ services:
     - io.confluent.docker.testing=true
 
   sasl-ssl-config:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181/sslsaslconfig

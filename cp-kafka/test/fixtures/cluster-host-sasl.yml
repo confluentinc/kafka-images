@@ -2,7 +2,7 @@
 version: '2'
 services:
   zookeeper-sasl-1:
-    image: confluentinc/cp-zookeeper:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-zookeeper:${DOCKER_TAG}
     # This is required because Zookeeper can fail if kerberos is still initializing.
     restart: on-failure:3
     environment:
@@ -23,7 +23,7 @@ services:
     - io.confluent.docker.testing=true
 
   zookeeper-sasl-2:
-    image: confluentinc/cp-zookeeper:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-zookeeper:${DOCKER_TAG}
     # This is required because Zookeeper can fail if kerberos is still initializing.
     restart: on-failure:3
     environment:
@@ -44,7 +44,7 @@ services:
     - io.confluent.docker.testing=true
 
   zookeeper-sasl-3:
-    image: confluentinc/cp-zookeeper:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-zookeeper:${DOCKER_TAG}
     # This is required because Zookeeper can fail if kerberos is still initializing.
     restart: on-failure:3
     environment:
@@ -65,7 +65,7 @@ services:
     - io.confluent.docker.testing=true
 
   kerberos:
-    image: confluentinc/cp-kerberos
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kerberos:${DOCKER_TAG}
     network_mode: host
     environment:
       BOOTSTRAP: 0
@@ -76,7 +76,7 @@ services:
     - io.confluent.docker.testing=true
 
   kafka-sasl-ssl-1:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     network_mode: host
     # This is required because Kafka can fail if kerberos is still initializing.
     restart: on-failure:3
@@ -103,7 +103,7 @@ services:
     - io.confluent.docker.testing=true
 
   kafka-sasl-ssl-2:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     network_mode: host
     restart: on-failure:3
     environment:
@@ -129,7 +129,7 @@ services:
     - io.confluent.docker.testing=true
 
   kafka-sasl-ssl-3:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     network_mode: host
     restart: on-failure:3
     environment:

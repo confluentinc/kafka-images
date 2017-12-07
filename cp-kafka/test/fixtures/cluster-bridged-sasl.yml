@@ -5,7 +5,7 @@ networks:
     driver: bridge
 services:
   zookeeper-1:
-    image: confluentinc/cp-zookeeper:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-zookeeper:${DOCKER_TAG}
     environment:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_TICK_TIME: 2000
@@ -24,7 +24,7 @@ services:
     - io.confluent.docker.testing=true
 
   zookeeper-2:
-    image: confluentinc/cp-zookeeper:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-zookeeper:${DOCKER_TAG}
     environment:
       ZOOKEEPER_SERVER_ID: 2
       ZOOKEEPER_TICK_TIME: 2000
@@ -43,7 +43,7 @@ services:
     - io.confluent.docker.testing=true
 
   zookeeper-3:
-    image: confluentinc/cp-zookeeper:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-zookeeper:${DOCKER_TAG}
     environment:
       ZOOKEEPER_SERVER_ID: 3
       ZOOKEEPER_TICK_TIME: 2000
@@ -62,7 +62,7 @@ services:
     - io.confluent.docker.testing=true
 
   kerberos:
-    image: confluentinc/cp-kerberos
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kerberos:${DOCKER_TAG}
     networks:
     - default
     - zk
@@ -75,7 +75,7 @@ services:
     - io.confluent.docker.testing=true
 
   kafka-sasl-ssl-1:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     hostname: kafka-sasl-ssl-1
     networks:
     - default
@@ -104,7 +104,7 @@ services:
     - io.confluent.docker.testing=true
 
   kafka-sasl-ssl-2:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     hostname: kafka-sasl-ssl-2
     networks:
     - default
@@ -133,7 +133,7 @@ services:
     - io.confluent.docker.testing=true
 
   kafka-sasl-ssl-3:
-    image: confluentinc/cp-kafka:latest
+    image: ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
     hostname: kafka-sasl-ssl-3
     networks:
     - default

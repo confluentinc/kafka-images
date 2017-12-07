@@ -36,7 +36,7 @@ ARG PROJECT_VERSION
 ARG ARTIFACT_ID
 
 ARG KAFKA_COMMIT=unknown
-ENV KAFKA_COMMIT=${KAFKA_COMMIT}
+LABEL io.confluent.kafka.git.id=${KAFKA_COMMIT}
 
 RUN echo "===> Getting confluent tarball package - ${PACKAGING_BUILD_DOWNLOAD}" \
     && wget -q ${PACKAGING_BUILD_DOWNLOAD} -O - | tar --strip-components 1 -C /usr -xvzf - \

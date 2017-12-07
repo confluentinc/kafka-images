@@ -80,17 +80,14 @@ class ConfigTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        machine_name = os.environ["DOCKER_MACHINE_NAME"]
-        cls.machine = utils.TestMachine(machine_name)
-
         # Create directories with the correct permissions for test with userid and external volumes.
-        cls.machine.ssh("mkdir -p /tmp/kafka-config-kitchen-sink-test/data")
-        cls.machine.ssh("sudo chown -R 12345 /tmp/kafka-config-kitchen-sink-test/data")
+        utils.run_cmd("mkdir -p /tmp/kafka-config-kitchen-sink-test/data")
+        # utils.run_cmd("sudo chown -R 12345 /tmp/kafka-config-kitchen-sink-test/data")
 
         # Copy SSL files.
-        cls.machine.ssh("mkdir -p /tmp/kafka-config-test/secrets")
+        utils.run_cmd("mkdir -p /tmp/kafka-config-test/secrets")
         local_secrets_dir = os.path.join(FIXTURES_DIR, "secrets")
-        cls.machine.scp_to_machine(local_secrets_dir, "/tmp/kafka-config-test")
+        utils.run_cmd("cp -rf {0} {1}".format(local_secrets_dir, "/tmp/kafka-config-test"))
 
         cls.cluster = utils.TestCluster("config-test", FIXTURES_DIR, "standalone-config.yml")
         cls.cluster.start()
@@ -103,8 +100,8 @@ class ConfigTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.cluster.shutdown()
-        cls.machine.ssh("sudo rm -rf /tmp/kafka-config-kitchen-sink-test")
-        cls.machine.ssh("sudo rm -rf /tmp/kafka-config-test/secrets")
+        utils.run_cmd("rm -rf /tmp/kafka-config-kitchen-sink-test")
+        utils.run_cmd("rm -rf /tmp/kafka-config-test/secrets")
 
     @classmethod
     def is_kafka_healthy_for_service(cls, service, port, num_brokers, host="localhost", security_protocol="PLAINTEXT"):
@@ -319,7 +316,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
         self.is_kafka_healthy_for_service("kafka-bridge", 19092, 1)
         # Test from outside the container
         logs = utils.run_docker_command(
-            image=util.add_registry_and_tag("confluentinc/cp-kafkacat"),
+            image=utils.add_registry_and_tag("confluentinc/cp-kafkacat"),
             command=KAFKA_CHECK.format(host="localhost", port=19092),
             host_config={'NetworkMode': 'host'})
 
@@ -333,7 +330,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
         self.is_kafka_healthy_for_service("kafka-host", 29092, 1)
         # Test from outside the container
         logs = utils.run_docker_command(
-            image=util.add_registry_and_tag("confluentinc/cp-kafkacat"),
+            image=utils.add_registry_and_tag("confluentinc/cp-kafkacat"),
             command=KAFKA_CHECK.format(host="localhost", port=29092),
             host_config={'NetworkMode': 'host'})
 
@@ -346,7 +343,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
 
         # Test from outside the container
         logs = utils.run_docker_command(
-            image=util.add_registry_and_tag("confluentinc/cp-jmxterm"),
+            image=utils.add_registry_and_tag("confluentinc/cp-jmxterm"),
             command=JMX_CHECK.format(jmx_hostname="localhost", jmx_port="39999"),
             host_config={'NetworkMode': 'host'})
         self.assertTrue("Version = 0.11.0.0-cp1;" in logs)
@@ -355,7 +352,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
 
         # Test from outside the container
         logs = utils.run_docker_command(
-            image=util.add_registry_and_tag("confluentinc/cp-jmxterm"),
+            image=utils.add_registry_and_tag("confluentinc/cp-jmxterm"),
             command=JMX_CHECK.format(jmx_hostname="kafka-bridged-jmx", jmx_port="9999"),
             host_config={'NetworkMode': 'standalone-network-test_zk'})
         self.assertTrue("Version = 0.11.0.0-cp1;" in logs)
@@ -385,7 +382,7 @@ class ClusterBridgedNetworkTest(unittest.TestCase):
         self.is_kafka_healthy_for_service("kafka-1", 9092, 3)
         # Test from outside the container
         logs = utils.run_docker_command(
-            image=util.add_registry_and_tag("confluentinc/cp-kafkacat"),
+            image=utils.add_registry_and_tag("confluentinc/cp-kafkacat"),
             command=KAFKA_CHECK.format(host="kafka-1", port=9092),
             host_config={'NetworkMode': 'cluster-test_zk'})
 
@@ -396,7 +393,7 @@ class ClusterBridgedNetworkTest(unittest.TestCase):
 
         client_logs = utils.run_docker_command(
             300,
-            image=util.add_registry_and_tag("confluentinc/cp-kafka"),
+            image=utils.add_registry_and_tag("confluentinc/cp-kafka"),
             name="kafka-producer",
             environment={'KAFKA_ZOOKEEPER_CONNECT': "zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181"},
             command=PLAIN_CLIENTS.format(brokers="kafka-1:9092", topic="foo", messages=100),
@@ -408,13 +405,10 @@ class ClusterBridgedNetworkTest(unittest.TestCase):
 class ClusterSSLBridgedNetworkTest(ClusterBridgedNetworkTest):
     @classmethod
     def setUpClass(cls):
-        machine_name = os.environ["DOCKER_MACHINE_NAME"]
-        cls.machine = utils.TestMachine(machine_name)
-
         # Copy SSL files.
-        print cls.machine.ssh("mkdir -p /tmp/kafka-cluster-bridge-test/secrets")
+        utils.run_cmd("mkdir -p /tmp/kafka-cluster-bridge-test/secrets")
         local_secrets_dir = os.path.join(FIXTURES_DIR, "secrets")
-        cls.machine.scp_to_machine(local_secrets_dir, "/tmp/kafka-cluster-bridge-test")
+        utils.run_cmd("cp -rf {0} {1}".format(local_secrets_dir, "/tmp/kafka-cluster-bridge-test"))
 
         cls.cluster = utils.TestCluster("cluster-test", FIXTURES_DIR, "cluster-bridged-ssl.yml")
         cls.cluster.start()
@@ -423,14 +417,14 @@ class ClusterSSLBridgedNetworkTest(ClusterBridgedNetworkTest):
     @classmethod
     def tearDownClass(cls):
         cls.cluster.shutdown()
-        cls.machine.ssh("sudo rm -rf /tmp/kafka-cluster-bridge-test/secrets")
+        utils.run_cmd("rm -rf /tmp/kafka-cluster-bridge-test/secrets")
 
     def test_bridge_network(self):
         # Test from within the container
         self.is_kafka_healthy_for_service("kafka-ssl-1", 9093, 3, "kafka-ssl-1", "SSL")
         # Test from outside the container
         logs = utils.run_docker_command(
-            image=util.add_registry_and_tag("confluentinc/cp-kafkacat"),
+            image=utils.add_registry_and_tag("confluentinc/cp-kafkacat"),
             command=KAFKA_SSL_CHECK.format(host="kafka-ssl-1", port=9093),
             host_config={'NetworkMode': 'cluster-test_zk', 'Binds': ['/tmp/kafka-cluster-bridge-test/secrets:/etc/kafka/secrets']})
 
@@ -441,7 +435,7 @@ class ClusterSSLBridgedNetworkTest(ClusterBridgedNetworkTest):
 
         producer_logs = utils.run_docker_command(
             300,
-            image=util.add_registry_and_tag("confluentinc/cp-kafka"),
+            image=utils.add_registry_and_tag("confluentinc/cp-kafka"),
             name="kafka-ssl-bridged-producer",
             environment={'KAFKA_ZOOKEEPER_CONNECT': "zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181/ssl"},
             command=PRODUCER.format(brokers="kafka-ssl-1:9093", topic="foo", config="bridged.producer.ssl.config", messages=100),
@@ -451,7 +445,7 @@ class ClusterSSLBridgedNetworkTest(ClusterBridgedNetworkTest):
 
         consumer_logs = utils.run_docker_command(
             300,
-            image=util.add_registry_and_tag("confluentinc/cp-kafkacat"),
+            image=utils.add_registry_and_tag("confluentinc/cp-kafkacat"),
             name="kafkacat-ssl-bridged-consumer",
             command=KAFKACAT_SSL_CONSUMER.format(brokers="kafka-ssl-1:9093", topic="foo", messages=10),
             host_config={'NetworkMode': 'cluster-test_zk', 'Binds': ['/tmp/kafka-cluster-bridge-test/secrets:/etc/kafka/secrets']})
@@ -462,13 +456,10 @@ class ClusterSSLBridgedNetworkTest(ClusterBridgedNetworkTest):
 class ClusterSASLBridgedNetworkTest(ClusterBridgedNetworkTest):
     @classmethod
     def setUpClass(cls):
-        machine_name = os.environ["DOCKER_MACHINE_NAME"]
-        cls.machine = utils.TestMachine(machine_name)
-
         # Copy SSL files.
-        print cls.machine.ssh("mkdir -p /tmp/kafka-cluster-bridge-test/secrets")
+        utils.run_cmd("mkdir -p /tmp/kafka-cluster-bridge-test/secrets")
         local_secrets_dir = os.path.join(FIXTURES_DIR, "secrets")
-        cls.machine.scp_to_machine(local_secrets_dir, "/tmp/kafka-cluster-bridge-test")
+        utils.run_cmd("cp -rf {0} {1}".format(local_secrets_dir, "/tmp/kafka-cluster-bridge-test"))
 
         cls.cluster = utils.TestCluster("cluster-test", FIXTURES_DIR, "cluster-bridged-sasl.yml")
         cls.cluster.start()
@@ -486,7 +477,7 @@ class ClusterSASLBridgedNetworkTest(ClusterBridgedNetworkTest):
     @classmethod
     def tearDownClass(cls):
         cls.cluster.shutdown()
-        cls.machine.ssh("sudo rm -rf /tmp/kafka-cluster-bridge-test/secrets")
+        utils.run_cmd("rm -rf /tmp/kafka-cluster-bridge-test/secrets")
 
     def test_bridge_network(self):
         # Test from within the container
@@ -495,7 +486,7 @@ class ClusterSASLBridgedNetworkTest(ClusterBridgedNetworkTest):
         # FIXME: Figure out how to use kafkacat with SASL/Kerberos
         # Test from outside the container
         # logs = utils.run_docker_command(
-        #     image=util.add_registry_and_tag("confluentinc/cp-kafkacat"),
+        #     image=utils.add_registry_and_tag("confluentinc/cp-kafkacat"),
         #     name="bridged-kafkacat",
         #     command=KAFKA_SASL_SSL_CHECK.format(host="kafka-sasl-ssl-1", port=9094, broker_principal="kafka", client_principal="bridged_kafkacat", client_host="bridged-kafkacat"),
         #     host_config={'NetworkMode': 'cluster-test_zk', 'Binds': ['/tmp/kafka-cluster-bridge-test/secrets:/etc/kafka/secrets', '/tmp/kafka-cluster-bridge-test/secrets/bridged_krb.conf:/etc/krb5.conf']})
@@ -509,7 +500,7 @@ class ClusterSASLBridgedNetworkTest(ClusterBridgedNetworkTest):
                         'KAFKA_OPTS': "-Djava.security.auth.login.config=/etc/kafka/secrets/bridged_producer_jaas.conf -Djava.security.krb5.conf=/etc/kafka/secrets/bridged_krb.conf -Dsun.net.spi.nameservice.provider.1=sun -Dsun.security.krb5.debug=true"}
         producer_logs = utils.run_docker_command(
             300,
-            image=util.add_registry_and_tag("confluentinc/cp-kafka"),
+            image=utils.add_registry_and_tag("confluentinc/cp-kafka"),
             name="kafka-sasl-ssl-bridged-producer",
             environment=producer_env,
             command=PRODUCER.format(brokers="kafka-sasl-ssl-1:9094", topic="foo", config="bridged.producer.ssl.sasl.config", messages=100),
@@ -522,7 +513,7 @@ class ClusterSASLBridgedNetworkTest(ClusterBridgedNetworkTest):
 
         consumer_logs = utils.run_docker_command(
             300,
-            image=util.add_registry_and_tag("confluentinc/cp-kafka"),
+            image=utils.add_registry_and_tag("confluentinc/cp-kafka"),
             name="kafka-sasl-ssl-bridged-consumer",
             environment=consumer_env,
             command=CONSUMER.format(brokers="kafka-sasl-ssl-1:9094", topic="foo", config="bridged.consumer.ssl.sasl.config", messages=10),
@@ -555,7 +546,7 @@ class ClusterHostNetworkTest(unittest.TestCase):
         self.is_kafka_healthy_for_service("kafka-1", 19092, 3)
         # Test from outside the container
         logs = utils.run_docker_command(
-            image=util.add_registry_and_tag("confluentinc/cp-kafkacat"),
+            image=utils.add_registry_and_tag("confluentinc/cp-kafkacat"),
             command=KAFKA_CHECK.format(host="localhost", port=19092),
             host_config={'NetworkMode': 'host'})
 
@@ -566,7 +557,7 @@ class ClusterHostNetworkTest(unittest.TestCase):
 
         client_logs = utils.run_docker_command(
             300,
-            image=util.add_registry_and_tag("confluentinc/cp-kafka"),
+            image=utils.add_registry_and_tag("confluentinc/cp-kafka"),
             name="kafka-producer",
             environment={'KAFKA_ZOOKEEPER_CONNECT': "localhost:22181,localhost:32181,localhost:42181"},
             command=PLAIN_CLIENTS.format(brokers="localhost:19092", topic="foo", messages=100),
@@ -578,13 +569,10 @@ class ClusterHostNetworkTest(unittest.TestCase):
 class ClusterSSLHostNetworkTest(ClusterHostNetworkTest):
     @classmethod
     def setUpClass(cls):
-        machine_name = os.environ["DOCKER_MACHINE_NAME"]
-        cls.machine = utils.TestMachine(machine_name)
-
         # Copy SSL files.
-        print cls.machine.ssh("mkdir -p /tmp/kafka-cluster-host-test/secrets")
+        utils.run_cmd("mkdir -p /tmp/kafka-cluster-host-test/secrets")
         local_secrets_dir = os.path.join(FIXTURES_DIR, "secrets")
-        cls.machine.scp_to_machine(local_secrets_dir, "/tmp/kafka-cluster-host-test")
+        utils.run_cmd("cp -rf {0} {1}".format(local_secrets_dir, "/tmp/kafka-cluster-host-test"))
 
         cls.cluster = utils.TestCluster("cluster-test", FIXTURES_DIR, "cluster-host-ssl.yml")
         cls.cluster.start()
@@ -594,14 +582,14 @@ class ClusterSSLHostNetworkTest(ClusterHostNetworkTest):
     @classmethod
     def tearDownClass(cls):
         cls.cluster.shutdown()
-        cls.machine.ssh("sudo rm -rf /tmp/kafka-cluster-host-test/secrets")
+        utils.run_cmd("rm -rf /tmp/kafka-cluster-host-test/secrets")
 
     def test_host_network(self):
         # Test from within the container
         self.is_kafka_healthy_for_service("kafka-ssl-1", 19093, 3, "localhost", "SSL")
         # Test from outside the container
         logs = utils.run_docker_command(
-            image=util.add_registry_and_tag("confluentinc/cp-kafkacat"),
+            image=utils.add_registry_and_tag("confluentinc/cp-kafkacat"),
             command=KAFKA_SSL_CHECK.format(host="localhost", port=19093),
             host_config={'NetworkMode': 'host', 'Binds': ['/tmp/kafka-cluster-host-test/secrets:/etc/kafka/secrets']})
 
@@ -612,7 +600,7 @@ class ClusterSSLHostNetworkTest(ClusterHostNetworkTest):
 
         producer_logs = utils.run_docker_command(
             300,
-            image=util.add_registry_and_tag("confluentinc/cp-kafka"),
+            image=utils.add_registry_and_tag("confluentinc/cp-kafka"),
             name="kafka-ssl-host-producer",
             environment={'KAFKA_ZOOKEEPER_CONNECT': "localhost:22181,localhost:32181,localhost:42181/ssl"},
             command=PRODUCER.format(brokers="localhost:29093", topic="foo", config="host.producer.ssl.config", messages=100),
@@ -622,7 +610,7 @@ class ClusterSSLHostNetworkTest(ClusterHostNetworkTest):
 
         consumer_logs = utils.run_docker_command(
             300,
-            image=util.add_registry_and_tag("confluentinc/cp-kafkacat"),
+            image=utils.add_registry_and_tag("confluentinc/cp-kafkacat"),
             name="kafkacat-ssl-host-consumer",
             command=KAFKACAT_SSL_CONSUMER.format(brokers="localhost:29093", topic="foo", messages=10),
             host_config={'NetworkMode': 'host', 'Binds': ['/tmp/kafka-cluster-host-test/secrets:/etc/kafka/secrets']})
@@ -633,22 +621,19 @@ class ClusterSSLHostNetworkTest(ClusterHostNetworkTest):
 class ClusterSASLHostNetworkTest(ClusterHostNetworkTest):
     @classmethod
     def setUpClass(cls):
-        machine_name = os.environ["DOCKER_MACHINE_NAME"]
-        cls.machine = utils.TestMachine(machine_name)
-
         # Add a hostname mapped to eth0, required for SASL to work predictably.
         # localhost and hostname both resolve to 127.0.0.1 in the docker image, so using localhost causes unprodicatable behaviour
         #  with zkclient
-        cmd = """
-            "sudo sh -c 'grep sasl.kafka.com /etc/hosts || echo {IP} sasl.kafka.com >> /etc/hosts'"
-        """.strip()
-        cls.machine.ssh(cmd.format(IP=cls.machine.get_internal_ip().strip()))
+        # cmd = """
+            # "sudo sh -c 'grep sasl.kafka.com /etc/hosts || echo {IP} sasl.kafka.com >> /etc/hosts'"
+        # """.strip()
+        # utils.run_cmd(cmd.format(IP=cls.machine.get_internal_ip().strip()))
 
         # Copy SSL files.
-        cls.machine.ssh("mkdir -p /tmp/kafka-cluster-host-test/secrets")
+        utils.run_cmd("mkdir -p /tmp/kafka-cluster-host-test/secrets")
 
         local_secrets_dir = os.path.join(FIXTURES_DIR, "secrets")
-        cls.machine.scp_to_machine(local_secrets_dir, "/tmp/kafka-cluster-host-test")
+        utils.run_cmd("cp -rf {0} {1}".format(local_secrets_dir, "/tmp/kafka-cluster-host-test"))
 
         cls.cluster = utils.TestCluster("cluster-test", FIXTURES_DIR, "cluster-host-sasl.yml")
         cls.cluster.start()
@@ -671,7 +656,7 @@ class ClusterSASLHostNetworkTest(ClusterHostNetworkTest):
     @classmethod
     def tearDownClass(cls):
         cls.cluster.shutdown()
-        cls.machine.ssh("sudo rm -rf /tmp/kafka-cluster-host-test/secrets")
+        utils.run_cmd("sudo rm -rf /tmp/kafka-cluster-host-test/secrets")
 
     def test_host_network(self):
         # Test from within the container
@@ -681,7 +666,7 @@ class ClusterSASLHostNetworkTest(ClusterHostNetworkTest):
                         'KAFKA_OPTS': "-Djava.security.auth.login.config=/etc/kafka/secrets/host_producer_jaas.conf -Djava.security.krb5.conf=/etc/kafka/secrets/host_krb.conf -Dsun.net.spi.nameservice.provider.1=sun -Dsun.security.krb5.debug=true"}
         producer_logs = utils.run_docker_command(
             300,
-            image=util.add_registry_and_tag("confluentinc/cp-kafka"),
+            image=utils.add_registry_and_tag("confluentinc/cp-kafka"),
             name="kafka-ssl-sasl-host-producer",
             environment=producer_env,
             command=PRODUCER.format(brokers="sasl.kafka.com:29094", topic="foo", config="host.producer.ssl.sasl.config", messages=100),
@@ -694,7 +679,7 @@ class ClusterSASLHostNetworkTest(ClusterHostNetworkTest):
 
         consumer_logs = utils.run_docker_command(
             300,
-            image=util.add_registry_and_tag("confluentinc/cp-kafka"),
+            image=utils.add_registry_and_tag("confluentinc/cp-kafka"),
             name="kafka-ssl-sasl-host-consumer",
             environment=consumer_env,
             command=CONSUMER.format(brokers="sasl.kafka.com:29094", topic="foo", config="host.consumer.ssl.sasl.config", messages=10),
