@@ -4,10 +4,10 @@ docker_oraclejdk8 {
     dockerPullDeps = ['confluentinc/cp-base']
     dockerPush = true
     dockerRegistry = '368821881613.dkr.ecr.us-west-2.amazonaws.com/'
-    dockerRepos = ['confluentinc/cp-kerberos', 'confluentinc/cp-jmxterm', 'confluentinc/cp-kafka', 'confluentinc/cp-enterprise-kafka', 'confluentinc/cp-zookeeper']
+    dockerRepos = ['confluentinc/cp-kafkacat', 'confluentinc/cp-kerberos', 'confluentinc/cp-jmxterm', 'confluentinc/cp-kafka', 'confluentinc/cp-enterprise-kafka', 'confluentinc/cp-zookeeper']
     dockerUpstreamRegistry = '368821881613.dkr.ecr.us-west-2.amazonaws.com/'
     dockerUpstreamTag = '4.0.x-latest'
-    mvnPhase = 'package'
+    mvnPhase = 'integration-test'
     slackChannel = ''
     properties = [
         buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '7', numToKeepStr: '7')),

@@ -38,6 +38,14 @@
     </properties>
 
     <dependencies>
+        <!-- Need this or TestNG breaks the build for modules without tests -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Every child project uses slf4j/log4j for logging, might as well just include them here automatically -->
         <!-- TODO: Remove after getting this dependency into common -->
         <dependency>
