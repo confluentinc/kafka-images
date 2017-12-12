@@ -36,11 +36,18 @@ ARG PROJECT_VERSION
 ARG ARTIFACT_ID
 
 ARG KAFKA_COMMIT=unknown
-ENV KAFKA_COMMIT=${KAFKA_COMMIT}
+LABEL io.confluent.kafka.git.id=${KAFKA_COMMIT}
 
 COPY include/etc/confluent/docker /etc/confluent/docker
 
+
 ADD target/${ARTIFACT_ID}-${PROJECT_VERSION}-package/share/java/${ARTIFACT_ID}/* /usr/share/java/${COMPONENT}/
 ADD target/${ARTIFACT_ID}-${PROJECT_VERSION}-package/share/doc/* /usr/share/doc/${COMPONENT}/
+
+ENV CLASSPATH=/usr/share/java/${COMPONENT}/*
+ENV CUB_CLASSPATH=${CUB_CLASSPATH}:${CLASSPATH}
+
+ADD target/dependency/rebalancer-console-scripts-${PROJECT_VERSION}/* /usr/bin/
+ENV REBALANCER_CLASSPATH=${CLASSPATH}
 
 CMD ["/etc/confluent/docker/run"]

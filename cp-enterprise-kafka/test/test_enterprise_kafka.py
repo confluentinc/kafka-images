@@ -40,7 +40,7 @@ class ConfigTest(unittest.TestCase):
     @classmethod
     def is_kafka_healthy_for_service(cls, service, port, num_brokers, host="localhost", security_protocol="PLAINTEXT"):
         output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(host=host, port=port, brokers=num_brokers, security_protocol=security_protocol))
-        assert "PASS" in output
+        assert "PASS" in output, "PASS not in {0}".format(output)
 
     def test_adb_config(self):
         self.is_kafka_healthy_for_service("adb-metrics", 9092, 1)
@@ -80,7 +80,7 @@ class ClusterHostNetworkTest(unittest.TestCase):
     @classmethod
     def is_kafka_healthy_for_service(cls, service, port, num_brokers, host="localhost", security_protocol="PLAINTEXT"):
         output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(host=host, port=port, brokers=num_brokers, security_protocol=security_protocol))
-        assert "PASS" in output
+        assert "PASS" in output, "PASS not in {0}".format(output)
 
     def test_adb(self):
         self.is_kafka_healthy_for_service("kafka-1", 19092, 3)
