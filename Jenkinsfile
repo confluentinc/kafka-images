@@ -8,6 +8,8 @@ docker_oraclejdk8 {
     dockerUpstreamRegistry = '368821881613.dkr.ecr.us-west-2.amazonaws.com/'
     dockerUpstreamTag = '4.0.x-latest'
     mvnPhase = 'integration-test'
+    mvnSkipDeploy = true
+    nodeLabel = 'docker-oraclejdk8-compose'
     slackChannel = ''
     properties = [
         buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '7', numToKeepStr: '7')),
