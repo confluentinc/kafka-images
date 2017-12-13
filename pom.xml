@@ -21,9 +21,9 @@
         <module>cp-kafkacat</module>
         <module>cp-kerberos</module>
         <module>cp-jmxterm</module>
+        <module>cp-zookeeper</module>
         <module>cp-kafka</module>
         <module>cp-enterprise-kafka</module>
-        <module>cp-zookeeper</module>
     </modules>
 
     <properties>

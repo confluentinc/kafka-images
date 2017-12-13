@@ -40,7 +40,6 @@ LABEL io.confluent.kafka.git.id=${KAFKA_COMMIT}
 
 COPY include/etc/confluent/docker /etc/confluent/docker
 
-
 ADD target/${ARTIFACT_ID}-${PROJECT_VERSION}-package/share/java/${ARTIFACT_ID}/* /usr/share/java/${COMPONENT}/
 ADD target/${ARTIFACT_ID}-${PROJECT_VERSION}-package/share/doc/* /usr/share/doc/${COMPONENT}/
 
