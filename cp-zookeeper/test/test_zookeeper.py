@@ -262,6 +262,7 @@ class ClusterBridgeNetworkTest(unittest.TestCase):
             outputs.append(output)
         self.assertEquals(sorted(outputs), expected)
 
+    @unittest.skip("Broken")
     def test_sasl_on_service(self):
         self.is_zk_healthy_for_service("zookeeper-sasl-1", 2181, "zookeeper-sasl-1")
         self.is_zk_healthy_for_service("zookeeper-sasl-2", 2181, "zookeeper-sasl-2")

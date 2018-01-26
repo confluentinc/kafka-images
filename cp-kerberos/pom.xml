@@ -27,7 +27,7 @@
     </parent>
 
     <groupId>io.confluent.docker</groupId>
-    <artifactId>cp-kerberos</artifactId>
+    <artifactId>cp-kerberos-new</artifactId>
     <name>${project.artifactId}</name>
 
     <properties>

@@ -27,7 +27,7 @@
     </parent>
 
     <groupId>io.confluent.docker</groupId>
-    <artifactId>cp-kafkacat</artifactId>
+    <artifactId>cp-kafkacat-new</artifactId>
     <name>${project.artifactId}</name>
 
     <properties>

@@ -27,7 +27,7 @@
     </parent>
 
     <groupId>io.confluent.docker</groupId>
-    <artifactId>cp-jmxterm</artifactId>
+    <artifactId>cp-jmxterm-new</artifactId>
     <name>${project.artifactId}</name>
 
     <properties>
