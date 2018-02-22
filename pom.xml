@@ -6,8 +6,8 @@
 
     <parent>
         <groupId>io.confluent</groupId>
-        <artifactId>common-docker</artifactId>
-        <version>4.0.1-SNAPSHOT</version>
+        <artifactId>common</artifactId>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <groupId>io.confluent.docker</groupId>
@@ -29,12 +29,11 @@
     <properties>
         <docker.registry>368821881613.dkr.ecr.us-west-2.amazonaws.com/</docker.registry>  <!-- Registry for this build. -->
         <docker.tag>${project.version}</docker.tag>  <!-- Tag for this build -->
-        <docker.upstream-tag>4.0.x-latest</docker.upstream-tag>  <!-- Tag for base images -->
+        <docker.upstream-tag>4.1.x-latest</docker.upstream-tag>  <!-- Tag for base images -->
 
-        <kafka.commit>unknown</kafka.commit>
         <packaging.build.label>release</packaging.build.label>
         <packaging.build.number>latest</packaging.build.number>
-        <packaging.build.download>https://s3-us-west-2.amazonaws.com/kafka-packaging/${packaging.build.label}/${packaging.build.number}/confluent-${project.version}-${kafka.scala.version}.tar.gz</packaging.build.download>
+        <packaging.repo>https://s3-us-west-2.amazonaws.com/jenkins-confluent-packages/4.1.x/20</packaging.repo>
     </properties>
 
     <dependencies>
@@ -79,8 +78,7 @@
                                 <id>package</id>
                                 <configuration combine.self="append">
                                     <buildArgs>
-                                        <PACKAGING_BUILD_DOWNLOAD>${packaging.build.download}</PACKAGING_BUILD_DOWNLOAD>
-                                        <KAFKA_COMMIT>${kafka.commit}</KAFKA_COMMIT>
+                                        <CONFLUENT_PACKAGES_REPO>${packaging.repo}</CONFLUENT_PACKAGES_REPO>
                                     </buildArgs>
                                 </configuration>
                             </execution>

@@ -27,11 +27,11 @@
     </parent>
 
     <groupId>io.confluent.docker</groupId>
-    <artifactId>cp-kafka</artifactId>
+    <artifactId>cp-kafka-integration</artifactId>
     <name>${project.artifactId}</name>
-    <description>Build files for cp-kafka</description>
+    <description>Image integration tests for cp-kafka with cp-zookeeper</description>
 
     <properties>
-        <docker.skip-build>false</docker.skip-build>
+        <docker.skip-test>false</docker.skip-test>
     </properties>
 </project>

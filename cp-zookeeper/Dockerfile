@@ -14,10 +14,10 @@
 # limitations under the License.
 #
 
-ARG DOCKER_UPSTREAM_REGISTRY
-ARG DOCKER_UPSTREAM_TAG
+ARG DOCKER_REGISTRY
+ARG DOCKER_TAG
 
-FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base:${DOCKER_UPSTREAM_TAG}
+FROM ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
 
 EXPOSE 2181 2888 3888
 
@@ -31,25 +31,11 @@ LABEL io.confluent.docker.git.id=$GIT_COMMIT
 ARG BUILD_NUMBER=-1
 LABEL io.confluent.docker.build.number=$BUILD_NUMBER
 
-ARG PACKAGING_BUILD_DOWNLOAD
-ARG PROJECT_VERSION
-ARG ARTIFACT_ID
-
-ARG KAFKA_COMMIT=unknown
-ENV KAFKA_COMMIT=${KAFKA_COMMIT}
-
-RUN echo "===> Getting confluent tarball package - ${PACKAGING_BUILD_DOWNLOAD}" \
-    && wget -q ${PACKAGING_BUILD_DOWNLOAD} -O - | tar --strip-components 1 -C /usr -xvzf - \
-    && mv /usr/etc/kafka /etc/kafka && rmdir /usr/etc \
-    && echo "===> Setting up ${COMPONENT} dirs..." \
-    && mkdir -p /var/lib/${COMPONENT}/data /var/lib/${COMPONENT}/log /etc/${COMPONENT}/secrets \
+RUN mkdir -p /var/lib/${COMPONENT}/data /var/lib/${COMPONENT}/log /etc/${COMPONENT}/secrets \
     && chmod -R ag+w /etc/kafka /etc/${COMPONENT} /var/lib/${COMPONENT}/data /var/lib/${COMPONENT}/log /etc/${COMPONENT}/secrets
 
 VOLUME ["/var/lib/${COMPONENT}/data", "/var/lib/${COMPONENT}/log", "/etc/${COMPONENT}/secrets"]
 
 COPY include/etc/confluent/docker /etc/confluent/docker
-
-ADD target/${ARTIFACT_ID}-${PROJECT_VERSION}-package/share/java/${ARTIFACT_ID}/* /usr/share/java/${COMPONENT}/
-ADD target/${ARTIFACT_ID}-${PROJECT_VERSION}-package/share/doc/* /usr/share/doc/${COMPONENT}/
 
 CMD ["/etc/confluent/docker/run"]

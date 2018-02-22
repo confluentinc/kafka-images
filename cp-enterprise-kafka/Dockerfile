@@ -14,14 +14,10 @@
 # limitations under the License.
 #
 
-ARG DOCKER_UPSTREAM_REGISTRY
-ARG DOCKER_UPSTREAM_TAG
+ARG DOCKER_REGISTRY
+ARG DOCKER_TAG
 
-FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-kafka:${DOCKER_UPSTREAM_TAG}
-
-EXPOSE 9092
-
-ENV COMPONENT=kafka
+FROM ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
 
 MAINTAINER partner-support@confluent.io
 LABEL io.confluent.docker=true
@@ -31,22 +27,10 @@ LABEL io.confluent.docker.git.id=$GIT_COMMIT
 ARG BUILD_NUMBER=-1
 LABEL io.confluent.docker.build.number=$BUILD_NUMBER
 
-ARG PACKAGING_BUILD_DOWNLOAD
-ARG PROJECT_VERSION
-ARG ARTIFACT_ID
-
-ARG KAFKA_COMMIT=unknown
-LABEL io.confluent.kafka.git.id=${KAFKA_COMMIT}
+RUN apt-get update \
+    && apt-get install -y confluent-support-metrics confluent-rebalancer \
+    && apt-get clean && rm -rf /tmp/* /var/lib/apt/lists/*
 
 COPY include/etc/confluent/docker /etc/confluent/docker
-
-ADD target/${ARTIFACT_ID}-${PROJECT_VERSION}-package/share/java/${ARTIFACT_ID}/* /usr/share/java/${COMPONENT}/
-ADD target/${ARTIFACT_ID}-${PROJECT_VERSION}-package/share/doc/* /usr/share/doc/${COMPONENT}/
-
-ENV CLASSPATH=/usr/share/java/${COMPONENT}/*
-ENV CUB_CLASSPATH=${CUB_CLASSPATH}:${CLASSPATH}
-
-ADD target/dependency/rebalancer-console-scripts-${PROJECT_VERSION}/* /usr/bin/
-ENV REBALANCER_CLASSPATH=${CLASSPATH}
 
 CMD ["/etc/confluent/docker/run"]
