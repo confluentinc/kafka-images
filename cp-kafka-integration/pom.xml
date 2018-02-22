@@ -29,9 +29,23 @@
     <groupId>io.confluent.docker</groupId>
     <artifactId>cp-kafka-integration</artifactId>
     <name>${project.artifactId}</name>
-    <description>Image integration tests for cp-kafka with cp-zookeeper</description>
+    <description>Image integration tests for cp-kafka</description>
 
     <properties>
         <docker.skip-test>false</docker.skip-test>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.confluent.docker</groupId>
+            <artifactId>cp-kafka</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.confluent.docker</groupId>
+            <artifactId>cp-zookeeper</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>
