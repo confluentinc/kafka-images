@@ -24,7 +24,7 @@
         <module>cp-zookeeper</module>
         <module>cp-kafka</module>
         <module>cp-enterprise-kafka</module>
-        <module>kafka-zookeeper-integration</module>
+        <module>kafka-integration</module>
     </modules>
 
     <properties>
