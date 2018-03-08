@@ -27,9 +27,17 @@ LABEL io.confluent.docker.git.id=$GIT_COMMIT
 ARG BUILD_NUMBER=-1
 LABEL io.confluent.docker.build.number=$BUILD_NUMBER
 
+ENV COMPONENT=kafka
+
+EXPOSE 9092
+
 RUN apt-get update \
     && apt-get install -y confluent-support-metrics confluent-rebalancer \
-    && apt-get clean && rm -rf /tmp/* /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /tmp/* /var/lib/apt/lists/* \
+    && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
+    && chmod -R ag+w /etc/${COMPONENT} /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets
+
+VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
 
 COPY include/etc/confluent/docker /etc/confluent/docker
 
