@@ -5,7 +5,7 @@ dockerfile {
     dockerRegistry = '368821881613.dkr.ecr.us-west-2.amazonaws.com/'
     dockerRepos = ['confluentinc/cp-kafkacat', 'confluentinc/cp-kerberos', 'confluentinc/cp-jmxterm', 'confluentinc/cp-kafka', 'confluentinc/cp-enterprise-kafka', 'confluentinc/cp-zookeeper']
     extraBuildArgs = "-Dpackaging.build.branch=${BRANCH_NAME} -Dpackaging.build.number=${BUILD_NUMBER}"
-    mvnPhase = 'package'  // TODO: Set to 'integration-test' when good tests are available.
+    mvnPhase = 'integration-test'
     nodeLabel = 'docker-oraclejdk8-compose'
     slackChannel = ''
     properties = [
