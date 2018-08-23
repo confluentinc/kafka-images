@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 
 dockerfile {
-    dockerPullDeps = ['confluentinc/cp-base']
+    dockerPullDeps = ['confluentinc/cp-base-new']
     dockerRegistry = '368821881613.dkr.ecr.us-west-2.amazonaws.com/'
     dockerRepos = ['confluentinc/cp-kafkacat', 'confluentinc/cp-kerberos', 'confluentinc/cp-jmxterm', 'confluentinc/cp-kafka', 'confluentinc/cp-enterprise-kafka', 'confluentinc/cp-zookeeper']
     extraBuildArgs = "-Dpackaging.build.branch=${BRANCH_NAME} -Dpackaging.build.number=${BUILD_NUMBER}"
