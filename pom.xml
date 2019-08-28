@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.confluent</groupId>
+        <artifactId>common-docker</artifactId>
+        <version>5.3.1-SNAPSHOT</version>
+    </parent>
+
+    <groupId>io.confluent.kafka-images</groupId>
+    <artifactId>kafka-images-parent</artifactId>
+    <packaging>pom</packaging>
+    <name>Kafka Docker Images</name>
+    <description>Build files for Confluent's Kafka Docker images</description>
+    <version>5.3.1-SNAPSHOT</version>
+
+    <modules>
+        <module>kafka-connect-base</module>
+        <module>kafka-connect</module>
+        <module>kafka</module>
+        <module>zookeeper</module>
+    </modules>
+
+    <properties>
+        <component.name>kafka</component.name>
+    </properties>
+</project>
