@@ -18,10 +18,10 @@
     <version>5.3.1-SNAPSHOT</version>
 
     <modules>
+        <module>zookeeper</module>
+        <module>kafka</module>
         <module>kafka-connect-base</module>
         <module>kafka-connect</module>
-        <module>kafka</module>
-        <module>zookeeper</module>
     </modules>
 
     <properties>
