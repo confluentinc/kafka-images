@@ -2,8 +2,8 @@
 
 dockerfile {
     dockerPush = true
-    dockerRepos = ['confluentinc/kafka-connect', 'confluentinc/kafka-connect-base',
-        'confluentinc/kafka', 'confluentinc/zookeeper']
+    dockerRepos = ['confluentinc/kafka-connect-image', 'confluentinc/kafka-connect-base-image',
+        'confluentinc/kafka-image', 'confluentinc/zookeeper-image']
     mvnPhase = 'package'
     mvnSkipDeploy = true
     nodeLabel = 'docker-oraclejdk8-compose'
