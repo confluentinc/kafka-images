@@ -19,4 +19,32 @@
         <docker.skip-build>false</docker.skip-build>
         <docker.skip-test>false</docker.skip-test>
     </properties>
+<!--Remove this once new version of common is released that contains scala version getting passed-->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>${dockerfile-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>package</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <buildArgs>
+                        <CONFLUENT_VERSION>${CONFLUENT_VERSION}</CONFLUENT_VERSION>
+                        <CONFLUENT_PACKAGES_REPO>${CONFLUENT_PACKAGES_REPO}</CONFLUENT_PACKAGES_REPO>
+                        <CONFLUENT_PLATFORM_LABEL>${CONFLUENT_PLATFORM_LABEL}</CONFLUENT_PLATFORM_LABEL>
+                        <CONFLUENT_DEB_VERSION>${CONFLUENT_DEB_VERSION}</CONFLUENT_DEB_VERSION>
+                        <ALLOW_UNSIGNED>${ALLOW_UNSIGNED}</ALLOW_UNSIGNED>
+                        <SCALA_VERSION>${kafka.scala.version}</SCALA_VERSION>
+                    </buildArgs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
