@@ -12,7 +12,7 @@
     </parent>
 
     <groupId>io.confluent.kafka-images</groupId>
-    <artifactId>kafka-image</artifactId>
+    <artifactId>kafka</artifactId>
     <name>Kafka Docker Image</name>
 
     <properties>
