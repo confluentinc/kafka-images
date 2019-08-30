@@ -23,7 +23,7 @@ ARG ALLOW_UNSIGNED
 EXPOSE 2181 2888 3888
 
 ENV COMPONENT=zookeeper
-
+ARG SCALA_VERSION
 
 RUN echo "===> Installing ${COMPONENT}..." \
     && apt-get update \
