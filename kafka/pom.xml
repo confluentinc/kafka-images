@@ -19,7 +19,7 @@
         <docker.skip-build>false</docker.skip-build>
         <docker.skip-test>false</docker.skip-test>
     </properties>
-
+<!--Remove this once new version of common is released that contains scala version getting passed-->
     <build>
         <plugins>
             <plugin>
