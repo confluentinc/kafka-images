@@ -41,6 +41,7 @@
                         <CONFLUENT_PLATFORM_LABEL>${CONFLUENT_PLATFORM_LABEL}</CONFLUENT_PLATFORM_LABEL>
                         <CONFLUENT_DEB_VERSION>${CONFLUENT_DEB_VERSION}</CONFLUENT_DEB_VERSION>
                         <ALLOW_UNSIGNED>${ALLOW_UNSIGNED}</ALLOW_UNSIGNED>
+                        <DOCKER_TAG>${docker.tag}</DOCKER_TAG>
                     </buildArgs>
                 </configuration>
             </plugin>
