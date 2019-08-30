@@ -32,8 +32,8 @@ RUN echo "===> Installing ${COMPONENT}..." \
     && cat /etc/apt/sources.list \
     && apt-get install -y apt-transport-https \
     && apt-get update \
+    && apt-get install -y procps \
     && echo "===> Installing JDBC, Elasticsearch and Hadoop connectors ..." \
-    && apt-get -qq update \
     && apt-get install -y confluent-kafka-connect-jdbc=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
     confluent-kafka-connect-elasticsearch=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
     confluent-kafka-connect-storage-common=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
