@@ -19,7 +19,8 @@ ARG CONFLUENT_PACKAGES_REPO
 ARG CONFLUENT_PLATFORM_LABEL
 ARG CONFLUENT_DEB_VERSION
 ARG ALLOW_UNSIGNED
-ARG SCALA_VERSION
+#TODO: hard coded version for testing only. need to fix and remove
+ARG SCALA_VERSION=2.12
 
 # allow arg override of required env params
 ARG KAFKA_ZOOKEEPER_CONNECT
