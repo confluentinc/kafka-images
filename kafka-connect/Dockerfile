@@ -30,8 +30,8 @@ RUN echo "===> Installing ${COMPONENT}..." \
     && if [ "x$ALLOW_UNSIGNED" = "xtrue" ]; then echo "APT::Get::AllowUnauthenticated \"true\";" > /etc/apt/apt.conf.d/allow_unauthenticated; else curl -s -L ${CONFLUENT_PACKAGES_REPO}/archive.key -o /tmp/archive.key && apt-key add /tmp/archive.key; fi \
     && echo "deb [arch=amd64] ${CONFLUENT_PACKAGES_REPO} stable main" >> /etc/apt/sources.list \
     && cat /etc/apt/sources.list \
-    && apt-get install -y apt-transport-https \
     && apt-get update \
+    && apt-get install -y apt-transport-https \
     && apt-get install -y procps \
     && echo "===> Installing JDBC, Elasticsearch and Hadoop connectors ..." \
     && apt-get install -y confluent-kafka-connect-jdbc=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
