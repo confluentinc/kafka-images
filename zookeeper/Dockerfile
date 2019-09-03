@@ -19,8 +19,7 @@ ARG CONFLUENT_PACKAGES_REPO
 ARG CONFLUENT_PLATFORM_LABEL
 ARG CONFLUENT_DEB_VERSION
 ARG ALLOW_UNSIGNED
-#TODO: do not hard code this version. this isn't getting inherited properly from common pom for some reason
-ARG SCALA_VERSION=2.12
+ARG SCALA_VERSION
 
 EXPOSE 2181 2888 3888
 
