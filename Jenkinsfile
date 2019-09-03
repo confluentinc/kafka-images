@@ -6,7 +6,6 @@ dockerfile {
         'confluentinc/kafka', 'confluentinc/zookeeper']
     mvnPhase = 'package'
     mvnSkipDeploy = true
-    //TODO: change node after testing
     nodeLabel = 'docker-oraclejdk8-eli-compose'
     slackChannel = 'tools' //TODO: change to correct team
     upstreamProjects = ['confluentinc/common']
