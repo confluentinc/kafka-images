@@ -8,7 +8,7 @@ dockerfile {
     mvnSkipDeploy = true
     nodeLabel = 'docker-oraclejdk8-eli-compose'
     slackChannel = 'tools' //TODO: change to correct team
-    upstreamProjects = ['confluentinc/common']
+    upstreamProjects = [] //TODO: after roll out, this will be the packaging job
     dockerPullDeps = ['confluentinc/cp-base-new']
     usePackages = true
 }
