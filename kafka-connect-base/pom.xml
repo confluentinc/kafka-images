@@ -12,7 +12,7 @@
     </parent>
 
     <groupId>io.confluent.kafka-images</groupId>
-    <artifactId>kafka-connect-base</artifactId>
+    <artifactId>cp-kafka-connect-base</artifactId>
     <name>Kafka Connect Base Docker Image</name>
 
     <properties>

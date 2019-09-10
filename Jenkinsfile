@@ -2,13 +2,13 @@
 
 dockerfile {
     dockerPush = true
-    dockerRepos = ['confluentinc/kafka-connect', 'confluentinc/kafka-connect-base',
-        'confluentinc/kafka', 'confluentinc/zookeeper']
+    dockerRepos = ['confluentinc/cp-kafka-connect', 'confluentinc/cp-kafka-connect-base',
+        'confluentinc/cp-kafka', 'confluentinc/cp-zookeeper']
     mvnPhase = 'package'
     mvnSkipDeploy = true
-    nodeLabel = 'docker-oraclejdk8-eli-compose'
-    slackChannel = 'tools' //TODO: change to correct team
-    upstreamProjects = [] //TODO: after roll out, this will be the packaging job
+    nodeLabel = 'docker-oraclejdk8-compose-swarm'
+    slackChannel = 'tools-notifications' //TODO: change to correct team
+    upstreamProjects = [] //TODO: after roll out update
     dockerPullDeps = ['confluentinc/cp-base-new']
     usePackages = true
 }
