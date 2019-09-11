@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 
 dockerfile {
-    dockerPush = true
+    dockerPush = false
     dockerRepos = ['confluentinc/cp-kafka-connect', 'confluentinc/cp-kafka-connect-base',
         'confluentinc/cp-kafka', 'confluentinc/cp-zookeeper']
     mvnPhase = 'package'
