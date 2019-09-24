@@ -11,4 +11,5 @@ dockerfile {
     upstreamProjects = [] //TODO: after roll out update
     dockerPullDeps = ['confluentinc/cp-base-new']
     usePackages = true
+    cron = '' // Disable the cron because this job requires parameters
 }
