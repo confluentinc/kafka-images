@@ -2,8 +2,10 @@
 
 dockerfile {
     dockerPush = false
-    dockerRepos = ['confluentinc/cp-kafka-connect', 'confluentinc/cp-kafka-connect-base',
-        'confluentinc/cp-kafka', 'confluentinc/cp-zookeeper']
+    dockerRepos = ['confluentinc/cp-server-connect', 'confluentinc/cp-server-connect-base',
+        'confluentinc/cp-kafka-connect', 'confluentinc/cp-kafka-connect-base',
+        'confluentinc/cp-enterprise-kafka', 'confluentinc/cp-kafka',
+        'confluentinc/cp-server', 'confluentinc/cp-zookeeper']
     mvnPhase = 'package'
     mvnSkipDeploy = true
     nodeLabel = 'docker-oraclejdk8-compose-swarm'
