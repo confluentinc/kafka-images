@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 
 dockerfile {
-    dockerPush = false
+    dockerPush = true
     dockerRepos = ['confluentinc/cp-server-connect', 'confluentinc/cp-server-connect-base',
         'confluentinc/cp-kafka-connect', 'confluentinc/cp-kafka-connect-base',
         'confluentinc/cp-enterprise-kafka', 'confluentinc/cp-kafka',
