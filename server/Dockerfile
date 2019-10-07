@@ -58,6 +58,8 @@ RUN echo "===> Installing ${COMPONENT}..." \
     && apt-get install -y confluent-server=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
     && echo "===> installing confluent-rebalancer ..." \
     && apt-get install -y confluent-rebalancer=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
+    && echo "===> installing confluent-security ..." \
+    && apt-get install -y confluent-security=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
     && echo "===> clean up ..." \
     && apt-get clean && rm -rf /tmp/* /var/lib/apt/lists/* \
     && echo "===> Setting up ${COMPONENT} dirs..." \
