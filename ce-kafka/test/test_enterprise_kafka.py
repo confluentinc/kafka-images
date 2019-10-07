@@ -1,12 +1,13 @@
 import os
 import unittest
-import utils
 import time
 import string
 import json
 
+import confluent.docker_utils as utils
+
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-FIXTURES_DIR = os.path.join(CURRENT_DIR, "fixtures", "debian", "enterprise-kafka")
+FIXTURES_DIR = os.path.join(CURRENT_DIR, "fixtures")
 HEALTH_CHECK = """bash -c 'cp /etc/kafka/kafka.properties /tmp/cub.properties \
                   && echo security.protocol={security_protocol} >> /tmp/cub.properties \
                   && cub kafka-ready {brokers} 40 -b {host}:{port} -c /tmp/cub.properties -s {security_protocol}\

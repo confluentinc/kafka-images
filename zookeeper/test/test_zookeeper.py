@@ -1,11 +1,12 @@
 import os
 import unittest
-import utils
 import time
 import string
 
+import confluent.docker_utils as utils
+
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-FIXTURES_DIR = os.path.join(CURRENT_DIR, "fixtures", "debian", "zookeeper")
+FIXTURES_DIR = os.path.join(CURRENT_DIR, "fixtures")
 MODE_COMMAND = "bash -c 'dub wait localhost {port} 30 && echo stat | nc localhost {port} | grep Mode'"
 HEALTH_CHECK = "bash -c 'cub zk-ready {host}:{port} 30 && echo PASS || echo FAIL'"
 JMX_CHECK = """bash -c "\

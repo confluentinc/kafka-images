@@ -6,7 +6,7 @@ dockerfile {
         'confluentinc/cp-kafka-connect', 'confluentinc/cp-kafka-connect-base',
         'confluentinc/cp-enterprise-kafka', 'confluentinc/cp-kafka',
         'confluentinc/cp-server', 'confluentinc/cp-zookeeper']
-    mvnPhase = 'package'
+    mvnPhase = 'package integration-test'
     mvnSkipDeploy = true
     nodeLabel = 'docker-oraclejdk8-compose-swarm'
     slackChannel = 'kafka-warn'
