@@ -58,9 +58,9 @@ class ConfigTest(unittest.TestCase):
         cls.cluster = utils.TestCluster("config-test", FIXTURES_DIR, "distributed-config.yml")
         cls.cluster.start()
 
-        assert "PASS" in cls.cluster.run_command_on_service("zookeeper", ZK_READY.format(servers="localhost:2181"))
-        assert "PASS" in cls.cluster.run_command_on_service("kafka", KAFKA_READY.format(brokers=1))
-        assert "PASS" in cls.cluster.run_command_on_service("schema-registry", SR_READY.format(host="schema-registry", port="8081"))
+        assert "PASS" in cls.cluster.run_command_on_service("zookeeper", ZK_READY.format(servers="localhost:2181")).decode()
+        assert "PASS" in cls.cluster.run_command_on_service("kafka", KAFKA_READY.format(brokers=1)).decode()
+        assert "PASS" in cls.cluster.run_command_on_service("schema-registry", SR_READY.format(host="schema-registry", port="8081")).decode()
 
     @classmethod
     def tearDownClass(cls):
@@ -68,7 +68,7 @@ class ConfigTest(unittest.TestCase):
 
     @classmethod
     def is_connect_healthy_for_service(cls, service):
-        output = cls.cluster.run_command_on_service(service, CONNECT_HEALTH_CHECK.format(host="localhost", port=8082))
+        output = cls.cluster.run_command_on_service(service, CONNECT_HEALTH_CHECK.format(host="localhost", port=8082)).decode()
         assert "PASS" in output
 
     def test_required_config_failure(self):
@@ -83,7 +83,7 @@ class ConfigTest(unittest.TestCase):
 
     def test_default_config(self):
         self.is_connect_healthy_for_service("default-config")
-        props = self.cluster.run_command_on_service("default-config", "bash -c 'cat /etc/kafka-connect/kafka-connect.properties | sort'")
+        props = self.cluster.run_command_on_service("default-config", "bash -c 'cat /etc/kafka-connect/kafka-connect.properties | sort'").decode()
         expected = """
             bootstrap.servers=kafka:9092
             config.storage.topic=default.config
@@ -104,7 +104,7 @@ class ConfigTest(unittest.TestCase):
 
     def test_default_config_avro(self):
         self.is_connect_healthy_for_service("default-config-avro")
-        props = self.cluster.run_command_on_service("default-config-avro", "bash -c 'cat /etc/kafka-connect/kafka-connect.properties | sort'")
+        props = self.cluster.run_command_on_service("default-config-avro", "bash -c 'cat /etc/kafka-connect/kafka-connect.properties | sort'").decode()
         expected = """
             bootstrap.servers=kafka:9092
             config.storage.topic=default.config
@@ -128,7 +128,7 @@ class ConfigTest(unittest.TestCase):
     def test_default_logging_config(self):
         self.is_connect_healthy_for_service("default-config")
 
-        log4j_props = self.cluster.run_command_on_service("default-config", "bash -c 'cat /etc/kafka/connect-log4j.properties | sort'")
+        log4j_props = self.cluster.run_command_on_service("default-config", "bash -c 'cat /etc/kafka/connect-log4j.properties | sort'").decode()
         expected_log4j_props = """
             log4j.appender.stdout.layout.ConversionPattern=[%d] %p %m (%c)%n
             log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
@@ -143,14 +143,14 @@ def create_connector(name, create_command, host, port):
     utils.run_docker_command(
         image="confluentinc/cp-kafka-connect",
         command=create_command,
-        host_config={'NetworkMode': 'host'})
+        host_config={'NetworkMode': 'host'}).decode()
 
     status = None
     for i in xrange(25):
         source_logs = utils.run_docker_command(
             image="confluentinc/cp-kafka-connect",
             command=CONNECTOR_STATUS.format(host=host, port=port, name=name),
-            host_config={'NetworkMode': 'host'})
+            host_config={'NetworkMode': 'host'}).decode()
 
         connector = json.loads(source_logs)
         # Retry if you see errors, connect might still be creating the connector.
@@ -175,7 +175,7 @@ def create_file_source_test_data(host_dir, file, num_records):
     utils.run_docker_command(
         image="confluentinc/cp-kafka-connect",
         command="bash -c 'rm -rf /tmp/test/*.txt && seq {count} > /tmp/test/{name}'".format(count=num_records, name=file),
-        host_config={'NetworkMode': 'host', 'Binds': volumes})
+        host_config={'NetworkMode': 'host', 'Binds': volumes}).decode()
 
 
 def wait_and_get_sink_output(host_dir, file, expected_num_records):
@@ -186,7 +186,7 @@ def wait_and_get_sink_output(host_dir, file, expected_num_records):
         sink_record_count = utils.run_docker_command(
             image="confluentinc/cp-kafka-connect",
             command="bash -c '[ -e /tmp/test/%s ] && (wc -l /tmp/test/%s | cut -d\" \" -f1) || echo -1'" % (file, file),
-            host_config={'NetworkMode': 'host', 'Binds': volumes})
+            host_config={'NetworkMode': 'host', 'Binds': volumes}).decode()
 
         # The bash command returns -1, if the file is not found. otherwise it returns the no of lines in the file.
         if int(sink_record_count.strip()) == expected_num_records:
@@ -219,10 +219,10 @@ class SingleNodeDistributedTest(unittest.TestCase):
         cls.cluster = utils.TestCluster("distributed-single-node", FIXTURES_DIR, "distributed-single-node.yml")
         cls.cluster.start()
         # assert "PASS" in cls.cluster.run_command_on_service("zookeeper-bridge", ZK_READY.format(servers="localhost:2181"))
-        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-host", ZK_READY.format(servers="localhost:32181"))
-        # assert "PASS" in cls.cluster.run_command_on_service("kafka-bridge", KAFKA_READY.format(brokers=1))
-        assert "PASS" in cls.cluster.run_command_on_service("kafka-host", KAFKA_READY.format(brokers=1))
-        assert "PASS" in cls.cluster.run_command_on_service("schema-registry-host", SR_READY.format(host="localhost", port="8081"))
+        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-host", ZK_READY.format(servers="localhost:32181")).decode()
+        # assert "PASS" in cls.cluster.run_command_on_service("kafka-bridge", KAFKA_READY.format(brokers=1)).decode()
+        assert "PASS" in cls.cluster.run_command_on_service("kafka-host", KAFKA_READY.format(brokers=1)).decode()
+        assert "PASS" in cls.cluster.run_command_on_service("schema-registry-host", SR_READY.format(host="localhost", port="8081")).decode()
 
     @classmethod
     def tearDownClass(cls):
@@ -231,13 +231,13 @@ class SingleNodeDistributedTest(unittest.TestCase):
 
     @classmethod
     def is_connect_healthy_for_service(cls, service, port):
-        assert "PASS" in cls.cluster.run_command_on_service(service, CONNECT_HEALTH_CHECK.format(host="localhost", port=port))
+        assert "PASS" in cls.cluster.run_command_on_service(service, CONNECT_HEALTH_CHECK.format(host="localhost", port=port)).decode()
 
     def create_topics(self, kafka_service, internal_topic_prefix, data_topic):
-        assert "PASS" in self.cluster.run_command_on_service(kafka_service, TOPIC_CREATE.format(name=internal_topic_prefix + ".config"))
-        assert "PASS" in self.cluster.run_command_on_service(kafka_service, TOPIC_CREATE.format(name=internal_topic_prefix + ".status"))
-        assert "PASS" in self.cluster.run_command_on_service(kafka_service, TOPIC_CREATE.format(name=internal_topic_prefix + ".offsets"))
-        assert "PASS" in self.cluster.run_command_on_service(kafka_service, TOPIC_CREATE.format(name=data_topic))
+        assert "PASS" in self.cluster.run_command_on_service(kafka_service, TOPIC_CREATE.format(name=internal_topic_prefix + ".config")).decode()
+        assert "PASS" in self.cluster.run_command_on_service(kafka_service, TOPIC_CREATE.format(name=internal_topic_prefix + ".status")).decode()
+        assert "PASS" in self.cluster.run_command_on_service(kafka_service, TOPIC_CREATE.format(name=internal_topic_prefix + ".offsets")).decode()
+        assert "PASS" in self.cluster.run_command_on_service(kafka_service, TOPIC_CREATE.format(name=data_topic)).decode()
 
     def test_file_connector_on_host_network(self):
 
@@ -313,7 +313,7 @@ class SingleNodeDistributedTest(unittest.TestCase):
         # Creating topics upfront makes the tests go a lot faster (I suspect this is because consumers dont waste time with rebalances)
         self.create_topics("kafka-host", "default", data_topic)
 
-        assert "PASS" in self.cluster.run_command_on_service("mysql-host", "bash -c 'mysql -u root -pconfluent < /tmp/sql/mysql-test.sql && echo PASS'")
+        assert "PASS" in self.cluster.run_command_on_service("mysql-host", "bash -c 'mysql -u root -pconfluent < /tmp/sql/mysql-test.sql && echo PASS'").decode()
 
         # Test from within the container
         self.is_connect_healthy_for_service("connect-host-json", 28082)
@@ -354,7 +354,7 @@ class SingleNodeDistributedTest(unittest.TestCase):
         # Creating topics upfront makes the tests go a lot faster (I suspect this is because consumers dont waste time with rebalances)
         self.create_topics("kafka-host", "default.avro", data_topic)
 
-        assert "PASS" in self.cluster.run_command_on_service("mysql-host", "bash -c 'mysql -u root -pconfluent < /tmp/sql/mysql-test.sql && echo PASS'")
+        assert "PASS" in self.cluster.run_command_on_service("mysql-host", "bash -c 'mysql -u root -pconfluent < /tmp/sql/mysql-test.sql && echo PASS'").decode()
 
         # Test from within the container
         self.is_connect_healthy_for_service("connect-host-avro", 38082)
@@ -393,12 +393,12 @@ class SingleNodeDistributedTest(unittest.TestCase):
         self.create_topics("kafka-host", "default.avro", topic)
 
         # Create the database.
-        assert "PASS" in self.cluster.run_command_on_service("mysql-host", "bash -c 'mysql -u root -pconfluent < /tmp/sql/mysql-test.sql && echo PASS'")
+        assert "PASS" in self.cluster.run_command_on_service("mysql-host", "bash -c 'mysql -u root -pconfluent < /tmp/sql/mysql-test.sql && echo PASS'").decode()
 
         # Test from within the container
         self.is_connect_healthy_for_service("connect-host-avro", 38082)
 
-        assert "PASS" in self.cluster.run_command_on_service("connect-host-avro", 'bash -c "TOPIC=%s sh /tmp/test/scripts/produce-data-avro.sh"' % topic)
+        assert "PASS" in self.cluster.run_command_on_service("connect-host-avro", 'bash -c "TOPIC=%s sh /tmp/test/scripts/produce-data-avro.sh"' % topic).decode()
 
         jdbc_sink_create_cmd = JDBC_SINK_CONNECTOR_CREATE % (
             sink_connector_name,
@@ -410,12 +410,12 @@ class SingleNodeDistributedTest(unittest.TestCase):
         jdbc_sink_status = create_connector(sink_connector_name, jdbc_sink_create_cmd, worker_host, worker_port)
         self.assertEquals(jdbc_sink_status, "RUNNING")
 
-        assert "PASS" in self.cluster.run_command_on_service("mysql-host", """ bash -c "mysql --user=root --password=confluent --silent -e 'show databases;' | grep connect_test && echo PASS || echo FAIL" """)
+        assert "PASS" in self.cluster.run_command_on_service("mysql-host", """ bash -c "mysql --user=root --password=confluent --silent -e 'show databases;' | grep connect_test && echo PASS || echo FAIL" """).decode()
 
         tmp = ""
         for i in xrange(25):
-            if "PASS" in self.cluster.run_command_on_service("mysql-host", """ bash -c "mysql --user=root --password=confluent --silent --database=connect_test -e 'show tables;' | grep %s && echo PASS || echo FAIL" """ % topic):
-                tmp = self.cluster.run_command_on_service("mysql-host", """ bash -c "mysql --user=root --password=confluent --silent --database=connect_test -e 'select COUNT(*) FROM %s ;' " """ % topic)
+            if "PASS" in self.cluster.run_command_on_service("mysql-host", """ bash -c "mysql --user=root --password=confluent --silent --database=connect_test -e 'show tables;' | grep %s && echo PASS || echo FAIL" """ % topic).decode():
+                tmp = self.cluster.run_command_on_service("mysql-host", """ bash -c "mysql --user=root --password=confluent --silent --database=connect_test -e 'select COUNT(*) FROM %s ;' " """ % topic).decode()
                 if "10000" in tmp:
                     break
 
@@ -435,7 +435,7 @@ class SingleNodeDistributedTest(unittest.TestCase):
         # Test from within the container
         self.is_connect_healthy_for_service("connect-host-avro", 38082)
 
-        assert "PASS" in self.cluster.run_command_on_service("connect-host-avro", 'bash -c "TOPIC=%s sh /tmp/test/scripts/produce-data-avro.sh"' % topic)
+        assert "PASS" in self.cluster.run_command_on_service("connect-host-avro", 'bash -c "TOPIC=%s sh /tmp/test/scripts/produce-data-avro.sh"' % topic).decode()
 
         es_sink_create_cmd = ES_SINK_CONNECTOR_CREATE % (
             sink_connector_name,
@@ -450,9 +450,9 @@ class SingleNodeDistributedTest(unittest.TestCase):
         tmp = ""
         for i in xrange(25):
             index_exists_cmd = 'bash -c "curl -s -f -XHEAD http://localhost:9200/%s && echo PASS || echo FAIL"' % topic
-            if "PASS" in self.cluster.run_command_on_service("elasticsearch-host", index_exists_cmd):
+            if "PASS" in self.cluster.run_command_on_service("elasticsearch-host", index_exists_cmd).decode():
                 doc_count = """ bash -c "curl -s -f http://localhost:9200/_cat/count/%s | cut -d' ' -f3" """ % topic
-                tmp = self.cluster.run_command_on_service("elasticsearch-host", doc_count)
+                tmp = self.cluster.run_command_on_service("elasticsearch-host", doc_count).decode()
                 if "10000" in tmp:
                     break
 
@@ -472,7 +472,7 @@ class SingleNodeDistributedTest(unittest.TestCase):
         # Creating topics upfront makes the tests go a lot faster (I suspect this is because consumers dont waste time with rebalances)
         self.create_topics("kafka-host", "default.avro", data_topic)
 
-        assert "PASS" in self.cluster.run_command_on_service("activemq-host", "bash -c 'bin/activemq producer --message MyMessage --messageCount 1000 --destination queue://TEST' | grep 'Produced: 1000 messages' && echo PASS || echo FAIL")
+        assert "PASS" in self.cluster.run_command_on_service("activemq-host", "bash -c 'bin/activemq producer --message MyMessage --messageCount 1000 --destination queue://TEST' | grep 'Produced: 1000 messages' && echo PASS || echo FAIL").decode()
 
         # Test from within the container
         self.is_connect_healthy_for_service("connect-host-avro", 38082)
@@ -514,8 +514,8 @@ class ClusterHostNetworkTest(unittest.TestCase):
         cls.machine.scp_to_machine(local_jars_dir, "/tmp/kafka-connect-host-cluster-test")
         cls.cluster = utils.TestCluster("cluster-test", FIXTURES_DIR, "cluster-host-plain.yml")
         cls.cluster.start()
-        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-1", ZK_READY.format(servers="localhost:22181,localhost:32181,localhost:42181"))
-        assert "PASS" in cls.cluster.run_command_on_service("kafka-1", KAFKA_READY.format(brokers=3))
+        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-1", ZK_READY.format(servers="localhost:22181,localhost:32181,localhost:42181")).decode()
+        assert "PASS" in cls.cluster.run_command_on_service("kafka-1", KAFKA_READY.format(brokers=3)).decode()
 
     @classmethod
     def tearDownClass(cls):
@@ -523,17 +523,17 @@ class ClusterHostNetworkTest(unittest.TestCase):
         cls.cluster.shutdown()
 
     def create_topics(self, kafka_service, internal_topic_prefix, data_topic):
-        assert "PASS" in self.cluster.run_command_on_service(kafka_service, TOPIC_CREATE.format(name=internal_topic_prefix + ".config"))
-        assert "PASS" in self.cluster.run_command_on_service(kafka_service, TOPIC_CREATE.format(name=internal_topic_prefix + ".status"))
-        assert "PASS" in self.cluster.run_command_on_service(kafka_service, TOPIC_CREATE.format(name=internal_topic_prefix + ".offsets"))
-        assert "PASS" in self.cluster.run_command_on_service(kafka_service, TOPIC_CREATE.format(name=data_topic))
+        assert "PASS" in self.cluster.run_command_on_service(kafka_service, TOPIC_CREATE.format(name=internal_topic_prefix + ".config")).decode()
+        assert "PASS" in self.cluster.run_command_on_service(kafka_service, TOPIC_CREATE.format(name=internal_topic_prefix + ".status")).decode()
+        assert "PASS" in self.cluster.run_command_on_service(kafka_service, TOPIC_CREATE.format(name=internal_topic_prefix + ".offsets")).decode()
+        assert "PASS" in self.cluster.run_command_on_service(kafka_service, TOPIC_CREATE.format(name=data_topic)).decode()
 
     def test_cluster_running(self):
         self.assertTrue(self.cluster.is_running())
 
     @classmethod
     def is_connect_healthy_for_service(cls, service, port):
-        assert "PASS" in cls.cluster.run_command_on_service(service, CONNECT_HEALTH_CHECK.format(host="localhost", port=port))
+        assert "PASS" in cls.cluster.run_command_on_service(service, CONNECT_HEALTH_CHECK.format(host="localhost", port=port)).decode()
 
     def test_file_connector(self):
 

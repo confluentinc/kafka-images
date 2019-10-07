@@ -40,8 +40,8 @@ class ConfigTest(unittest.TestCase):
         cls.cluster.start()
 
         # Create keytabs
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-config", principal="zookeeper", hostname="sasl-config"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-config", principal="zkclient", hostname="sasl-config"))
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-config", principal="zookeeper", hostname="sasl-config")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-config", principal="zkclient", hostname="sasl-config")).decode()
 
     @classmethod
     def tearDownClass(cls):
@@ -51,7 +51,7 @@ class ConfigTest(unittest.TestCase):
 
     @classmethod
     def is_zk_healthy_for_service(cls, service, client_port, host="localhost"):
-        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(port=client_port, host=host))
+        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(port=client_port, host=host)).decode()
         assert "PASS" in output
 
     def test_required_config_failure(self):
@@ -61,7 +61,7 @@ class ConfigTest(unittest.TestCase):
     def test_default_config(self):
         self.is_zk_healthy_for_service("default-config", 2181)
         import string
-        zk_props = self.cluster.run_command_on_service("default-config", "cat /etc/kafka/zookeeper.properties")
+        zk_props = self.cluster.run_command_on_service("default-config", "cat /etc/kafka/zookeeper.properties").decode()
         expected = """clientPort=2181
             dataDir=/var/lib/zookeeper/data
             dataLogDir=/var/lib/zookeeper/log
@@ -71,7 +71,7 @@ class ConfigTest(unittest.TestCase):
     def test_default_logging_config(self):
         self.is_zk_healthy_for_service("default-config", 2181)
 
-        log4j_props = self.cluster.run_command_on_service("default-config", "cat /etc/kafka/log4j.properties")
+        log4j_props = self.cluster.run_command_on_service("default-config", "cat /etc/kafka/log4j.properties").decode()
         expected_log4j_props = """log4j.rootLogger=INFO, stdout
 
             log4j.appender.stdout=org.apache.log4j.ConsoleAppender
@@ -80,7 +80,7 @@ class ConfigTest(unittest.TestCase):
             """
         self.assertEquals(log4j_props.translate(None, string.whitespace), expected_log4j_props.translate(None, string.whitespace))
 
-        tools_log4j_props = self.cluster.run_command_on_service("default-config", "cat /etc/kafka/tools-log4j.properties")
+        tools_log4j_props = self.cluster.run_command_on_service("default-config", "cat /etc/kafka/tools-log4j.properties").decode()
         expected_tools_log4j_props = """log4j.rootLogger=WARN, stderr
 
             log4j.appender.stderr=org.apache.log4j.ConsoleAppender
@@ -92,7 +92,7 @@ class ConfigTest(unittest.TestCase):
 
     def test_full_config(self):
         self.is_zk_healthy_for_service("full-config", 22181)
-        zk_props = self.cluster.run_command_on_service("full-config", "cat /etc/kafka/zookeeper.properties")
+        zk_props = self.cluster.run_command_on_service("full-config", "cat /etc/kafka/zookeeper.properties").decode()
         expected = """clientPort=22181
                 dataDir=/var/lib/zookeeper/data
                 dataLogDir=/var/lib/zookeeper/log
@@ -106,13 +106,13 @@ class ConfigTest(unittest.TestCase):
                 """
         self.assertEquals(zk_props.translate(None, string.whitespace), expected.translate(None, string.whitespace))
 
-        zk_id = self.cluster.run_command_on_service("full-config", "cat /var/lib/zookeeper/data/myid")
+        zk_id = self.cluster.run_command_on_service("full-config", "cat /var/lib/zookeeper/data/myid").decode()
         self.assertEquals(zk_id, "1")
 
     def test_full_logging_config(self):
         self.is_zk_healthy_for_service("full-config", 22181)
 
-        log4j_props = self.cluster.run_command_on_service("full-config", "cat /etc/kafka/log4j.properties")
+        log4j_props = self.cluster.run_command_on_service("full-config", "cat /etc/kafka/log4j.properties").decode()
         expected_log4j_props = """log4j.rootLogger=WARN, stdout
 
             log4j.appender.stdout=org.apache.log4j.ConsoleAppender
@@ -123,7 +123,7 @@ class ConfigTest(unittest.TestCase):
             """
         self.assertEquals(log4j_props.translate(None, string.whitespace), expected_log4j_props.translate(None, string.whitespace))
 
-        tools_log4j_props = self.cluster.run_command_on_service("full-config", "cat /etc/kafka/tools-log4j.properties")
+        tools_log4j_props = self.cluster.run_command_on_service("full-config", "cat /etc/kafka/tools-log4j.properties").decode()
         expected_tools_log4j_props = """log4j.rootLogger=ERROR, stderr
 
             log4j.appender.stderr=org.apache.log4j.ConsoleAppender
@@ -144,7 +144,7 @@ class ConfigTest(unittest.TestCase):
 
     def test_kitchen_sink(self):
         self.is_zk_healthy_for_service("kitchen-sink", 22181)
-        zk_props = self.cluster.run_command_on_service("kitchen-sink", "cat /etc/kafka/zookeeper.properties")
+        zk_props = self.cluster.run_command_on_service("kitchen-sink", "cat /etc/kafka/zookeeper.properties").decode()
         expected = """clientPort=22181
                     dataDir=/var/lib/zookeeper/data
                     dataLogDir=/var/lib/zookeeper/log
@@ -156,7 +156,7 @@ class ConfigTest(unittest.TestCase):
                     """
         self.assertTrue(zk_props.translate(None, string.whitespace) == expected.translate(None, string.whitespace))
 
-        zk_id = self.cluster.run_command_on_service("full-config", "cat /var/lib/zookeeper/data/myid")
+        zk_id = self.cluster.run_command_on_service("full-config", "cat /var/lib/zookeeper/data/myid").decode()
         self.assertTrue(zk_id == "1")
 
 
@@ -173,7 +173,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
 
     @classmethod
     def is_zk_healthy_for_service(cls, service, client_port, host="localhost"):
-        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(port=client_port, host=host))
+        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(port=client_port, host=host)).decode()
         assert "PASS" in output
 
     def test_bridge_network(self):
@@ -183,7 +183,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
         logs = utils.run_docker_command(
             image="confluentinc/cp-zookeeper",
             command=HEALTH_CHECK.format(port=22181, host="localhost"),
-            host_config={'NetworkMode': 'host'})
+            host_config={'NetworkMode': 'host'}).decode()
         self.assertTrue("PASS" in logs)
 
     def test_host_network(self):
@@ -193,7 +193,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
         logs = utils.run_docker_command(
             image="confluentinc/cp-zookeeper",
             command=HEALTH_CHECK.format(port=32181, host="localhost"),
-            host_config={'NetworkMode': 'host'})
+            host_config={'NetworkMode': 'host'}).decode()
         self.assertTrue("PASS" in logs)
 
     def test_jmx_host_network(self):
@@ -202,7 +202,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
         logs = utils.run_docker_command(
             image="confluentinc/cp-jmxterm",
             command=JMX_CHECK.format(client_port=52181, jmx_hostname="localhost", jmx_port="39999"),
-            host_config={'NetworkMode': 'host'})
+            host_config={'NetworkMode': 'host'}).decode()
         self.assertTrue("Version = 3.4.9-1757313, built on 08/23/2016 06:50 GMT;" in logs)
 
     def test_jmx_bridged_network(self):
@@ -211,7 +211,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
         logs = utils.run_docker_command(
             image="confluentinc/cp-jmxterm",
             command=JMX_CHECK.format(client_port=2181, jmx_hostname="bridge-network-jmx", jmx_port="9999"),
-            host_config={'NetworkMode': 'standalone-network-test_zk'})
+            host_config={'NetworkMode': 'standalone-network-test_zk'}).decode()
         self.assertTrue("Version = 3.4.9-1757313, built on 08/23/2016 06:50 GMT;" in logs)
 
 
@@ -230,12 +230,12 @@ class ClusterBridgeNetworkTest(unittest.TestCase):
         cls.cluster.start()
 
         # Create keytabs
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-bridged-1", principal="zookeeper", hostname="zookeeper-sasl-1"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-bridged-2", principal="zookeeper", hostname="zookeeper-sasl-2"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-bridged-3", principal="zookeeper", hostname="zookeeper-sasl-3"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-bridged-1", principal="zkclient", hostname="zookeeper-sasl-1"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-bridged-2", principal="zkclient", hostname="zookeeper-sasl-2"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-bridged-3", principal="zkclient", hostname="zookeeper-sasl-3"))
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-bridged-1", principal="zookeeper", hostname="zookeeper-sasl-1")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-bridged-2", principal="zookeeper", hostname="zookeeper-sasl-2")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-bridged-3", principal="zookeeper", hostname="zookeeper-sasl-3")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-bridged-1", principal="zkclient", hostname="zookeeper-sasl-1")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-bridged-2", principal="zkclient", hostname="zookeeper-sasl-2")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-bridged-3", principal="zkclient", hostname="zookeeper-sasl-3")).decode()
 
     @classmethod
     def tearDownClass(cls):
@@ -247,7 +247,7 @@ class ClusterBridgeNetworkTest(unittest.TestCase):
 
     @classmethod
     def is_zk_healthy_for_service(cls, service, client_port, host="localhost"):
-        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(port=client_port, host=host))
+        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(port=client_port, host=host)).decode()
         assert "PASS" in output
 
     def test_zookeeper_on_service(self):
@@ -263,7 +263,7 @@ class ClusterBridgeNetworkTest(unittest.TestCase):
             output = utils.run_docker_command(
                 image="confluentinc/cp-zookeeper",
                 command=MODE_COMMAND.format(port=port),
-                host_config={'NetworkMode': 'host'})
+                host_config={'NetworkMode': 'host'}).decode()
             outputs.append(output)
         self.assertEquals(sorted(outputs), expected)
 
@@ -305,12 +305,12 @@ class ClusterHostNetworkTest(unittest.TestCase):
         cls.cluster.start()
 
         # Create keytabs
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-host-1", principal="zookeeper", hostname="sasl.kafka.com"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-host-2", principal="zookeeper", hostname="sasl.kafka.com"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-host-3", principal="zookeeper", hostname="sasl.kafka.com"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-host-1", principal="zkclient", hostname="sasl.kafka.com"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-host-2", principal="zkclient", hostname="sasl.kafka.com"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-host-3", principal="zkclient", hostname="sasl.kafka.com"))
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-host-1", principal="zookeeper", hostname="sasl.kafka.com")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-host-2", principal="zookeeper", hostname="sasl.kafka.com")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-host-3", principal="zookeeper", hostname="sasl.kafka.com")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-host-1", principal="zkclient", hostname="sasl.kafka.com")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-host-2", principal="zkclient", hostname="sasl.kafka.com")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-host-3", principal="zkclient", hostname="sasl.kafka.com")).decode()
 
     @classmethod
     def tearDownClass(cls):
@@ -322,7 +322,7 @@ class ClusterHostNetworkTest(unittest.TestCase):
 
     @classmethod
     def is_zk_healthy_for_service(cls, service, client_port, host="sasl.kafka.com"):
-        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(port=client_port, host=host))
+        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(port=client_port, host=host)).decode()
         assert "PASS" in output
 
     def test_zookeeper_on_service(self):
@@ -337,7 +337,7 @@ class ClusterHostNetworkTest(unittest.TestCase):
             output = utils.run_docker_command(
                 image="confluentinc/cp-zookeeper",
                 command=MODE_COMMAND.format(port=port),
-                host_config={'NetworkMode': 'host'})
+                host_config={'NetworkMode': 'host'}).decode()
             outputs.append(output)
         self.assertEquals(sorted(outputs), expected)
 

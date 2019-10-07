@@ -95,9 +95,9 @@ class ConfigTest(unittest.TestCase):
         cls.cluster.start()
 
         # Create keytabs
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="broker1", principal="kafka", hostname="sasl-ssl-config"))
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="broker1", principal="kafka", hostname="sasl-ssl-config")).decode()
 
-        assert "PASS" in cls.cluster.run_command_on_service("zookeeper", ZK_READY.format(servers="localhost:2181"))
+        assert "PASS" in cls.cluster.run_command_on_service("zookeeper", ZK_READY.format(servers="localhost:2181")).decode()
 
     @classmethod
     def tearDownClass(cls):
@@ -107,7 +107,7 @@ class ConfigTest(unittest.TestCase):
 
     @classmethod
     def is_kafka_healthy_for_service(cls, service, port, num_brokers, host="localhost", security_protocol="PLAINTEXT"):
-        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(host=host, port=port, brokers=num_brokers, security_protocol=security_protocol))
+        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(host=host, port=port, brokers=num_brokers, security_protocol=security_protocol)).decode()
         assert "PASS" in output
 
     def test_required_config_failure(self):
@@ -130,7 +130,7 @@ class ConfigTest(unittest.TestCase):
 
     def test_default_config(self):
         self.is_kafka_healthy_for_service("default-config", 9092, 1)
-        props = self.cluster.run_command_on_service("default-config", "bash -c 'cat /etc/kafka/kafka.properties | sort'")
+        props = self.cluster.run_command_on_service("default-config", "bash -c 'cat /etc/kafka/kafka.properties | sort'").decode()
         expected = """
             advertised.listeners=PLAINTEXT://default-config:9092
             listeners=PLAINTEXT://0.0.0.0:9092
@@ -142,7 +142,7 @@ class ConfigTest(unittest.TestCase):
         logs = utils.run_docker_command(
             image="confluentinc/cp-kafkacat",
             command=KAFKA_CHECK.format(host="default-config", port=9092),
-            host_config={'NetworkMode': 'config-test_default'})
+            host_config={'NetworkMode': 'config-test_default'}).decode()
 
         parsed_logs = json.loads(logs)
         expected_brokers = [{"id": 1001, "name": "default-config:9092"}]
@@ -151,7 +151,7 @@ class ConfigTest(unittest.TestCase):
     def test_default_logging_config(self):
         self.is_kafka_healthy_for_service("default-config", 9092, 1)
 
-        log4j_props = self.cluster.run_command_on_service("default-config", "cat /etc/kafka/log4j.properties")
+        log4j_props = self.cluster.run_command_on_service("default-config", "cat /etc/kafka/log4j.properties").decode()
         expected_log4j_props = """log4j.rootLogger=INFO, stdout
 
             log4j.appender.stdout=org.apache.log4j.ConsoleAppender
@@ -170,7 +170,7 @@ class ConfigTest(unittest.TestCase):
             """
         self.assertEquals(log4j_props.translate(None, string.whitespace), expected_log4j_props.translate(None, string.whitespace))
 
-        tools_log4j_props = self.cluster.run_command_on_service("default-config", "cat /etc/kafka/tools-log4j.properties")
+        tools_log4j_props = self.cluster.run_command_on_service("default-config", "cat /etc/kafka/tools-log4j.properties").decode()
         expected_tools_log4j_props = """log4j.rootLogger=WARN, stderr
 
             log4j.appender.stderr=org.apache.log4j.ConsoleAppender
@@ -182,7 +182,7 @@ class ConfigTest(unittest.TestCase):
 
     def test_full_config(self):
         self.is_kafka_healthy_for_service("full-config", 9092, 1)
-        props = self.cluster.run_command_on_service("full-config", "bash -c 'cat /etc/kafka/kafka.properties | sort'")
+        props = self.cluster.run_command_on_service("full-config", "bash -c 'cat /etc/kafka/kafka.properties | sort'").decode()
         expected = """
                 advertised.listeners=PLAINTEXT://full-config:9092
                 broker.id=1
@@ -195,7 +195,7 @@ class ConfigTest(unittest.TestCase):
     def test_full_logging_config(self):
         self.is_kafka_healthy_for_service("full-config", 9092, 1)
 
-        log4j_props = self.cluster.run_command_on_service("full-config", "cat /etc/kafka/log4j.properties")
+        log4j_props = self.cluster.run_command_on_service("full-config", "cat /etc/kafka/log4j.properties").decode()
         expected_log4j_props = """log4j.rootLogger=WARN, stdout
 
             log4j.appender.stdout=org.apache.log4j.ConsoleAppender
@@ -215,7 +215,7 @@ class ConfigTest(unittest.TestCase):
             """
         self.assertEquals(log4j_props.translate(None, string.whitespace), expected_log4j_props.translate(None, string.whitespace))
 
-        tools_log4j_props = self.cluster.run_command_on_service("full-config", "cat /etc/kafka/tools-log4j.properties")
+        tools_log4j_props = self.cluster.run_command_on_service("full-config", "cat /etc/kafka/tools-log4j.properties").decode()
         expected_tools_log4j_props = """log4j.rootLogger=ERROR, stderr
 
             log4j.appender.stderr=org.apache.log4j.ConsoleAppender
@@ -233,7 +233,7 @@ class ConfigTest(unittest.TestCase):
 
     def test_kitchen_sink(self):
         self.is_kafka_healthy_for_service("kitchen-sink", 9092, 1)
-        zk_props = self.cluster.run_command_on_service("kitchen-sink", "bash -c 'cat /etc/kafka/kafka.properties | sort'")
+        zk_props = self.cluster.run_command_on_service("kitchen-sink", "bash -c 'cat /etc/kafka/kafka.properties | sort'").decode()
         expected = """
                 advertised.listeners=PLAINTEXT://kitchen-sink:9092
                 broker.id=1
@@ -247,7 +247,7 @@ class ConfigTest(unittest.TestCase):
 
     def test_ssl_config(self):
         self.is_kafka_healthy_for_service("ssl-config", 9092, 1, "ssl-config", "SSL")
-        zk_props = self.cluster.run_command_on_service("ssl-config", "bash -c 'cat /etc/kafka/kafka.properties | sort'")
+        zk_props = self.cluster.run_command_on_service("ssl-config", "bash -c 'cat /etc/kafka/kafka.properties | sort'").decode()
         expected = """
                 advertised.listeners=SSL://ssl-config:9092
                 broker.id=1
@@ -270,7 +270,7 @@ class ConfigTest(unittest.TestCase):
 
     def test_sasl_config(self):
         self.is_kafka_healthy_for_service("sasl-ssl-config", 9094, 1, "sasl-ssl-config", "SASL_SSL")
-        zk_props = self.cluster.run_command_on_service("sasl-ssl-config", "bash -c 'cat /etc/kafka/kafka.properties | sort'")
+        zk_props = self.cluster.run_command_on_service("sasl-ssl-config", "bash -c 'cat /etc/kafka/kafka.properties | sort'").decode()
         expected = """
                 advertised.listeners=SSL://sasl-ssl-config:9092,SASL_SSL://sasl-ssl-config:9094
                 broker.id=1
@@ -301,8 +301,8 @@ class StandaloneNetworkingTest(unittest.TestCase):
     def setUpClass(cls):
         cls.cluster = utils.TestCluster("standalone-network-test", FIXTURES_DIR, "standalone-network.yml")
         cls.cluster.start()
-        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-bridge", ZK_READY.format(servers="localhost:2181"))
-        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-host", ZK_READY.format(servers="localhost:32181"))
+        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-bridge", ZK_READY.format(servers="localhost:2181")).decode()
+        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-host", ZK_READY.format(servers="localhost:32181")).decode()
 
     @classmethod
     def tearDownClass(cls):
@@ -310,7 +310,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
 
     @classmethod
     def is_kafka_healthy_for_service(cls, service, port, num_brokers, host="localhost", security_protocol="PLAINTEXT"):
-        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(host=host, port=port, brokers=num_brokers, security_protocol=security_protocol))
+        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(host=host, port=port, brokers=num_brokers, security_protocol=security_protocol)).decode()
         assert "PASS" in output
 
     def test_bridged_network(self):
@@ -320,7 +320,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
         logs = utils.run_docker_command(
             image="confluentinc/cp-kafkacat",
             command=KAFKA_CHECK.format(host="localhost", port=19092),
-            host_config={'NetworkMode': 'host'})
+            host_config={'NetworkMode': 'host'}).decode()
 
         parsed_logs = json.loads(logs)
         self.assertEquals(1, len(parsed_logs["brokers"]))
@@ -334,7 +334,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
         logs = utils.run_docker_command(
             image="confluentinc/cp-kafkacat",
             command=KAFKA_CHECK.format(host="localhost", port=29092),
-            host_config={'NetworkMode': 'host'})
+            host_config={'NetworkMode': 'host'}).decode()
 
         parsed_logs = json.loads(logs)
         self.assertEquals(1, len(parsed_logs["brokers"]))
@@ -347,7 +347,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
         logs = utils.run_docker_command(
             image="confluentinc/cp-jmxterm",
             command=JMX_CHECK.format(jmx_hostname="localhost", jmx_port="39999"),
-            host_config={'NetworkMode': 'host'})
+            host_config={'NetworkMode': 'host'}).decode()
         self.assertTrue("Version = 0.11.0.0-cp1;" in logs)
 
     def test_jmx_bridged_network(self):
@@ -356,7 +356,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
         logs = utils.run_docker_command(
             image="confluentinc/cp-jmxterm",
             command=JMX_CHECK.format(jmx_hostname="kafka-bridged-jmx", jmx_port="9999"),
-            host_config={'NetworkMode': 'standalone-network-test_zk'})
+            host_config={'NetworkMode': 'standalone-network-test_zk'}).decode()
         self.assertTrue("Version = 0.11.0.0-cp1;" in logs)
 
 
@@ -365,7 +365,7 @@ class ClusterBridgedNetworkTest(unittest.TestCase):
     def setUpClass(cls):
         cls.cluster = utils.TestCluster("cluster-test", FIXTURES_DIR, "cluster-bridged-plain.yml")
         cls.cluster.start()
-        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-1", ZK_READY.format(servers="zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181"))
+        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-1", ZK_READY.format(servers="zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181")).decode()
 
     @classmethod
     def tearDownClass(cls):
@@ -376,7 +376,7 @@ class ClusterBridgedNetworkTest(unittest.TestCase):
 
     @classmethod
     def is_kafka_healthy_for_service(cls, service, port, num_brokers, host="localhost", security_protocol="PLAINTEXT"):
-        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(host=host, port=port, brokers=num_brokers, security_protocol=security_protocol))
+        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(host=host, port=port, brokers=num_brokers, security_protocol=security_protocol)).decode()
         assert "PASS" in output
 
     def test_bridge_network(self):
@@ -386,7 +386,7 @@ class ClusterBridgedNetworkTest(unittest.TestCase):
         logs = utils.run_docker_command(
             image="confluentinc/cp-kafkacat",
             command=KAFKA_CHECK.format(host="kafka-1", port=9092),
-            host_config={'NetworkMode': 'cluster-test_zk'})
+            host_config={'NetworkMode': 'cluster-test_zk'}).decode()
 
         parsed_logs = json.loads(logs)
         self.assertEquals(3, len(parsed_logs["brokers"]))
@@ -399,7 +399,7 @@ class ClusterBridgedNetworkTest(unittest.TestCase):
             name="kafka-producer",
             environment={'KAFKA_ZOOKEEPER_CONNECT': "zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181"},
             command=PLAIN_CLIENTS.format(brokers="kafka-1:9092", topic="foo", messages=100),
-            host_config={'NetworkMode': 'cluster-test_zk'})
+            host_config={'NetworkMode': 'cluster-test_zk'}).decode()
 
         self.assertTrue("Processed a total of 100 messages" in client_logs)
 
@@ -417,7 +417,7 @@ class ClusterSSLBridgedNetworkTest(ClusterBridgedNetworkTest):
 
         cls.cluster = utils.TestCluster("cluster-test", FIXTURES_DIR, "cluster-bridged-ssl.yml")
         cls.cluster.start()
-        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-1", ZK_READY.format(servers="zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181"))
+        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-1", ZK_READY.format(servers="zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181")).decode()
 
     @classmethod
     def tearDownClass(cls):
@@ -431,7 +431,7 @@ class ClusterSSLBridgedNetworkTest(ClusterBridgedNetworkTest):
         logs = utils.run_docker_command(
             image="confluentinc/cp-kafkacat",
             command=KAFKA_SSL_CHECK.format(host="kafka-ssl-1", port=9093),
-            host_config={'NetworkMode': 'cluster-test_zk', 'Binds': ['/tmp/kafka-cluster-bridge-test/secrets:/etc/kafka/secrets']})
+            host_config={'NetworkMode': 'cluster-test_zk', 'Binds': ['/tmp/kafka-cluster-bridge-test/secrets:/etc/kafka/secrets']}).decode()
 
         parsed_logs = json.loads(logs)
         self.assertEquals(3, len(parsed_logs["brokers"]))
@@ -444,7 +444,7 @@ class ClusterSSLBridgedNetworkTest(ClusterBridgedNetworkTest):
             name="kafka-ssl-bridged-producer",
             environment={'KAFKA_ZOOKEEPER_CONNECT': "zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181/ssl"},
             command=PRODUCER.format(brokers="kafka-ssl-1:9093", topic="foo", config="bridged.producer.ssl.config", messages=100),
-            host_config={'NetworkMode': 'cluster-test_zk', 'Binds': ['/tmp/kafka-cluster-bridge-test/secrets:/etc/kafka/secrets']})
+            host_config={'NetworkMode': 'cluster-test_zk', 'Binds': ['/tmp/kafka-cluster-bridge-test/secrets:/etc/kafka/secrets']}).decode()
 
         self.assertTrue("PRODUCED 100 messages" in producer_logs)
 
@@ -453,7 +453,7 @@ class ClusterSSLBridgedNetworkTest(ClusterBridgedNetworkTest):
             image="confluentinc/cp-kafkacat",
             name="kafkacat-ssl-bridged-consumer",
             command=KAFKACAT_SSL_CONSUMER.format(brokers="kafka-ssl-1:9093", topic="foo", messages=10),
-            host_config={'NetworkMode': 'cluster-test_zk', 'Binds': ['/tmp/kafka-cluster-bridge-test/secrets:/etc/kafka/secrets']})
+            host_config={'NetworkMode': 'cluster-test_zk', 'Binds': ['/tmp/kafka-cluster-bridge-test/secrets:/etc/kafka/secrets']}).decode()
 
         self.assertEquals("\n".join([str(i + 1) for i in xrange(10)]), consumer_logs.strip())
 
@@ -473,14 +473,14 @@ class ClusterSASLBridgedNetworkTest(ClusterBridgedNetworkTest):
         cls.cluster.start()
 
         # Create keytabs
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="bridged_broker1", principal="kafka", hostname="kafka-sasl-ssl-1"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="bridged_broker2", principal="kafka", hostname="kafka-sasl-ssl-2"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="bridged_broker3", principal="kafka", hostname="kafka-sasl-ssl-3"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="bridged_kafkacat", principal="bridged_kafkacat", hostname="bridged-kafkacat"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="bridged_producer", principal="bridged_producer", hostname="kafka-sasl-ssl-producer"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="bridged_consumer", principal="bridged_consumer", hostname="kafka-sasl-ssl-consumer"))
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="bridged_broker1", principal="kafka", hostname="kafka-sasl-ssl-1")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="bridged_broker2", principal="kafka", hostname="kafka-sasl-ssl-2")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="bridged_broker3", principal="kafka", hostname="kafka-sasl-ssl-3")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="bridged_kafkacat", principal="bridged_kafkacat", hostname="bridged-kafkacat")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="bridged_producer", principal="bridged_producer", hostname="kafka-sasl-ssl-producer")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="bridged_consumer", principal="bridged_consumer", hostname="kafka-sasl-ssl-consumer")).decode()
 
-        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-1", ZK_READY.format(servers="zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181"))
+        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-1", ZK_READY.format(servers="zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181")).decode()
 
     @classmethod
     def tearDownClass(cls):
@@ -512,7 +512,7 @@ class ClusterSASLBridgedNetworkTest(ClusterBridgedNetworkTest):
             name="kafka-sasl-ssl-bridged-producer",
             environment=producer_env,
             command=PRODUCER.format(brokers="kafka-sasl-ssl-1:9094", topic="foo", config="bridged.producer.ssl.sasl.config", messages=100),
-            host_config={'NetworkMode': 'cluster-test_zk', 'Binds': ['/tmp/kafka-cluster-bridge-test/secrets:/etc/kafka/secrets']})
+            host_config={'NetworkMode': 'cluster-test_zk', 'Binds': ['/tmp/kafka-cluster-bridge-test/secrets:/etc/kafka/secrets']}).decode()
 
         self.assertTrue("PRODUCED 100 messages" in producer_logs)
 
@@ -525,7 +525,7 @@ class ClusterSASLBridgedNetworkTest(ClusterBridgedNetworkTest):
             name="kafka-sasl-ssl-bridged-consumer",
             environment=consumer_env,
             command=CONSUMER.format(brokers="kafka-sasl-ssl-1:9094", topic="foo", config="bridged.consumer.ssl.sasl.config", messages=10),
-            host_config={'NetworkMode': 'cluster-test_zk', 'Binds': ['/tmp/kafka-cluster-bridge-test/secrets:/etc/kafka/secrets']})
+            host_config={'NetworkMode': 'cluster-test_zk', 'Binds': ['/tmp/kafka-cluster-bridge-test/secrets:/etc/kafka/secrets']}).decode()
 
         self.assertTrue("Processed a total of 10 messages" in consumer_logs)
 
@@ -535,7 +535,7 @@ class ClusterHostNetworkTest(unittest.TestCase):
     def setUpClass(cls):
         cls.cluster = utils.TestCluster("cluster-test", FIXTURES_DIR, "cluster-host-plain.yml")
         cls.cluster.start()
-        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-1", ZK_READY.format(servers="localhost:22181,localhost:32181,localhost:42181"))
+        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-1", ZK_READY.format(servers="localhost:22181,localhost:32181,localhost:42181")).decode()
 
     @classmethod
     def tearDownClass(cls):
@@ -546,7 +546,7 @@ class ClusterHostNetworkTest(unittest.TestCase):
 
     @classmethod
     def is_kafka_healthy_for_service(cls, service, port, num_brokers, host="localhost", security_protocol="PLAINTEXT"):
-        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(host=host, port=port, brokers=num_brokers, security_protocol=security_protocol))
+        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(host=host, port=port, brokers=num_brokers, security_protocol=security_protocol)).decode()
         assert "PASS" in output
 
     def test_host_network(self):
@@ -556,7 +556,7 @@ class ClusterHostNetworkTest(unittest.TestCase):
         logs = utils.run_docker_command(
             image="confluentinc/cp-kafkacat",
             command=KAFKA_CHECK.format(host="localhost", port=19092),
-            host_config={'NetworkMode': 'host'})
+            host_config={'NetworkMode': 'host'}).decode()
 
         parsed_logs = json.loads(logs)
         self.assertEquals(3, len(parsed_logs["brokers"]))
@@ -569,7 +569,7 @@ class ClusterHostNetworkTest(unittest.TestCase):
             name="kafka-producer",
             environment={'KAFKA_ZOOKEEPER_CONNECT': "localhost:22181,localhost:32181,localhost:42181"},
             command=PLAIN_CLIENTS.format(brokers="localhost:19092", topic="foo", messages=100),
-            host_config={'NetworkMode': 'host'})
+            host_config={'NetworkMode': 'host'}).decode()
 
         self.assertTrue("Processed a total of 100 messages" in client_logs)
 
@@ -588,7 +588,7 @@ class ClusterSSLHostNetworkTest(ClusterHostNetworkTest):
         cls.cluster = utils.TestCluster("cluster-test", FIXTURES_DIR, "cluster-host-ssl.yml")
         cls.cluster.start()
 
-        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-1", ZK_READY.format(servers="localhost:22181,localhost:32181,localhost:42181"))
+        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-1", ZK_READY.format(servers="localhost:22181,localhost:32181,localhost:42181")).decode()
 
     @classmethod
     def tearDownClass(cls):
@@ -602,7 +602,7 @@ class ClusterSSLHostNetworkTest(ClusterHostNetworkTest):
         logs = utils.run_docker_command(
             image="confluentinc/cp-kafkacat",
             command=KAFKA_SSL_CHECK.format(host="localhost", port=19093),
-            host_config={'NetworkMode': 'host', 'Binds': ['/tmp/kafka-cluster-host-test/secrets:/etc/kafka/secrets']})
+            host_config={'NetworkMode': 'host', 'Binds': ['/tmp/kafka-cluster-host-test/secrets:/etc/kafka/secrets']}).decode()
 
         parsed_logs = json.loads(logs)
         self.assertEquals(3, len(parsed_logs["brokers"]))
@@ -615,7 +615,7 @@ class ClusterSSLHostNetworkTest(ClusterHostNetworkTest):
             name="kafka-ssl-host-producer",
             environment={'KAFKA_ZOOKEEPER_CONNECT': "localhost:22181,localhost:32181,localhost:42181/ssl"},
             command=PRODUCER.format(brokers="localhost:29093", topic="foo", config="host.producer.ssl.config", messages=100),
-            host_config={'NetworkMode': 'host', 'Binds': ['/tmp/kafka-cluster-host-test/secrets:/etc/kafka/secrets']})
+            host_config={'NetworkMode': 'host', 'Binds': ['/tmp/kafka-cluster-host-test/secrets:/etc/kafka/secrets']}).decode()
 
         self.assertTrue("PRODUCED 100 messages" in producer_logs)
 
@@ -624,7 +624,7 @@ class ClusterSSLHostNetworkTest(ClusterHostNetworkTest):
             image="confluentinc/cp-kafkacat",
             name="kafkacat-ssl-host-consumer",
             command=KAFKACAT_SSL_CONSUMER.format(brokers="localhost:29093", topic="foo", messages=10),
-            host_config={'NetworkMode': 'host', 'Binds': ['/tmp/kafka-cluster-host-test/secrets:/etc/kafka/secrets']})
+            host_config={'NetworkMode': 'host', 'Binds': ['/tmp/kafka-cluster-host-test/secrets:/etc/kafka/secrets']}).decode()
 
         self.assertEquals("\n".join([str(i + 1) for i in xrange(10)]), consumer_logs.strip())
 
@@ -653,19 +653,19 @@ class ClusterSASLHostNetworkTest(ClusterHostNetworkTest):
         cls.cluster.start()
 
         # Create keytabs
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="host_broker1", principal="kafka", hostname="sasl.kafka.com"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="host_broker2", principal="kafka", hostname="sasl.kafka.com"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="host_broker3", principal="kafka", hostname="sasl.kafka.com"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="host_producer", principal="host_producer", hostname="sasl.kafka.com"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="host_consumer", principal="host_consumer", hostname="sasl.kafka.com"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-host-1", principal="zookeeper", hostname="sasl.kafka.com"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-host-2", principal="zookeeper", hostname="sasl.kafka.com"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-host-3", principal="zookeeper", hostname="sasl.kafka.com"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-host-1", principal="zkclient", hostname="sasl.kafka.com"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-host-2", principal="zkclient", hostname="sasl.kafka.com"))
-        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-host-3", principal="zkclient", hostname="sasl.kafka.com"))
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="host_broker1", principal="kafka", hostname="sasl.kafka.com")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="host_broker2", principal="kafka", hostname="sasl.kafka.com")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="host_broker3", principal="kafka", hostname="sasl.kafka.com")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="host_producer", principal="host_producer", hostname="sasl.kafka.com")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="host_consumer", principal="host_consumer", hostname="sasl.kafka.com")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-host-1", principal="zookeeper", hostname="sasl.kafka.com")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-host-2", principal="zookeeper", hostname="sasl.kafka.com")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zookeeper-host-3", principal="zookeeper", hostname="sasl.kafka.com")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-host-1", principal="zkclient", hostname="sasl.kafka.com")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-host-2", principal="zkclient", hostname="sasl.kafka.com")).decode()
+        cls.cluster.run_command_on_service("kerberos", KADMIN_KEYTAB_CREATE.format(filename="zkclient-host-3", principal="zkclient", hostname="sasl.kafka.com")).decode()
 
-        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-sasl-1", ZK_READY.format(servers="sasl.kafka.com:22181,sasl.kafka.com:32181,sasl.kafka.com:42181"))
+        assert "PASS" in cls.cluster.run_command_on_service("zookeeper-sasl-1", ZK_READY.format(servers="sasl.kafka.com:22181,sasl.kafka.com:32181,sasl.kafka.com:42181")).decode()
 
     @classmethod
     def tearDownClass(cls):
@@ -684,7 +684,7 @@ class ClusterSASLHostNetworkTest(ClusterHostNetworkTest):
             name="kafka-ssl-sasl-host-producer",
             environment=producer_env,
             command=PRODUCER.format(brokers="sasl.kafka.com:29094", topic="foo", config="host.producer.ssl.sasl.config", messages=100),
-            host_config={'NetworkMode': 'host', 'Binds': ['/tmp/kafka-cluster-host-test/secrets:/etc/kafka/secrets']})
+            host_config={'NetworkMode': 'host', 'Binds': ['/tmp/kafka-cluster-host-test/secrets:/etc/kafka/secrets']}).decode()
 
         self.assertTrue("PRODUCED 100 messages" in producer_logs)
 
@@ -697,6 +697,6 @@ class ClusterSASLHostNetworkTest(ClusterHostNetworkTest):
             name="kafka-ssl-sasl-host-consumer",
             environment=consumer_env,
             command=CONSUMER.format(brokers="sasl.kafka.com:29094", topic="foo", config="host.consumer.ssl.sasl.config", messages=10),
-            host_config={'NetworkMode': 'host', 'Binds': ['/tmp/kafka-cluster-host-test/secrets:/etc/kafka/secrets']})
+            host_config={'NetworkMode': 'host', 'Binds': ['/tmp/kafka-cluster-host-test/secrets:/etc/kafka/secrets']}).decode()
 
         self.assertTrue("Processed a total of 10 messages" in consumer_logs)
