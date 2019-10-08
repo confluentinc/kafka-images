@@ -9,7 +9,7 @@ dockerfile {
     mvnPhase = 'package'
     mvnSkipDeploy = true
     nodeLabel = 'docker-oraclejdk8-compose-swarm'
-    slackChannel = 'kafka-oncall'
+    slackChannel = 'kafka-warn'
     upstreamProjects = []
     dockerPullDeps = ['confluentinc/cp-base-new']
     usePackages = true
