@@ -315,8 +315,10 @@ class ClusterHostNetworkTest(unittest.TestCase):
         """.strip()
 
         # nw_interface="eth0"
-        get_ip_cmd = "/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'" #% nw_interface
+        get_ip_cmd = "/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{print $1}'"
         internal_ip = utils.run_cmd(get_ip_cmd).strip()
+        print("===================================")
+        print("IP: {}".format(internal_ip))
         utils.run_cmd(cmd.format(IP=internal_ip))
         # cls.machine.ssh(cmd.format(IP=cls.machine.get_internal_ip().strip()))
 
