@@ -199,7 +199,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
     def test_jmx_host_network(self):
 
         # Test from outside the container
-        jmxterm_image = "{0}confluentinc/cp-jmxterm:{1}".format(os.environ["DOCKER_REGISTRY"], os.environ["DOCKER_TAG"])
+        jmxterm_image = "{0}confluentinc/cp-jmxterm:{1}".format(os.environ["DOCKER_REGISTRY"], os.environ["DOCKER_UPSTREAM_TAG"])
         logs = utils.run_docker_command(
             image=jmxterm_image,
             command=JMX_CHECK.format(client_port=52181, jmx_hostname="localhost", jmx_port="39999"),
@@ -209,7 +209,7 @@ class StandaloneNetworkingTest(unittest.TestCase):
     def test_jmx_bridged_network(self):
 
         # Test from outside the container
-        jmxterm_image = "{0}confluentinc/cp-jmxterm:{1}".format(os.environ["DOCKER_REGISTRY"], os.environ["DOCKER_TAG"])
+        jmxterm_image = "{0}confluentinc/cp-jmxterm:{1}".format(os.environ["DOCKER_REGISTRY"], os.environ["DOCKER_UPSTREAM_TAG"])
         logs = utils.run_docker_command(
             image=jmxterm_image,
             command=JMX_CHECK.format(client_port=2181, jmx_hostname="bridge-network-jmx", jmx_port="9999"),
