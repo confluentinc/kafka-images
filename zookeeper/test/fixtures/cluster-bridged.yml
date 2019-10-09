@@ -59,7 +59,7 @@ services:
     - io.confluent.docker.testing=true
 
   kerberos:
-    image: confluentinc/cp-kerberos
+    image: confluentinc/cp-kerberos:master-latest
     environment:
       BOOTSTRAP: 0
     volumes:
