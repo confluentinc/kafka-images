@@ -69,7 +69,7 @@ class ConfigTest(unittest.TestCase):
             """
         expected = expected.translate({ord(c): None for c in string.whitespace})
         zk_props = zk_props.translate({ord(c): None for c in string.whitespace})
-        self.assertEquals(zk_props, expected)
+        self.assertEqual(zk_props, expected)
 
     def test_default_logging_config(self):
         self.is_zk_healthy_for_service("default-config", 2181)
@@ -83,7 +83,7 @@ class ConfigTest(unittest.TestCase):
             """
         expected_log4j_props = expected_log4j_props.translate({ord(c): None for c in string.whitespace})
         log4j_props = log4j_props.translate({ord(c): None for c in string.whitespace})
-        self.assertEquals(log4j_props, expected_log4j_props)
+        self.assertEqual(log4j_props, expected_log4j_props)
 
         tools_log4j_props = self.cluster.run_command_on_service("default-config", "cat /etc/kafka/tools-log4j.properties").decode()
         expected_tools_log4j_props = """log4j.rootLogger=WARN, stderr
@@ -95,7 +95,7 @@ class ConfigTest(unittest.TestCase):
             """
         expected_tools_log4j_props = expected_tools_log4j_props.translate({ord(c): None for c in string.whitespace})
         tools_log4j_props = tools_log4j_props.translate({ord(c): None for c in string.whitespace})
-        self.assertEquals(tools_log4j_props, expected_tools_log4j_props)
+        self.assertEqual(tools_log4j_props, expected_tools_log4j_props)
 
     def test_full_config(self):
         self.is_zk_healthy_for_service("full-config", 22181)
@@ -113,10 +113,10 @@ class ConfigTest(unittest.TestCase):
                 """
         expected = expected.translate({ord(c): None for c in string.whitespace})
         zk_props = zk_props.translate({ord(c): None for c in string.whitespace})
-        self.assertEquals(zk_props, expected)
+        self.assertEqual(zk_props, expected)
 
         zk_id = self.cluster.run_command_on_service("full-config", "cat /var/lib/zookeeper/data/myid").decode()
-        self.assertEquals(zk_id, "1")
+        self.assertEqual(zk_id, "1")
 
     def test_full_logging_config(self):
         self.is_zk_healthy_for_service("full-config", 22181)
@@ -132,7 +132,7 @@ class ConfigTest(unittest.TestCase):
             """
         log4j_props = log4j_props.translate({ord(c): None for c in string.whitespace})
         expected_log4j_props = expected_log4j_props.translate({ord(c): None for c in string.whitespace})
-        self.assertEquals(log4j_props, expected_log4j_props)
+        self.assertEqual(log4j_props, expected_log4j_props)
 
         tools_log4j_props = self.cluster.run_command_on_service("full-config", "cat /etc/kafka/tools-log4j.properties").decode()
         expected_tools_log4j_props = """log4j.rootLogger=ERROR, stderr
@@ -144,7 +144,7 @@ class ConfigTest(unittest.TestCase):
             """
         tools_log4j_props = tools_log4j_props.translate({ord(c): None for c in string.whitespace})
         expected_tools_log4j_props = expected_tools_log4j_props.translate({ord(c): None for c in string.whitespace})
-        self.assertEquals(tools_log4j_props, expected_tools_log4j_props)
+        self.assertEqual(tools_log4j_props, expected_tools_log4j_props)
 
     def test_volumes(self):
         self.is_zk_healthy_for_service("external-volumes", 2181)
@@ -169,7 +169,7 @@ class ConfigTest(unittest.TestCase):
                     """
         zk_props = zk_props.translate({ord(c): None for c in string.whitespace})
         expected = expected.translate({ord(c): None for c in string.whitespace})
-        self.assertEquals(zk_props, expected)
+        self.assertEqual(zk_props, expected)
 
         zk_id = self.cluster.run_command_on_service("full-config", "cat /var/lib/zookeeper/data/myid").decode()
         self.assertTrue(zk_id == "1")
@@ -284,7 +284,7 @@ class ClusterBridgeNetworkTest(unittest.TestCase):
                 command=MODE_COMMAND.format(port=port),
                 host_config={'NetworkMode': 'host'}).decode()
             outputs.append(output)
-        self.assertEquals(sorted(outputs), expected)
+        self.assertEqual(sorted(outputs), expected)
 
     def test_sasl_on_service(self):
         self.is_zk_healthy_for_service("zookeeper-sasl-1", 2181, "zookeeper-sasl-1")
@@ -365,7 +365,7 @@ class ClusterHostNetworkTest(unittest.TestCase):
                 command=MODE_COMMAND.format(port=port),
                 host_config={'NetworkMode': 'host'}).decode()
             outputs.append(output)
-        self.assertEquals(sorted(outputs), expected)
+        self.assertEqual(sorted(outputs), expected)
 
     def test_sasl_on_service(self):
         self.is_zk_healthy_for_service("zookeeper-sasl-1", 22182)
