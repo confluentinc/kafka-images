@@ -22,8 +22,8 @@ KADMIN_KEYTAB_CREATE = """bash -c \
 class ConfigTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        machine_name = os.environ["DOCKER_MACHINE_NAME"]
-        cls.machine = utils.TestMachine(machine_name)
+        # machine_name = os.environ["DOCKER_MACHINE_NAME"]
+        # cls.machine = utils.TestMachine(machine_name)
 
         # Create directories with the correct permissions for test with userid and external volumes.
         utils.run_command_on_host(
@@ -32,9 +32,11 @@ class ConfigTest(unittest.TestCase):
             "chown -R 12345 /tmp/zk-config-kitchen-sink-test/data /tmp/zk-config-kitchen-sink-test/log")
 
         # Copy SSL files.
-        cls.machine.ssh("mkdir -p /tmp/zookeeper-config-test/secrets")
+        utils.run_cmd("mkdir -p /tmp/zookeeper-config-test/secrets")
+        # cls.machine.ssh("mkdir -p /tmp/zookeeper-config-test/secrets")
         local_secrets_dir = os.path.join(FIXTURES_DIR, "secrets")
-        cls.machine.scp_to_machine(local_secrets_dir, "/tmp/zookeeper-config-test")
+        utils.run_cmd("cp {} /tmp/zookeeper-config-test".format(local_secrets_dir))
+        # cls.machine.scp_to_machine(local_secrets_dir, "/tmp/zookeeper-config-test")
 
         cls.cluster = utils.TestCluster("config-test", FIXTURES_DIR, "standalone-config.yml")
         cls.cluster.start()
@@ -220,13 +222,15 @@ class StandaloneNetworkingTest(unittest.TestCase):
 class ClusterBridgeNetworkTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        machine_name = os.environ["DOCKER_MACHINE_NAME"]
-        cls.machine = utils.TestMachine(machine_name)
+        # machine_name = os.environ["DOCKER_MACHINE_NAME"]
+        # cls.machine = utils.TestMachine(machine_name)
 
         # Copy SSL files.
-        cls.machine.ssh("mkdir -p /tmp/zookeeper-bridged-test/secrets")
+        utils.run_cmd("mkdir -p /tmp/zookeeper-bridged-test/secrets")
+        # cls.machine.ssh("mkdir -p /tmp/zookeeper-bridged-test/secrets")
         local_secrets_dir = os.path.join(FIXTURES_DIR, "secrets")
-        cls.machine.scp_to_machine(local_secrets_dir, "/tmp/zookeeper-bridged-test")
+        utils.run_cmd("cp {} /tmp/zookeeper-bridged-test".format(local_secrets_dir))
+        # cls.machine.scp_to_machine(local_secrets_dir, "/tmp/zookeeper-bridged-test")
 
         cls.cluster = utils.TestCluster("cluster-test", FIXTURES_DIR, "cluster-bridged.yml")
         cls.cluster.start()
@@ -287,8 +291,8 @@ class ClusterHostNetworkTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
 
-        machine_name = os.environ["DOCKER_MACHINE_NAME"]
-        cls.machine = utils.TestMachine(machine_name)
+        # machine_name = os.environ["DOCKER_MACHINE_NAME"]
+        # cls.machine = utils.TestMachine(machine_name)
 
         # Add a hostname mapped to eth0, required for SASL to work predictably.
         # localhost and hostname both resolve to 127.0.0.1 in the docker image, so using localhost causes unprodicatable behaviour
@@ -297,11 +301,18 @@ class ClusterHostNetworkTest(unittest.TestCase):
             "sudo sh -c 'grep sasl.kafka.com /etc/hosts || echo {IP} sasl.kafka.com >> /etc/hosts'"
         """.strip()
 
-        cls.machine.ssh(cmd.format(IP=cls.machine.get_internal_ip().strip()))
+        # nw_interface="eth0"
+        get_ip_cmd = "/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'" #% nw_interface
+        internal_ip = utils.run_cmd(get_ip_cmd).strip()
+        utils.run_cmd(cmd.format(IP=internal_ip))
+        # cls.machine.ssh(cmd.format(IP=cls.machine.get_internal_ip().strip()))
+        
         # Copy SSL files.
-        cls.machine.ssh("mkdir -p /tmp/zookeeper-host-test/secrets")
+        utils.run_cmd("mkdir -p /tmp/zookeeper-host-test/secrets")
+        # cls.machine.ssh("mkdir -p /tmp/zookeeper-host-test/secrets")
         local_secrets_dir = os.path.join(FIXTURES_DIR, "secrets")
-        cls.machine.scp_to_machine(local_secrets_dir, "/tmp/zookeeper-host-test")
+        utils.run_cmd("cp {} /tmp/zookeeper-host-test".format(local_secrets_dir))
+        # cls.machine.scp_to_machine(local_secrets_dir, "/tmp/zookeeper-host-test")
 
         cls.cluster = utils.TestCluster("cluster-test", FIXTURES_DIR, "cluster-host.yml")
         cls.cluster.start()
