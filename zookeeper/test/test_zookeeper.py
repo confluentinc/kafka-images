@@ -35,7 +35,7 @@ class ConfigTest(unittest.TestCase):
         utils.run_cmd("mkdir -p /tmp/zookeeper-config-test/secrets")
         # cls.machine.ssh("mkdir -p /tmp/zookeeper-config-test/secrets")
         local_secrets_dir = os.path.join(FIXTURES_DIR, "secrets")
-        utils.run_cmd("cp {} /tmp/zookeeper-config-test".format(local_secrets_dir))
+        utils.run_cmd("cp -r {} /tmp/zookeeper-config-test".format(local_secrets_dir))
         # cls.machine.scp_to_machine(local_secrets_dir, "/tmp/zookeeper-config-test")
 
         cls.cluster = utils.TestCluster("config-test", FIXTURES_DIR, "standalone-config.yml")
@@ -229,7 +229,7 @@ class ClusterBridgeNetworkTest(unittest.TestCase):
         utils.run_cmd("mkdir -p /tmp/zookeeper-bridged-test/secrets")
         # cls.machine.ssh("mkdir -p /tmp/zookeeper-bridged-test/secrets")
         local_secrets_dir = os.path.join(FIXTURES_DIR, "secrets")
-        utils.run_cmd("cp {} /tmp/zookeeper-bridged-test".format(local_secrets_dir))
+        utils.run_cmd("cp -r {} /tmp/zookeeper-bridged-test".format(local_secrets_dir))
         # cls.machine.scp_to_machine(local_secrets_dir, "/tmp/zookeeper-bridged-test")
 
         cls.cluster = utils.TestCluster("cluster-test", FIXTURES_DIR, "cluster-bridged.yml")
@@ -306,12 +306,12 @@ class ClusterHostNetworkTest(unittest.TestCase):
         internal_ip = utils.run_cmd(get_ip_cmd).strip()
         utils.run_cmd(cmd.format(IP=internal_ip))
         # cls.machine.ssh(cmd.format(IP=cls.machine.get_internal_ip().strip()))
-        
+
         # Copy SSL files.
         utils.run_cmd("mkdir -p /tmp/zookeeper-host-test/secrets")
         # cls.machine.ssh("mkdir -p /tmp/zookeeper-host-test/secrets")
         local_secrets_dir = os.path.join(FIXTURES_DIR, "secrets")
-        utils.run_cmd("cp {} /tmp/zookeeper-host-test".format(local_secrets_dir))
+        utils.run_cmd("cp -r {} /tmp/zookeeper-host-test".format(local_secrets_dir))
         # cls.machine.scp_to_machine(local_secrets_dir, "/tmp/zookeeper-host-test")
 
         cls.cluster = utils.TestCluster("cluster-test", FIXTURES_DIR, "cluster-host.yml")
