@@ -33,7 +33,7 @@ services:
 
 
   kerberos:
-    image: confluentinc/cp-kerberos:master-latest
+    image: "${DOCKER_TEST_REGISTRY}confluentinc/cp-kerberos:master-latest"
     network_mode: host
     environment:
       BOOTSTRAP: 0
