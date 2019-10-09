@@ -68,7 +68,7 @@ class ConfigTest(unittest.TestCase):
             dataDir=/var/lib/zookeeper/data
             dataLogDir=/var/lib/zookeeper/log
             """
-        self.assertEquals(zk_props.translate(None, string.whitespace), expected.translate(None, string.whitespace))
+        self.assertEquals(zk_props.translate(maketrans(None, string.whitespace)), expected.translate(maketrans(None, string.whitespace)))
 
     def test_default_logging_config(self):
         self.is_zk_healthy_for_service("default-config", 2181)
@@ -80,7 +80,7 @@ class ConfigTest(unittest.TestCase):
             log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
             log4j.appender.stdout.layout.ConversionPattern=[%d] %p %m (%c)%n
             """
-        self.assertEquals(log4j_props.translate(None, string.whitespace), expected_log4j_props.translate(None, string.whitespace))
+        self.assertEquals(log4j_props.translate(maketrans(None, string.whitespace)), expected_log4j_props.translate(maketrans(None, string.whitespace)))
 
         tools_log4j_props = self.cluster.run_command_on_service("default-config", "cat /etc/kafka/tools-log4j.properties").decode()
         expected_tools_log4j_props = """log4j.rootLogger=WARN, stderr
@@ -90,7 +90,7 @@ class ConfigTest(unittest.TestCase):
             log4j.appender.stderr.layout.ConversionPattern=[%d] %p %m (%c)%n
             log4j.appender.stderr.Target=System.err
             """
-        self.assertEquals(tools_log4j_props.translate(None, string.whitespace), expected_tools_log4j_props.translate(None, string.whitespace))
+        self.assertEquals(tools_log4j_props.translate(maketrans(None, string.whitespace)), expected_tools_log4j_props.translate(maketrans(None, string.whitespace)))
 
     def test_full_config(self):
         self.is_zk_healthy_for_service("full-config", 22181)
@@ -106,7 +106,7 @@ class ConfigTest(unittest.TestCase):
                 tickTime=5555
                 quorumListenOnAllIPs=false
                 """
-        self.assertEquals(zk_props.translate(None, string.whitespace), expected.translate(None, string.whitespace))
+        self.assertEquals(zk_props.translate(maketrans(None, string.whitespace)), expected.translate(maketrans(None, string.whitespace)))
 
         zk_id = self.cluster.run_command_on_service("full-config", "cat /var/lib/zookeeper/data/myid").decode()
         self.assertEquals(zk_id, "1")
@@ -123,7 +123,7 @@ class ConfigTest(unittest.TestCase):
 
             log4j.logger.zookeeper.foo.bar=DEBUG, stdout
             """
-        self.assertEquals(log4j_props.translate(None, string.whitespace), expected_log4j_props.translate(None, string.whitespace))
+        self.assertEquals(log4j_props.translate(maketrans(None, string.whitespace)), expected_log4j_props.translate(maketrans(None, string.whitespace)))
 
         tools_log4j_props = self.cluster.run_command_on_service("full-config", "cat /etc/kafka/tools-log4j.properties").decode()
         expected_tools_log4j_props = """log4j.rootLogger=ERROR, stderr
@@ -133,7 +133,7 @@ class ConfigTest(unittest.TestCase):
             log4j.appender.stderr.layout.ConversionPattern=[%d] %p %m (%c)%n
             log4j.appender.stderr.Target=System.err
             """
-        self.assertEquals(tools_log4j_props.translate(None, string.whitespace), expected_tools_log4j_props.translate(None, string.whitespace))
+        self.assertEquals(tools_log4j_props.translate(maketrans(None, string.whitespace)), expected_tools_log4j_props.translate(maketrans(None, string.whitespace)))
 
     def test_volumes(self):
         self.is_zk_healthy_for_service("external-volumes", 2181)
@@ -156,7 +156,7 @@ class ConfigTest(unittest.TestCase):
                     tickTime=5555
                     quorumListenOnAllIPs=false
                     """
-        self.assertTrue(zk_props.translate(None, string.whitespace) == expected.translate(None, string.whitespace))
+        self.assertTrue(zk_props.translate(maketrans(None, string.whitespace)) == expected.translate(maketrans(None, string.whitespace)))
 
         zk_id = self.cluster.run_command_on_service("full-config", "cat /var/lib/zookeeper/data/myid").decode()
         self.assertTrue(zk_id == "1")
