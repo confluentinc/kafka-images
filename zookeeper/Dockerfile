@@ -41,16 +41,11 @@ EXPOSE 2181 2888 3888
 ENV COMPONENT=zookeeper
 
 RUN echo "===> Installing ${COMPONENT}..." \
-    && apt-get update \
-    && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
-    && if [ "x$ALLOW_UNSIGNED" = "xtrue" ]; then echo "APT::Get::AllowUnauthenticated \"true\";" > /etc/apt/apt.conf.d/allow_unauthenticated; else curl -s -L ${CONFLUENT_PACKAGES_REPO}/archive.key -o /tmp/archive.key && apt-key add /tmp/archive.key; fi \
-    && echo "deb [arch=amd64] ${CONFLUENT_PACKAGES_REPO} stable main" >> /etc/apt/sources.list \
-    && cat /etc/apt/sources.list \
-    && apt-get install -y apt-transport-https \
-    && apt-get -qq update \
-    && apt-get install -y confluent-kafka-${SCALA_VERSION}=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
-    && echo "===> clean up ..." \
-    && apt-get clean && rm -rf /tmp/* /var/lib/apt/lists/* \
+    && yum -q -y update \
+    && yum install -y confluent-kafka-${SCALA_VERSION}-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
+    && echo "===> clean up ..."  \
+    && yum clean all \
+    && rm -rf /tmp/* \
     && echo "===> Setting up ${COMPONENT} dirs" \
     && mkdir -p /var/lib/${COMPONENT}/data /var/lib/${COMPONENT}/log /etc/${COMPONENT}/secrets \
     && chmod -R ag+w /etc/kafka /var/lib/${COMPONENT}/data /var/lib/${COMPONENT}/log /etc/${COMPONENT}/secrets \

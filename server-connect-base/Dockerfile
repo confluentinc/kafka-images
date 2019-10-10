@@ -23,7 +23,7 @@ ARG PROJECT_VERSION
 ARG ARTIFACT_ID
  
 # Make sure you use an appropriate contact address.
-MAINTAINER partner-support@confluent.io
+LABEL maintainer="partner-support@confluent.io"
 LABEL io.confluent.docker=true
 ARG COMMIT_ID=unknown
 LABEL io.confluent.docker.git.id=$COMMIT_ID
@@ -42,23 +42,18 @@ ENV COMPONENT=kafka-connect
 EXPOSE 8083
 
 RUN echo "===> Installing ${COMPONENT}..." \
-    && apt-get -qq update \
-    && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
-    && if [ "x$ALLOW_UNSIGNED" = "xtrue" ]; then echo "APT::Get::AllowUnauthenticated \"true\";" > /etc/apt/apt.conf.d/allow_unauthenticated; else curl -s -L ${CONFLUENT_PACKAGES_REPO}/archive.key -o /tmp/archive.key && apt-key add /tmp/archive.key; fi \
-    && echo "deb [arch=amd64] ${CONFLUENT_PACKAGES_REPO} stable main" >> /etc/apt/sources.list \
-    && cat /etc/apt/sources.list \
-    && apt-get install -y apt-transport-https \
-    && apt-get -qq update \
+    && yum -q -y update \
     && echo "===> Installing Schema Registry (for Avro jars) ..." \
-    && apt-get install -y confluent-schema-registry=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
+    && yum install -y confluent-schema-registry-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
     && echo "===> Installing Controlcenter for monitoring interceptors ..."\
-    && apt-get install -y confluent-control-center=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
+    && yum install -y confluent-control-center-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
     && echo "===> Installing Confluent security plugins ..." \
-    && apt-get install -y confluent-security=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
+    && yum install -y confluent-security-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
     && echo "===> Installing Confluent Hub client ..." \
-    && apt-get install -y confluent-hub-client=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
-    && echo "===> Cleaning up ..." \
-    && apt-get clean && rm -rf /tmp/* /var/lib/apt/lists/* \
+    && yum install -y confluent-hub-client-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
+    && echo "===> Cleaning up ..."  \
+    && yum clean all \
+    && rm -rf /tmp/* \
     echo "===> Setting up ${COMPONENT} dirs ..." \
     && mkdir -p /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars \
     && chmod -R ag+w /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars

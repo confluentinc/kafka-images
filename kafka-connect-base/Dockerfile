@@ -42,25 +42,19 @@ ENV COMPONENT=kafka-connect
 EXPOSE 8083
 
 
-RUN echo "===> Installing ${COMPONENT}..." \
-    && apt-get update \
-    && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
-    && if [ "x$ALLOW_UNSIGNED" = "xtrue" ]; then echo "APT::Get::AllowUnauthenticated \"true\";" > /etc/apt/apt.conf.d/allow_unauthenticated; else curl -s -L ${CONFLUENT_PACKAGES_REPO}/archive.key -o /tmp/archive.key && apt-key add /tmp/archive.key; fi \
-    && echo "deb [arch=amd64] ${CONFLUENT_PACKAGES_REPO} stable main" >> /etc/apt/sources.list \
-    && cat /etc/apt/sources.list \
-    && apt-get install -y apt-transport-https \
-    && apt-get -qq update \
-    && echo "===> Installing Schema Registry (for Avro jars) ..." \
-    && apt-get install -y confluent-schema-registry=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
-    && echo "===> Installing Controlcenter for monitoring interceptors ..." \
-    && apt-get install -y confluent-control-center=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
-    && echo "===> Installing Confluent Hub client ..." \
-    && apt-get install -y confluent-hub-client=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
-    && echo "===> Cleaning up ..." \
-    && apt-get clean && rm -rf /tmp/* /var/lib/apt/lists/* \
-    echo "===> Setting up ${COMPONENT} dirs ..." \
-    && mkdir -p /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars \
-    && chmod -R ag+w /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars
+RUN echo "===> Installing JDBC, Elasticsearch and Hadoop connectors ..." \
+    && yum -q -y update \
+    && yum install -y \
+        confluent-kafka-connect-jjj-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
+        confluent-kafka-connect-jdbc-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
+        confluent-kafka-connect-hdfs-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
+        confluent-kafka-connect-elasticsearch-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
+        confluent-kafka-connect-storage-common-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
+        confluent-kafka-connect-s3-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
+        confluent-kafka-connect-jms-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
+    && echo "===> Cleaning up ..."  \
+    && yum clean all \
+    && rm -rf /tmp/*
 
 ENV CONNECT_PLUGIN_PATH=/usr/share/java/,/usr/share/confluent-hub-components/
 

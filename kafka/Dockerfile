@@ -22,7 +22,7 @@ ARG PROJECT_VERSION
 ARG ARTIFACT_ID
 
 # Make sure you use an appropriate contact address.
-MAINTAINER partner-support@confluent.io
+LABEL maintainer="partner-support@confluent.io"
 LABEL io.confluent.docker=true
 ARG COMMIT_ID=unknown
 LABEL io.confluent.docker.git.id=$COMMIT_ID
@@ -49,20 +49,46 @@ EXPOSE 9092
 
 
 RUN echo "===> Installing ${COMPONENT}..." \
-    && apt-get update \
+    && yum -q -y update \
     && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
-    && if [ "x$ALLOW_UNSIGNED" = "xtrue" ]; then echo "APT::Get::AllowUnauthenticated \"true\";" > /etc/apt/apt.conf.d/allow_unauthenticated; else curl -s -L ${CONFLUENT_PACKAGES_REPO}/archive.key -o /tmp/archive.key && apt-key add /tmp/archive.key; fi \
-    && echo "deb [arch=amd64] ${CONFLUENT_PACKAGES_REPO} stable main" >> /etc/apt/sources.list \
-    && cat /etc/apt/sources.list \
-    && apt-get install -y apt-transport-https \
-    && apt-get update \
-    && apt-get install -y confluent-kafka-${SCALA_VERSION}=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
-    && echo "===> clean up ..." \
-    && apt-get clean && rm -rf /tmp/* /var/lib/apt/lists/* \
-    && echo "===> Setting up ${COMPONENT} dirs..." \
-    && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets\
-    && chmod -R ag+w /etc/${COMPONENT} /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
-    && chown -R root:root /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/zookeeper
+        if [ "x${ALLOW_UNSIGNED}" = "xtrue" ]; then \
+        echo "===> GPG signatures are disabled for SNAPSHOT builds..." \
+        && printf "[Confluent.dist] \n\
+name=Confluent repository (dist) \n\
+baseurl=${CONFLUENT_PACKAGES_REPO}/rpm/${CONFLUENT_VERSION}/7 \n\
+gpgcheck=0 \n\
+enabled=1 \n\
+\n\
+[Confluent] \n\
+name=Confluent repository \n\
+baseurl=${CONFLUENT_PACKAGES_REPO}/rpm/${CONFLUENT_VERSION}/ \n\
+gpgcheck=0 \n\
+enabled=1 " > /etc/yum.repos.d/confluent.repo; \
+    else \
+        echo "===> Using Confluent's archive.key..." \
+        && rpm --import ${CONFLUENT_PACKAGES_REPO}/rpm/${CONFLUENT_VERSION}/archive.key \
+        && printf "[Confluent.dist] \n\
+name=Confluent repository (dist) \n\
+baseurl=${CONFLUENT_PACKAGES_REPO}/7 \n\
+gpgcheck=1 \n\
+gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
+enabled=1 \n\
+\n\
+[Confluent] \n\
+name=Confluent repository \n\
+baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
+gpgcheck=1 \n\
+gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
+enabled=1 " > /etc/yum.repos.d/confluent.repo; \
+    fi \
+    && yum install -y confluent-kafka-${SCALA_VERSION}-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
+    && echo "===> clean up ..."  \
+    && yum clean all \
+    && rm -rf /tmp/* \
+    \
+    && echo "===> Setting up ${COMPONENT} dirs" \
+    && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
+    && chmod -R ag+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets
 
 
 VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
