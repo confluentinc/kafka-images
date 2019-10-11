@@ -22,7 +22,7 @@ ARG PROJECT_VERSION
 ARG ARTIFACT_ID
  
 # Make sure you use an appropriate contact address.
-MAINTAINER partner-support@confluent.io
+LABEL maintainer="partner-support@confluent.io"
 LABEL io.confluent.docker=true
 ARG COMMIT_ID=unknown
 LABEL io.confluent.docker.git.id=$COMMIT_ID
@@ -32,7 +32,6 @@ LABEL io.confluent.docker.build.number=$BUILD_NUMBER
 ARG CONFLUENT_VERSION
 ARG CONFLUENT_PACKAGES_REPO
 ARG CONFLUENT_PLATFORM_LABEL
-ARG CONFLUENT_DEB_VERSION
 ARG ALLOW_UNSIGNED
 
 # allow arg override of required env params
