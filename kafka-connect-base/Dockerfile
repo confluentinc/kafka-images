@@ -41,21 +41,20 @@ ENV COMPONENT=kafka-connect
 EXPOSE 8083
 
 
-RUN echo "===> Installing JDBC, Elasticsearch and Hadoop connectors ..." \
+RUN echo "===> Installing Schema Registry (for Avro jars) ..." \
     && yum -q -y update \
-    && yum install -y \
-        confluent-kafka-connect-jjj-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
-        confluent-kafka-connect-jdbc-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
-        confluent-kafka-connect-hdfs-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
-        confluent-kafka-connect-elasticsearch-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
-        confluent-kafka-connect-storage-common-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
-        confluent-kafka-connect-s3-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
-        confluent-kafka-connect-jms-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
+    && echo "===> Installing Schema Registry (for Avro jars) ..." \
+    && yum install -y confluent-schema-registry-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
+    && echo "===> Installing Controlcenter for monitoring interceptors ..."\
+    && yum install -y confluent-control-center-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
+    && echo "===> Installing Confluent Hub client ..."\
+    && yum install -y confluent-hub-client-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
     && echo "===> Cleaning up ..."  \
     && yum clean all \
-    && rm -rf /tmp/*
-
-ENV CONNECT_PLUGIN_PATH=/usr/share/java/,/usr/share/confluent-hub-components/
+    && rm -rf /tmp/* \
+    echo "===> Setting up ${COMPONENT} dirs ..." \
+    && mkdir -p /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars \
+    && chmod -R ag+w /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars
 
 VOLUME ["/etc/${COMPONENT}/jars", "/etc/${COMPONENT}/secrets"]
 
