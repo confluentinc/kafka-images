@@ -42,9 +42,7 @@ RUN echo "===> Installing ${COMPONENT}..." \
     && yum -q -y update \
     && echo "===> Installing JDBC, Elasticsearch and Hadoop connectors ..." \
     && yum install -y \
-        confluent-kafka-connect-jjj-${CONFLUENT_VERSION} \
         confluent-kafka-connect-jdbc-${CONFLUENT_VERSION} \
-        confluent-kafka-connect-hdfs-${CONFLUENT_VERSION} \
         confluent-kafka-connect-elasticsearch-${CONFLUENT_VERSION} \
         confluent-kafka-connect-storage-common-${CONFLUENT_VERSION} \
         confluent-kafka-connect-s3-${CONFLUENT_VERSION} \
