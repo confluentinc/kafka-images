@@ -44,11 +44,11 @@ EXPOSE 8083
 RUN echo "===> Installing Schema Registry (for Avro jars) ..." \
     && yum -q -y update \
     && echo "===> Installing Schema Registry (for Avro jars) ..." \
-    && yum install -y confluent-schema-registry-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
+    && yum install -y confluent-schema-registry-${CONFLUENT_VERSION} \
     && echo "===> Installing Controlcenter for monitoring interceptors ..."\
-    && yum install -y confluent-control-center-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
+    && yum install -y confluent-control-center-${CONFLUENT_VERSION} \
     && echo "===> Installing Confluent Hub client ..."\
-    && yum install -y confluent-hub-client-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
+    && yum install -y confluent-hub-client-${CONFLUENT_VERSION} \
     && echo "===> Cleaning up ..."  \
     && yum clean all \
     && rm -rf /tmp/* \

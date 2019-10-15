@@ -63,9 +63,9 @@ gpgcheck=1 \n\
 gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
 enabled=1 " > /etc/yum.repos.d/confluent.repo; \
     && echo "===> installing ${COMPONENT}..." \
-    && yum install -y confluent-server-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
+    && yum install -y confluent-server-${CONFLUENT_VERSION} \
     && echo "===> installing confluent-rebalancer ..." \
-    && yum install -y confluent-rebalancer-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
+    && yum install -y confluent-rebalancer-${CONFLUENT_VERSION} \
     && echo "===> clean up ..."  \
     && yum clean all \
     && rm -rf /tmp/* \

@@ -41,11 +41,11 @@ RUN echo "===> Installing ${COMPONENT}..." \
     && yum -q -y update \
     && echo "===> Installing JDBC, Elasticsearch and Hadoop connectors ..." \
     && yum install -y \
-        confluent-kafka-connect-jdbc-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
-        confluent-kafka-connect-elasticsearch-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
-        confluent-kafka-connect-storage-common-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
-        confluent-kafka-connect-s3-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
-        confluent-kafka-connect-jms-${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL} \
+        confluent-kafka-connect-jdbc-${CONFLUENT_VERSION} \
+        confluent-kafka-connect-elasticsearch-${CONFLUENT_VERSION} \
+        confluent-kafka-connect-storage-common-${CONFLUENT_VERSION} \
+        confluent-kafka-connect-s3-${CONFLUENT_VERSION} \
+        confluent-kafka-connect-jms-${CONFLUENT_VERSION} \
     && echo "===> Cleaning up ..."  \
     && yum clean all \
     && rm -rf /tmp/*
