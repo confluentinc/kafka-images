@@ -41,7 +41,7 @@ ENV COMPONENT=kafka-connect
 EXPOSE 8083
 
 
-RUN echo "===> Installing Schema Registry (for Avro jars) ..." \
+RUN echo "===> Installing ${COMPONENT}..." \
     && yum -q -y update \
     && echo "===> Installing Schema Registry (for Avro jars) ..." \
     && yum install -y confluent-schema-registry-${CONFLUENT_VERSION} \
