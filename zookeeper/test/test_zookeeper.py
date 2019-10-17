@@ -87,13 +87,29 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual(log4j_props, expected_log4j_props)
 
         tools_log4j_props = self.cluster.run_command_on_service("default-config", "cat /etc/kafka/tools-log4j.properties").decode()
-        expected_tools_log4j_props = """log4j.rootLogger=WARN, stderr
+        expected_tools_log4j_props =  """# Licensed to the Apache Software Foundation (ASF) under one or more
+        # contributor license agreements.  See the NOTICE file distributed with
+        # this work for additional information regarding copyright ownership.
+        # The ASF licenses this file to You under the Apache License, Version 2.0
+        # (the "License"); you may not use this file except in compliance with
+        # the License.  You may obtain a copy of the License at
+        #
+        #    http://www.apache.org/licenses/LICENSE-2.0
+        #
+        # Unless required by applicable law or agreed to in writing, software
+        # distributed under the License is distributed on an "AS IS" BASIS,
+        # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        # See the License for the specific language governing permissions and
+        # limitations under the License.
 
-            log4j.appender.stderr=org.apache.log4j.ConsoleAppender
-            log4j.appender.stderr.layout=org.apache.log4j.PatternLayout
-            log4j.appender.stderr.layout.ConversionPattern=[%d] %p %m (%c)%n
-            log4j.appender.stderr.Target=System.err
-            """
+        log4j.rootLogger=WARN, stderr
+
+        log4j.appender.stderr=org.apache.log4j.ConsoleAppender
+        log4j.appender.stderr.layout=org.apache.log4j.PatternLayout
+        log4j.appender.stderr.layout.ConversionPattern=[%d] %p %m (%c)%n
+        log4j.appender.stderr.Target=System.err
+        """ 
+
         expected_tools_log4j_props = expected_tools_log4j_props.translate({ord(c): None for c in string.whitespace})
         tools_log4j_props = tools_log4j_props.translate({ord(c): None for c in string.whitespace})
         self.assertEqual(tools_log4j_props, expected_tools_log4j_props)
