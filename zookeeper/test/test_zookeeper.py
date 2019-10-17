@@ -33,10 +33,8 @@ class ConfigTest(unittest.TestCase):
 
         # Copy SSL files.
         utils.run_cmd("mkdir -p /tmp/zookeeper-config-test/secrets")
-        # cls.machine.ssh("mkdir -p /tmp/zookeeper-config-test/secrets")
         local_secrets_dir = os.path.join(FIXTURES_DIR, "secrets")
         utils.run_cmd("cp -r {} /tmp/zookeeper-config-test".format(local_secrets_dir))
-        # cls.machine.scp_to_machine(local_secrets_dir, "/tmp/zookeeper-config-test")
 
         cls.cluster = utils.TestCluster("config-test", FIXTURES_DIR, "standalone-config.yml")
         cls.cluster.start()
@@ -242,10 +240,8 @@ class ClusterBridgeNetworkTest(unittest.TestCase):
 
         # Copy SSL files.
         utils.run_cmd("mkdir -p /tmp/zookeeper-bridged-test/secrets")
-        # cls.machine.ssh("mkdir -p /tmp/zookeeper-bridged-test/secrets")
         local_secrets_dir = os.path.join(FIXTURES_DIR, "secrets")
         utils.run_cmd("cp -r {} /tmp/zookeeper-bridged-test".format(local_secrets_dir))
-        # cls.machine.scp_to_machine(local_secrets_dir, "/tmp/zookeeper-bridged-test")
 
         cls.cluster = utils.TestCluster("cluster-test", FIXTURES_DIR, "cluster-bridged.yml")
         cls.cluster.start()
@@ -316,21 +312,16 @@ class ClusterHostNetworkTest(unittest.TestCase):
         cmd = """
             "sudo sh -c 'grep sasl.kafka.com /etc/hosts || echo {IP} sasl.kafka.com >> /etc/hosts'"
         """.strip()
-
-        # nw_interface="eth0"
-        get_ip_cmd = "/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{print $1}'"
+        get_ip_cmd = "ip addr show eth0 | grep -Po 'inet \\K[\\d.]+'"
         internal_ip = utils.run_cmd(get_ip_cmd).strip()
         print("===================================")
         print("IP: {}".format(internal_ip))
         utils.run_cmd(cmd.format(IP=internal_ip))
-        # cls.machine.ssh(cmd.format(IP=cls.machine.get_internal_ip().strip()))
 
         # Copy SSL files.
         utils.run_cmd("mkdir -p /tmp/zookeeper-host-test/secrets")
-        # cls.machine.ssh("mkdir -p /tmp/zookeeper-host-test/secrets")
         local_secrets_dir = os.path.join(FIXTURES_DIR, "secrets")
         utils.run_cmd("cp -r {} /tmp/zookeeper-host-test".format(local_secrets_dir))
-        # cls.machine.scp_to_machine(local_secrets_dir, "/tmp/zookeeper-host-test")
 
         cls.cluster = utils.TestCluster("cluster-test", FIXTURES_DIR, "cluster-host.yml")
         cls.cluster.start()
@@ -358,20 +349,6 @@ class ClusterHostNetworkTest(unittest.TestCase):
         return
 
     def test_zookeeper_on_service(self):
-        print("====================================")
-        print("============DEBUG===================")
-        cmd = """
-            "sudo sh -c 'grep sasl.kafka.com /etc/hosts || echo {IP} sasl.kafka.com >> /etc/hosts'"
-        """.strip()
-
-        # nw_interface="eth0"
-        get_ip_cmd = "ip addr show eth0 | grep -Po 'inet \\K[\\d.]+'"
-        internal_ip = utils.run_cmd(get_ip_cmd).strip()
-        print("INTERNAL_IP: {}".format(internal_ip))
-        result = utils.run_cmd(cmd.format(IP=internal_ip))
-        print("CMD RESULT: {}".format(result))
-        print("=====================================")
-
         self.is_zk_healthy_for_service("zookeeper-1", 22182)
         self.is_zk_healthy_for_service("zookeeper-1", 32182)
         self.is_zk_healthy_for_service("zookeeper-1", 42182)
