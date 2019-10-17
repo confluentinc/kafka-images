@@ -82,11 +82,6 @@ class ConfigTest(unittest.TestCase):
             log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
             log4j.appender.stdout.layout.ConversionPattern=[%d] %p %m (%c)%n
             """
-        print("================================")
-        print("=========PROPS==================")
-        print("expected: {}".format(expected_log4j_props))
-        print("actual: {}".format(log4j_props))
-        print("=================================")
         expected_log4j_props = expected_log4j_props.translate({ord(c): None for c in string.whitespace})
         log4j_props = log4j_props.translate({ord(c): None for c in string.whitespace})
         self.assertEqual(log4j_props, expected_log4j_props)
@@ -99,11 +94,6 @@ class ConfigTest(unittest.TestCase):
             log4j.appender.stderr.layout.ConversionPattern=[%d] %p %m (%c)%n
             log4j.appender.stderr.Target=System.err
             """
-        print("================================")
-        print("=========TOOLS==================")
-        print("expected: {}".format(expected_tools_log4j_props))
-        print("actual: {}".format(tools_log4j_props))
-        print("=================================")
         expected_tools_log4j_props = expected_tools_log4j_props.translate({ord(c): None for c in string.whitespace})
         tools_log4j_props = tools_log4j_props.translate({ord(c): None for c in string.whitespace})
         self.assertEqual(tools_log4j_props, expected_tools_log4j_props)
