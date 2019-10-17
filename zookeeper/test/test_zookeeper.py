@@ -365,7 +365,7 @@ class ClusterHostNetworkTest(unittest.TestCase):
         """.strip()
 
         # nw_interface="eth0"
-        get_ip_cmd = "/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{print $1}'"
+        get_ip_cmd = "ip addr show eth0 | grep -Po 'inet \\K[\\d.]+'"
         internal_ip = utils.run_cmd(get_ip_cmd).strip()
         print("INTERNAL_IP: {}".format(internal_ip))
         result = utils.run_cmd(cmd.format(IP=internal_ip))
