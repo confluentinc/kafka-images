@@ -358,6 +358,20 @@ class ClusterHostNetworkTest(unittest.TestCase):
         return
 
     def test_zookeeper_on_service(self):
+        print("====================================")
+        print("============DEBUG===================")
+        cmd = """
+            "sudo sh -c 'grep sasl.kafka.com /etc/hosts || echo {IP} sasl.kafka.com >> /etc/hosts'"
+        """.strip()
+
+        # nw_interface="eth0"
+        get_ip_cmd = "/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{print $1}'"
+        internal_ip = utils.run_cmd(get_ip_cmd).strip()
+        print("INTERNAL_IP: {}".format(internal_ip))
+        result = utils.run_cmd(cmd.format(IP=internal_ip))
+        print("CMD RESULT: {}".format(result))
+        print("=====================================")
+
         self.is_zk_healthy_for_service("zookeeper-1", 22182)
         self.is_zk_healthy_for_service("zookeeper-1", 32182)
         self.is_zk_healthy_for_service("zookeeper-1", 42182)
