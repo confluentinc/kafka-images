@@ -34,9 +34,9 @@ class ConfigTest(unittest.TestCase):
             "chown -R 12345 /tmp/zk-config-kitchen-sink-test/data /tmp/zk-config-kitchen-sink-test/log")
 
         # Copy SSL files.
-        utils.run_cmd("mkdir -p {}".format(LOCAL_SECRETS_DIR))
-        utils.run_cmd("cp -r {} {}".format(SECRETS_DIR, LOCAL_SECRETS_DIR))
-        print(utils.run_cmd("ls -l {}".format(LOCAL_SECRETS_DIR)))
+        utils.run_command_on_host("mkdir -p {}".format(LOCAL_SECRETS_DIR))
+        utils.run_command_on_host("cp -r {} {}".format(SECRETS_DIR, LOCAL_SECRETS_DIR))
+        print(utils.run_command_on_host("ls -l {}".format(LOCAL_SECRETS_DIR)))
 
         cls.cluster = utils.TestCluster("config-test", FIXTURES_DIR, "standalone-config.yml")
         cls.cluster.start()
@@ -153,7 +153,7 @@ class ConfigTest(unittest.TestCase):
     #     self.is_zk_healthy_for_service("external-volumes", 2181)
 
     def test_sasl_config(self):
-        print(utils.run_cmd("ls -l {}".format(LOCAL_SECRETS_DIR)))
+        print(utils.run_command_on_host("ls -l {}".format(LOCAL_SECRETS_DIR)))
         self.is_zk_healthy_for_service("sasl-config", 52181)
 
     # def test_random_user(self):
