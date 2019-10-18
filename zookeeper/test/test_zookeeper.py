@@ -35,7 +35,8 @@ class ConfigTest(unittest.TestCase):
 
         # Copy SSL files.
         utils.run_cmd("mkdir -p {}".format(LOCAL_SECRETS_DIR))
-        print(utils.run_cmd("cp -r {} {}".format(SECRETS_DIR, LOCAL_SECRETS_DIR)))
+        print(utils.run_cmd("cp -rv {} {}".format(SECRETS_DIR, LOCAL_SECRETS_DIR)))
+        print(utils.run_cmd("cp -Rv {} {}".format(SECRETS_DIR, LOCAL_SECRETS_DIR)))
         print(utils.run_cmd("cp {}config_jaas.conf {}config_jaas.conf".format(SECRETS_DIR, LOCAL_SECRETS_DIR)))
         print(utils.run_cmd("ls -l {}".format(LOCAL_SECRETS_DIR)))
         print(LOCAL_SECRETS_DIR)
@@ -158,7 +159,7 @@ class ConfigTest(unittest.TestCase):
 
     def test_sasl_config(self):
         print(utils.run_cmd("ls -l {}".format(LOCAL_SECRETS_DIR)))
-        self.is_zk_healthy_for_service("sasl-config", 52181)
+        self.is_zk_healthy_for_service("sasl-config", 52181, "sasl-config")
 
     # def test_random_user(self):
     #     self.is_zk_healthy_for_service("random-user", 2181)
