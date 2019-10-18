@@ -37,6 +37,9 @@ class ConfigTest(unittest.TestCase):
         utils.run_cmd("mkdir -p {}".format(LOCAL_SECRETS_DIR))
         utils.run_cmd("cp -r {} {}".format(SECRETS_DIR, LOCAL_SECRETS_DIR))
         print(utils.run_cmd("ls -l {}".format(LOCAL_SECRETS_DIR)))
+        print(LOCAL_SECRETS_DIR)
+        print(SECRETS_DIR)
+        print(utils.run_cmd("ls -l {}".format(SECRETS_DIR)))
 
         cls.cluster = utils.TestCluster("config-test", FIXTURES_DIR, "standalone-config.yml")
         cls.cluster.start()
