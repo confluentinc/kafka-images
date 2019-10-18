@@ -7,7 +7,7 @@ import confluent.docker_utils as utils
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 FIXTURES_DIR = os.path.join(CURRENT_DIR, "fixtures")
-SECRETS_DIR = os.path.join(FIXTURES_DIR, "secrets")
+SECRETS_DIR = os.path.join(FIXTURES_DIR, "secrets", "")
 LOCAL_SECRETS_DIR = "/tmp/zookeeper/secrets/"
 MODE_COMMAND = "bash -c 'dub wait localhost {port} 30 && echo stat | nc localhost {port} | grep Mode'"
 HEALTH_CHECK = "bash -c 'cub zk-ready {host}:{port} 30 && echo PASS || echo FAIL'"
