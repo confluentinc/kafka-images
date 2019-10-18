@@ -38,7 +38,7 @@ services:
     environment:
       BOOTSTRAP: 0
     volumes:
-    - /tmp/zookeeper-host-test/secrets:/tmp/keytab
+    - /tmp/zookeeper/secrets:/tmp/keytab
     - /dev/urandom:/dev/random
     labels:
     - io.confluent.docker.testing=true
@@ -59,7 +59,7 @@ services:
         -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
         -Dsun.security.krb5.debug=true
     volumes:
-    - /tmp/zookeeper-host-test/secrets:/etc/kafka/secrets
+    - /tmp/zookeeper/secrets:/etc/kafka/secrets
     network_mode: host
     labels:
     - io.confluent.docker.testing=true
@@ -80,7 +80,7 @@ services:
         -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
         -Dsun.security.krb5.debug=true
     volumes:
-    - /tmp/zookeeper-host-test/secrets:/etc/kafka/secrets
+    - /tmp/zookeeper/secrets:/etc/kafka/secrets
     network_mode: host
     labels:
     - io.confluent.docker.testing=true
@@ -101,7 +101,7 @@ services:
         -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
         -Dsun.security.krb5.debug=true
     volumes:
-    - /tmp/zookeeper-host-test/secrets:/etc/kafka/secrets
+    - /tmp/zookeeper/secrets:/etc/kafka/secrets
     network_mode: host
     labels:
     - io.confluent.docker.testing=true

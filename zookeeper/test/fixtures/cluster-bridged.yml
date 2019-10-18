@@ -63,7 +63,7 @@ services:
     environment:
       BOOTSTRAP: 0
     volumes:
-    - /tmp/zookeeper-bridged-test/secrets:/tmp/keytab
+    - /tmp/zookeeper/secrets:/tmp/keytab
     - /dev/urandom:/dev/random
     networks:
     - zk
@@ -87,7 +87,7 @@ services:
         -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
         -Dsun.security.krb5.debug=true
     volumes:
-    - /tmp/zookeeper-bridged-test/secrets:/etc/kafka/secrets
+    - /tmp/zookeeper/secrets:/etc/kafka/secrets
     networks:
     - zk
     labels:
@@ -109,7 +109,7 @@ services:
         -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
         -Dsun.security.krb5.debug=true
     volumes:
-    - /tmp/zookeeper-bridged-test/secrets:/etc/kafka/secrets
+    - /tmp/zookeeper/secrets:/etc/kafka/secrets
     networks:
     - zk
     labels:
@@ -131,7 +131,7 @@ services:
         -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
         -Dsun.security.krb5.debug=true
     volumes:
-    - /tmp/zookeeper-bridged-test/secrets:/etc/kafka/secrets
+    - /tmp/zookeeper/secrets:/etc/kafka/secrets
     networks:
     - zk
     labels:
