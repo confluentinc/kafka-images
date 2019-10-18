@@ -36,6 +36,7 @@ class ConfigTest(unittest.TestCase):
         # Copy SSL files.
         utils.run_cmd("mkdir -p {}".format(LOCAL_SECRETS_DIR))
         print(utils.run_cmd("cp -r {} {}".format(SECRETS_DIR, LOCAL_SECRETS_DIR)))
+        print(utils.run_cmd("cp {}config_jaas.conf {}config_jaas.conf".format(SECRETS_DIR, LOCAL_SECRETS_DIR)))
         print(utils.run_cmd("ls -l {}".format(LOCAL_SECRETS_DIR)))
         print(LOCAL_SECRETS_DIR)
         print(SECRETS_DIR)
