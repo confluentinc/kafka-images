@@ -152,7 +152,7 @@ class ConfigTest(unittest.TestCase):
         self.is_zk_healthy_for_service("external-volumes", 2181)
 
     def test_sasl_config(self):
-        self.is_zk_healthy_for_service("sasl-config", 52181, "sasl-config")
+        self.is_zk_healthy_for_service("sasl-config", 52181)
 
     def test_random_user(self):
         self.is_zk_healthy_for_service("random-user", 2181)
