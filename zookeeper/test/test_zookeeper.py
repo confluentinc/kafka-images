@@ -7,6 +7,8 @@ import confluent.docker_utils as utils
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 FIXTURES_DIR = os.path.join(CURRENT_DIR, "fixtures")
+SECRETS_DIR = os.path.join(FIXTURES_DIR, "secrets")
+LOCAL_SECRETS_DIR = "/etc/kafka/secrets/"
 MODE_COMMAND = "bash -c 'dub wait localhost {port} 30 && echo stat | nc localhost {port} | grep Mode'"
 HEALTH_CHECK = "bash -c 'cub zk-ready {host}:{port} 30 && echo PASS || echo FAIL'"
 JMX_CHECK = """bash -c "\
@@ -32,9 +34,8 @@ class ConfigTest(unittest.TestCase):
             "chown -R 12345 /tmp/zk-config-kitchen-sink-test/data /tmp/zk-config-kitchen-sink-test/log")
 
         # Copy SSL files.
-        utils.run_cmd("mkdir -p /tmp/zookeeper-config-test/secrets")
-        local_secrets_dir = os.path.join(FIXTURES_DIR, "secrets")
-        utils.run_cmd("cp -r {} /tmp/zookeeper-config-test".format(local_secrets_dir))
+        utils.run_cmd("mkdir -p {}".format(LOCAL_SECRETS_DIR))
+        utils.run_cmd("cp -r {} {}".format(SECRETS_DIR, LOCAL_SECRETS_DIR))
 
         cls.cluster = utils.TestCluster("config-test", FIXTURES_DIR, "standalone-config.yml")
         cls.cluster.start()
@@ -47,7 +48,7 @@ class ConfigTest(unittest.TestCase):
     def tearDownClass(cls):
         cls.cluster.shutdown()
         utils.run_command_on_host("rm -rf /tmp/zk-config-kitchen-sink-test")
-        utils.run_command_on_host(" rm -rf /tmp/zookeeper-config-test")
+        utils.run_command_on_host("rm -rf {}".format(LOCAL_SECRETS_DIR))
 
     @classmethod
     def is_zk_healthy_for_service(cls, service, client_port, host="localhost"):
@@ -243,9 +244,8 @@ class ClusterBridgeNetworkTest(unittest.TestCase):
         # cls.machine = utils.TestMachine(machine_name)
 
         # Copy SSL files.
-        utils.run_cmd("mkdir -p /tmp/zookeeper-bridged-test/secrets")
-        local_secrets_dir = os.path.join(FIXTURES_DIR, "secrets")
-        utils.run_cmd("cp -r {} /tmp/zookeeper-bridged-test".format(local_secrets_dir))
+        utils.run_cmd("mkdir -p {}".format(LOCAL_SECRETS_DIR))
+        utils.run_cmd("cp -r {} {}".format(SECRETS_DIR, LOCAL_SECRETS_DIR))
 
         cls.cluster = utils.TestCluster("cluster-test", FIXTURES_DIR, "cluster-bridged.yml")
         cls.cluster.start()
@@ -261,7 +261,7 @@ class ClusterBridgeNetworkTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.cluster.shutdown()
-        utils.run_command_on_host("rm -rf /tmp/zookeeper-bridged-test")
+        utils.run_command_on_host("rm -rf {}".format(LOCAL_SECRETS_DIR))
 
     def test_cluster_running(self):
         self.assertTrue(self.cluster.is_running())
@@ -325,9 +325,8 @@ class ClusterHostNetworkTest(unittest.TestCase):
         utils.run_cmd(cmd.format(IP=internal_ip))
 
         # Copy SSL files.
-        utils.run_cmd("mkdir -p /tmp/zookeeper-host-test/secrets")
-        local_secrets_dir = os.path.join(FIXTURES_DIR, "secrets")
-        utils.run_cmd("cp -r {} /tmp/zookeeper-host-test".format(local_secrets_dir))
+        utils.run_cmd("mkdir -p {}".format(LOCAL_SECRETS_DIR))
+        utils.run_cmd("cp -r {} {}".format(SECRETS_DIR, LOCAL_SECRETS_DIR)
 
         cls.cluster = utils.TestCluster("cluster-test", FIXTURES_DIR, "cluster-host.yml")
         cls.cluster.start()
@@ -343,7 +342,7 @@ class ClusterHostNetworkTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.cluster.shutdown()
-        utils.run_command_on_host("rm -rf /tmp/zookeeper-host-test")
+        utils.run_command_on_host("rm -rf {}".format(LOCAL_SECRETS_DIR))
 
     def test_cluster_running(self):
         self.assertTrue(self.cluster.is_running())
