@@ -326,7 +326,7 @@ class ClusterHostNetworkTest(unittest.TestCase):
 
         # Copy SSL files.
         utils.run_cmd("mkdir -p {}".format(LOCAL_SECRETS_DIR))
-        utils.run_cmd("cp -r {} {}".format(SECRETS_DIR, LOCAL_SECRETS_DIR)
+        utils.run_cmd("cp -r {} {}".format(SECRETS_DIR, LOCAL_SECRETS_DIR))
 
         cls.cluster = utils.TestCluster("cluster-test", FIXTURES_DIR, "cluster-host.yml")
         cls.cluster.start()
