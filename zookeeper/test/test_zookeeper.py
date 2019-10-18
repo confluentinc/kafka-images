@@ -51,8 +51,10 @@ class ConfigTest(unittest.TestCase):
 
     @classmethod
     def is_zk_healthy_for_service(cls, service, client_port, host="localhost"):
-        # output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(port=client_port, host=host)).decode()
-        # assert "PASS" in output
+        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(port=client_port, host=host)).decode()
+        print("==============HEALTH_CHECK==============")
+        print(output)
+        assert "PASS" in output
         return
 
     def test_required_config_failure(self):
@@ -187,8 +189,10 @@ class StandaloneNetworkingTest(unittest.TestCase):
 
     @classmethod
     def is_zk_healthy_for_service(cls, service, client_port, host="localhost"):
-        # output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(port=client_port, host=host)).decode()
-        # assert "PASS" in output
+        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(port=client_port, host=host)).decode()
+        print("==============HEALTH_CHECK==============")
+        print(output)
+        assert "PASS" in output
         return
 
     def test_bridge_network(self):
@@ -264,8 +268,10 @@ class ClusterBridgeNetworkTest(unittest.TestCase):
 
     @classmethod
     def is_zk_healthy_for_service(cls, service, client_port, host="localhost"):
-        # output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(port=client_port, host=host)).decode()
-        # assert "PASS" in output
+        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(port=client_port, host=host)).decode()
+        print("==============HEALTH_CHECK==============")
+        print(output)
+        assert "PASS" in output
         return
 
     def test_zookeeper_on_service(self):
@@ -344,8 +350,10 @@ class ClusterHostNetworkTest(unittest.TestCase):
 
     @classmethod
     def is_zk_healthy_for_service(cls, service, client_port, host="sasl.kafka.com"):
-        # output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(port=client_port, host=host)).decode()
-        # assert "PASS" in output
+        output = cls.cluster.run_command_on_service(service, HEALTH_CHECK.format(port=client_port, host=host)).decode()
+        print("==============HEALTH_CHECK==============")
+        print(output)
+        assert "PASS" in output
         return
 
     def test_zookeeper_on_service(self):
