@@ -283,6 +283,8 @@ class ClusterBridgeNetworkTest(unittest.TestCase):
                 command=MODE_COMMAND.format(port=port),
                 host_config={'NetworkMode': 'host'}).decode()
             outputs.append(output)
+        print("================MODE COMMAND====================")
+        print(outputs)
         self.assertEqual(sorted(outputs), expected)
 
     def test_sasl_on_service(self):
@@ -314,8 +316,6 @@ class ClusterHostNetworkTest(unittest.TestCase):
         """.strip()
         get_ip_cmd = "ip addr show eth0 | grep -Po 'inet \\K[\\d.]+'"
         internal_ip = utils.run_cmd(get_ip_cmd).strip()
-        print("===================================")
-        print("IP: {}".format(internal_ip))
         utils.run_cmd(cmd.format(IP=internal_ip))
 
         # Copy SSL files.
