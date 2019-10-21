@@ -19,6 +19,6 @@ log4j.appender.stdout.layout.ConversionPattern ={{ env["CONNECT_LOG4J_APPENDER_S
 # default log levels
 {% set loggers = default_loggers %}
 {% endif %}
-{% for logger,loglevel in loggers.iteritems() %}
+{% for logger,loglevel in loggers.items() %}
 log4j.logger.{{logger}}={{loglevel}}
 {% endfor %}
