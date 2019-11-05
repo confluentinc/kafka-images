@@ -66,6 +66,8 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && yum install -y confluent-server-${CONFLUENT_VERSION} \
     && echo "===> installing confluent-rebalancer ..." \
     && yum install -y confluent-rebalancer-${CONFLUENT_VERSION} \
+    && echo "===> installing confluent-security ..." \
+    && yum install -y confluent-security-${CONFLUENT_VERSION} \
     && echo "===> clean up ..."  \
     && yum clean all \
     && rm -rf /tmp/* \
