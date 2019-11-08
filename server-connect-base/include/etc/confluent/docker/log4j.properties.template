@@ -18,6 +18,6 @@ log4j.appender.stdout.layout.ConversionPattern=[%d] %p %m (%c)%n
 # default log levels
 {% set loggers = default_loggers %}
 {% endif %}
-{% for logger,loglevel in loggers.items() %}
+{% for logger,loglevel in loggers.iteritems() %}
 log4j.logger.{{logger}}={{loglevel}}
 {% endfor %}
