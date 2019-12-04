@@ -16,13 +16,13 @@
 ARG DOCKER_UPSTREAM_REGISTRY
 ARG DOCKER_UPSTREAM_TAG=latest
 
-FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base:${DOCKER_UPSTREAM_TAG}
+FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-new:${DOCKER_UPSTREAM_TAG}
 
 ARG PROJECT_VERSION
 ARG ARTIFACT_ID
 
 # Make sure you use an appropriate contact address.
-MAINTAINER partner-support@confluent.io
+LABEL MAINTAINER partner-support@confluent.io
 LABEL io.confluent.docker=true
 ARG COMMIT_ID=unknown
 LABEL io.confluent.docker.git.id=$COMMIT_ID
