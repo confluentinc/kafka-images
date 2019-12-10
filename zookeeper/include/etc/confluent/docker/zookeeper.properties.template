@@ -29,7 +29,7 @@ dataLogDir=/var/lib/zookeeper/log
   'ZOOKEEPER_QUORUM_LISTEN_ON_ALL_IPS': 'quorumListenOnAllIPs'
  } -%}
 
-{% for k, property in other_props.iteritems() -%}
+{% for k, property in other_props.items() -%}
 {% if env.get(k) != None -%}
 {{property}}={{env[k]}}
 {% endif -%}

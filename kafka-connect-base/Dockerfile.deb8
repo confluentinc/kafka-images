@@ -23,7 +23,7 @@ ARG PROJECT_VERSION
 ARG ARTIFACT_ID
 
 # Make sure you use an appropriate contact address.
-MAINTAINER partner-support@confluent.io
+LABEL MAINTAINER partner-support@confluent.io
 LABEL io.confluent.docker=true
 ARG COMMIT_ID=unknown
 LABEL io.confluent.docker.git.id=$COMMIT_ID
