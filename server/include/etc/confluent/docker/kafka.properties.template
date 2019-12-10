@@ -10,16 +10,16 @@
                          'KAFKA_TOOLS_LOG4J_LOGLEVEL']
 -%}
 {% set kafka_props = env_to_props('KAFKA_', '', exclude=excluded_props) -%}
-{% for name, value in kafka_props.iteritems() -%}
+{% for name, value in kafka_props.items() -%}
 {{name}}={{value}}
 {% endfor -%}
 
 {% set confluent_support_props = env_to_props('CONFLUENT_SUPPORT_', 'confluent.support.') -%}
-{% for name, value in confluent_support_props.iteritems() -%}
+{% for name, value in confluent_support_props.items() -%}
 {{name}}={{value}}
 {% endfor -%}
 
 {% set confluent_metric_props = env_to_props('CONFLUENT_METRICS_', 'confluent.metrics.') -%}
-{% for name, value in confluent_metric_props.iteritems() -%}
+{% for name, value in confluent_metric_props.items() -%}
 {{name}}={{value}}
 {% endfor -%}

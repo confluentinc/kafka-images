@@ -11,7 +11,9 @@ dockerfile {
     nodeLabel = 'docker-oraclejdk8-compose-swarm'
     slackChannel = 'kafka-warn'
     upstreamProjects = []
-    dockerPullDeps = ['confluentinc/cp-base']
+    dockerPullDeps = ['confluentinc/cp-base-new']
     usePackages = true
     cron = '' // Disable the cron because this job requires parameters
+    cpImages = true
+    osTypes = ['deb8', 'rhel8']
 }
