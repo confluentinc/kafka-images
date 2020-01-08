@@ -34,11 +34,12 @@ ARG CONFLUENT_VERSION
 ARG CONFLUENT_PACKAGES_REPO
 ARG CONFLUENT_PLATFORM_LABEL
 
-
 ENV COMPONENT=kafka-connect
 
 # Default kafka-connect rest.port
 EXPOSE 8083
+
+USER root
 
 RUN echo "===> Installing ${COMPONENT}..." \
     && yum -q -y update \
@@ -53,14 +54,17 @@ RUN echo "===> Installing ${COMPONENT}..." \
     && echo "===> Cleaning up ..."  \
     && yum clean all \
     && rm -rf /tmp/* \
-    echo "===> Setting up ${COMPONENT} dirs ..." \
+    && echo "===> Setting up ${COMPONENT} dirs ..." \
     && mkdir -p /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars \
+    && chown appuser:appuser -R /etc/${COMPONENT} \
     && chmod -R ag+w /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars
 
 ENV CONNECT_PLUGIN_PATH=/usr/share/java/,/usr/share/confluent-hub-components/
 
 VOLUME ["/etc/${COMPONENT}/jars", "/etc/${COMPONENT}/secrets"]
 
-COPY include/etc/confluent/docker /etc/confluent/docker
+COPY --chown=appuser:appuser include/etc/confluent/docker /etc/confluent/docker
+
+USER appuser
 
 CMD ["/etc/confluent/docker/run"]
