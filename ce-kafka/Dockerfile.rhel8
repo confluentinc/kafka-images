@@ -34,11 +34,12 @@ ARG CONFLUENT_VERSION
 ARG CONFLUENT_PACKAGES_REPO
 ARG CONFLUENT_PLATFORM_LABEL
 
-
 ENV COMPONENT=kafka
 
 # primary
 EXPOSE 9092
+
+USER root
 
 RUN echo "===> Installing ${COMPONENT}..." \
     && yum -q -y update \
@@ -48,12 +49,14 @@ RUN echo "===> Installing ${COMPONENT}..." \
     && yum clean all \
     && rm -rf /tmp/* \
     && echo "===> Setting up ${COMPONENT} dirs  ..." \
-    && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets\
+    && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
     && chmod -R ag+w /etc/${COMPONENT} /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
-    && chown -R root:root /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/zookeeper
+    && chown -R appuser:appuser /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/zookeeper /etc/${COMPONENT}
 
 VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
 
-COPY include/etc/confluent/docker /etc/confluent/docker
+COPY --chown=appuser:appuser include/etc/confluent/docker /etc/confluent/docker
+
+USER appuser
 
 CMD ["/etc/confluent/docker/run"]

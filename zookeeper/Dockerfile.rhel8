@@ -38,6 +38,8 @@ EXPOSE 2181 2888 3888
 
 ENV COMPONENT=zookeeper
 
+USER root
+
 RUN echo "===> Installing ${COMPONENT}..." \
     && yum -q -y update \
     && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
@@ -62,10 +64,12 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && echo "===> Setting up ${COMPONENT} dirs" \
     && mkdir -p /var/lib/${COMPONENT}/data /var/lib/${COMPONENT}/log /etc/${COMPONENT}/secrets \
     && chmod -R ag+w /etc/kafka /var/lib/${COMPONENT}/data /var/lib/${COMPONENT}/log /etc/${COMPONENT}/secrets \
-    && chown -R root:root /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/zookeeper
+    && chown -R appuser:appuser /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/zookeeper /etc/${COMPONENT}/secrets
 
 VOLUME ["/var/lib/${COMPONENT}/data", "/var/lib/${COMPONENT}/log", "/etc/${COMPONENT}/secrets"]
 
-COPY include/etc/confluent/docker /etc/confluent/docker
+COPY --chown=appuser:appuser include/etc/confluent/docker /etc/confluent/docker
+
+USER appuser
 
 CMD ["/etc/confluent/docker/run"]

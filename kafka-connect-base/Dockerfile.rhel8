@@ -34,31 +34,34 @@ ARG CONFLUENT_VERSION
 ARG CONFLUENT_PACKAGES_REPO
 ARG CONFLUENT_PLATFORM_LABEL
 
-
 ENV COMPONENT=kafka-connect
 
 # Default kafka-connect rest.port
 EXPOSE 8083
 
+USER root
 
 RUN echo "===> Installing ${COMPONENT}..." \
     && yum -q -y update \
     && echo "===> Installing Schema Registry (for Avro jars) ..." \
     && yum install -y confluent-schema-registry-${CONFLUENT_VERSION} \
-    && echo "===> Installing Controlcenter for monitoring interceptors ..."\
+    && echo "===> Installing Controlcenter for monitoring interceptors ..." \
     && yum install -y confluent-control-center-${CONFLUENT_VERSION} \
     && echo "===> Installing Confluent Hub client ..."\
     && yum install -y confluent-hub-client-${CONFLUENT_VERSION} \
-    && echo "===> Cleaning up ..."  \
+    && echo "===> Cleaning up ..." \
     && yum clean all \
     && rm -rf /tmp/* \
-    echo "===> Setting up ${COMPONENT} dirs ..." \
+    && echo "===> Setting up ${COMPONENT} dirs ..." \
     && mkdir -p /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars \
+    && chown appuser:appuser -R /etc/${COMPONENT} \
     && chmod -R ag+w /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars
 
 VOLUME ["/etc/${COMPONENT}/jars", "/etc/${COMPONENT}/secrets"]
 
-COPY include/etc/confluent/docker /etc/confluent/docker
+COPY --chown=appuser:appuser include/etc/confluent/docker /etc/confluent/docker
+
+USER appuser
 
 CMD ["/etc/confluent/docker/run"]
 
