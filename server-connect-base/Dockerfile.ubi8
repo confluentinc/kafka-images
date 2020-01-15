@@ -14,10 +14,10 @@
 # limitations under the License.
 
 ARG DOCKER_UPSTREAM_REGISTRY
-ARG DOCKER_UPSTREAM_TAG=rhel8-latest
+ARG DOCKER_UPSTREAM_TAG=ubi8-latest
 ARG DOCKER_TAG
 
-FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
+FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-server:${DOCKER_TAG}
 
 ARG PROJECT_VERSION
 ARG ARTIFACT_ID
@@ -28,7 +28,7 @@ LABEL vendor="Confluent"
 LABEL version=$GIT_COMMIT
 LABEL release=$PROJECT_VERSION
 LABEL name=$ARTIFACT_ID
-LABEL summary="Confluent platform enterprise Kafka."
+LABEL summary="Confluent platform server connect base image."
 LABEL io.confluent.docker=true
 LABEL io.confluent.docker.git.id=$GIT_COMMIT
 ARG BUILD_NUMBER=-1
@@ -39,26 +39,34 @@ ARG CONFLUENT_VERSION
 ARG CONFLUENT_PACKAGES_REPO
 ARG CONFLUENT_PLATFORM_LABEL
 
-ENV COMPONENT=kafka
+ENV COMPONENT=kafka-connect
 
-# primary
-EXPOSE 9092
+# Default kafka-connect rest.port
+EXPOSE 8083
 
 USER root
 
 RUN echo "===> Installing ${COMPONENT}..." \
     && yum -q -y update \
-    && echo "===> installing confluent-rebalancer ..." \
-    && yum install -y confluent-rebalancer-${CONFLUENT_VERSION} \
-    && echo "===> clean up ..."  \
+    && echo "===> Installing Schema Registry (for Avro jars) ..." \
+    && yum install -y confluent-schema-registry-${CONFLUENT_VERSION} \
+    && echo "===> Installing Controlcenter for monitoring interceptors ..."\
+    && yum install -y confluent-control-center-${CONFLUENT_VERSION} \
+    && echo "===> Installing Confluent security plugins ..." \
+    && yum install -y confluent-security-${CONFLUENT_VERSION} \
+    && echo "===> Installing Confluent Hub client ..." \
+    && yum install -y confluent-hub-client-${CONFLUENT_VERSION} \
+    && echo "===> Cleaning up ..."  \
     && yum clean all \
     && rm -rf /tmp/* \
-    && echo "===> Setting up ${COMPONENT} dirs  ..." \
-    && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
-    && chmod -R ag+w /etc/${COMPONENT} /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
-    && chown -R appuser:appuser /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/zookeeper /etc/${COMPONENT}
+    && echo "===> Setting up ${COMPONENT} dirs ..." \
+    && mkdir -p /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /usr/logs \
+    && chown appuser:appuser -R /etc/${COMPONENT} /usr/logs \
+    && chmod -R ag+w /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars
 
-VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
+ENV CONNECT_PLUGIN_PATH=/usr/share/java/,/usr/share/confluent-hub-components/
+
+VOLUME ["/etc/${COMPONENT}/jars", "/etc/${COMPONENT}/secrets"]
 
 COPY --chown=appuser:appuser include/etc/confluent/docker /etc/confluent/docker
 
