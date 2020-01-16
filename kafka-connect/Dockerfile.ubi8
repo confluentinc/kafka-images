@@ -14,14 +14,14 @@
 # limitations under the License.
 
 ARG DOCKER_UPSTREAM_REGISTRY
-ARG DOCKER_UPSTREAM_TAG=rhel8-latest
+ARG DOCKER_UPSTREAM_TAG=ubi8-latest
 ARG DOCKER_TAG
 
-FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-server-connect-base:${DOCKER_TAG}
+FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-kafka-connect-base:${DOCKER_TAG}
 
 ARG PROJECT_VERSION
 ARG ARTIFACT_ID
- 
+
 # Make sure you use an appropriate contact address.
 LABEL maintainer="partner-support@confluent.io"
 LABEL io.confluent.docker=true
