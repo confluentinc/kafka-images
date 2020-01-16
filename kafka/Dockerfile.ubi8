@@ -14,7 +14,7 @@
 # limitations under the License.
 
 ARG DOCKER_UPSTREAM_REGISTRY
-ARG DOCKER_UPSTREAM_TAG=rhel8-latest
+ARG DOCKER_UPSTREAM_TAG=ubi8-latest
 
 FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-new:${DOCKER_UPSTREAM_TAG}
 
@@ -27,7 +27,7 @@ LABEL vendor="Confluent"
 LABEL version=$GIT_COMMIT
 LABEL release=$PROJECT_VERSION
 LABEL name=$ARTIFACT_ID
-LABEL summary="ZooKeeper is a centralized service for maintaining configuration information, naming, providing distributed synchronization, and providing group services."
+LABEL summary="Confluent platform Kafka."
 LABEL io.confluent.docker=true
 LABEL io.confluent.docker.git.id=$GIT_COMMIT
 ARG BUILD_NUMBER=-1
@@ -39,9 +39,16 @@ ARG CONFLUENT_PACKAGES_REPO
 ARG CONFLUENT_PLATFORM_LABEL
 ARG SCALA_VERSION
 
-EXPOSE 2181 2888 3888
+# allow arg override of required env params
+ARG KAFKA_ZOOKEEPER_CONNECT
+ENV KAFKA_ZOOKEEPER_CONNECT=${KAFKA_ZOOKEEPER_CONNECT}
+ARG KAFKA_ADVERTISED_LISTENERS
+ENV KAFKA_ADVERTISED_LISTENERS=${KAFKA_ADVERTISED_LISTENERS}
 
-ENV COMPONENT=zookeeper
+ENV COMPONENT=kafka
+
+# primary
+EXPOSE 9092
 
 USER root
 
@@ -67,11 +74,11 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && yum clean all \
     && rm -rf /tmp/* \
     && echo "===> Setting up ${COMPONENT} dirs" \
-    && mkdir -p /var/lib/${COMPONENT}/data /var/lib/${COMPONENT}/log /etc/${COMPONENT}/secrets \
-    && chmod -R ag+w /etc/kafka /var/lib/${COMPONENT}/data /var/lib/${COMPONENT}/log /etc/${COMPONENT}/secrets \
-    && chown -R appuser:appuser /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/zookeeper /etc/${COMPONENT}/secrets
+    && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
+    && chown appuser:appuser -R /var/lib/${COMPONENT} /etc/${COMPONENT} \
+    && chmod -R ag+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets
 
-VOLUME ["/var/lib/${COMPONENT}/data", "/var/lib/${COMPONENT}/log", "/etc/${COMPONENT}/secrets"]
+VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
 
 COPY --chown=appuser:appuser include/etc/confluent/docker /etc/confluent/docker
 
