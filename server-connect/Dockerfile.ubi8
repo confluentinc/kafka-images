@@ -14,10 +14,10 @@
 # limitations under the License.
 
 ARG DOCKER_UPSTREAM_REGISTRY
-ARG DOCKER_UPSTREAM_TAG=rhel8-latest
+ARG DOCKER_UPSTREAM_TAG=ubi8-latest
 ARG DOCKER_TAG
 
-FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
+FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-server-connect-base:${DOCKER_TAG}
 
 ARG PROJECT_VERSION
 ARG ARTIFACT_ID
@@ -34,29 +34,24 @@ ARG CONFLUENT_VERSION
 ARG CONFLUENT_PACKAGES_REPO
 ARG CONFLUENT_PLATFORM_LABEL
 
-ENV COMPONENT=kafka
-
-# primary
-EXPOSE 9092
+ENV COMPONENT=kafka-connect
 
 USER root
 
 RUN echo "===> Installing ${COMPONENT}..." \
     && yum -q -y update \
-    && echo "===> installing confluent-rebalancer ..." \
-    && yum install -y confluent-rebalancer-${CONFLUENT_VERSION} \
-    && echo "===> clean up ..."  \
+    && echo "===> Installing JDBC, Elasticsearch and Hadoop connectors ..." \
+    && yum install -y \
+        confluent-kafka-connect-jdbc-${CONFLUENT_VERSION} \
+        confluent-kafka-connect-elasticsearch-${CONFLUENT_VERSION} \
+        confluent-kafka-connect-storage-common-${CONFLUENT_VERSION} \
+        confluent-kafka-connect-s3-${CONFLUENT_VERSION} \
+        confluent-kafka-connect-jms-${CONFLUENT_VERSION} \
+    && echo "===> Cleaning up ..." \
     && yum clean all \
-    && rm -rf /tmp/* \
-    && echo "===> Setting up ${COMPONENT} dirs  ..." \
-    && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
-    && chmod -R ag+w /etc/${COMPONENT} /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
-    && chown -R appuser:appuser /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/zookeeper /etc/${COMPONENT}
+    && rm -rf /tmp/*
 
-VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
-
-COPY --chown=appuser:appuser include/etc/confluent/docker /etc/confluent/docker
+RUN echo "===> Installing GCS Sink Connector ..." \
+    && confluent-hub install confluentinc/kafka-connect-gcs:latest --no-prompt
 
 USER appuser
-
-CMD ["/etc/confluent/docker/run"]
