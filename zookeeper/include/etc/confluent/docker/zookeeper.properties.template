@@ -40,8 +40,11 @@ dataLogDir=/var/lib/zookeeper/log
   'ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD' : 'ssl.trustStore.password',
   'ZOOKEEPER_SSL_TRUSTSTORE_TYPE' : 'ssl.trustStore.type',
   'ZOOKEEPER_SSL_ENABLED_PROTOCOLS' : 'ssl.enabledProtocols',
+  'ZOOKEEPER_SSL_CONTEXT_SUPPLIER_CLASS' : 'ssl.context.supplier.class',
   'ZOOKEEPER_SSL_CIPHER_SUITES' : 'ssl.ciphersuites',
   'ZOOKEEPER_SSL_HOSTNAME_VERIFICATION' : 'ssl.hostnameVerification',
+  'ZOOKEEPER_SSL_CRL' : 'ssl.crl',
+  'ZOOKEEPER_SSL_OCPS' : 'ssl.ocsp',
   'ZOOKEEPER_SSL_HANDSHAKE_DETECTION_TIMEOUT_MILLIS' : 'ssl.handshakeDetectionTimeoutMillis',
   'ZOOKEEPER_SSL_QUORUM' : 'sslQuorum',
   'ZOOKEEPER_SSL_QUORUM_CLIENT_AUTH' : 'ssl.quorum.clientAuth',
@@ -53,7 +56,10 @@ dataLogDir=/var/lib/zookeeper/log
   'ZOOKEEPER_SSL_QUORUM_TRUSTSTORE_TYPE' : 'ssl.quorum.trustStore.type',
   'ZOOKEEPER_SSL_QUORUM_ENABLED_PROTOCOLS' : 'ssl.quorum.enabledProtocols',
   'ZOOKEEPER_SSL_QUORUM_CIPHER_SUITES' : 'ssl.quorum.ciphersuites',
+  'ZOOKEEPER_SSL_QUORUM_CONTEXT_SUPPLIER_CLASS' : 'ssl.quorum.context.supplier.class',
   'ZOOKEEPER_SSL_QUORUM_HOSTNAME_VERIFICATION' : 'ssl.quorum.hostnameVerification',
+  'ZOOKEEPER_SSL_QUORUM_CRL' : 'ssl.quorum.crl',
+  'ZOOKEEPER_SSL_QUORUM_OCPS' : 'ssl.quorum.ocsp',
   'ZOOKEEPER_SSL_QUORUM_HANDSHAKE_DETECTION_TIMEOUT_MILLIS' : 'ssl.quorum.handshakeDetectionTimeoutMillis',
   'ZOOKEEPER_SERVER_CNXN_FACTORY' : 'serverCnxnFactory',
   'ZOOKEEPER_AUTH_PROVIDER_X509' : 'authProvider.x509',
@@ -70,11 +76,6 @@ dataLogDir=/var/lib/zookeeper/log
 {% if env.get(k) != None -%}
 {{property}}={{env[k]}}
 {% endif -%}
-{% endfor -%}
-
-{% set zookeeper_props = env_to_props('ZOOKEEPER_', '', exclude=other_props) -%}
-{% for name, value in zookeeper_props.items() -%}
-{{name}}={{value}}
 {% endfor -%}
 
 {% if env['ZOOKEEPER_SERVERS'] %}
