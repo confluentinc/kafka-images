@@ -36,3 +36,8 @@
 {% for name, value in confluent_metric_props.items() -%}
 {{name}}={{value}}
 {% endfor -%}
+
+{% set confluent_balancer_props = env_to_props('CONFLUENT_BALANCER_', 'confluent.balancer.') -%}
+{% for name, value in confluent_balancer_props.items() -%}
+{{name}}={{value}}
+{% endfor -%}
