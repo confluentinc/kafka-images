@@ -60,7 +60,9 @@ RUN echo "===> Installing ${COMPONENT}..." \
     && echo "===> Setting up ${COMPONENT} dirs ..." \
     && mkdir -p /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars \
     && chown appuser:appuser -R /etc/${COMPONENT} \
-    && chmod -R ag+w /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars
+    && chmod -R ag+w /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars \
+    && mkdir -p /usr/share/confluent-hub-components \
+    && chown appuser:appuser -R /usr/share/confluent-hub-components
 
 VOLUME ["/etc/${COMPONENT}/jars", "/etc/${COMPONENT}/secrets"]
 
