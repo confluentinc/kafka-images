@@ -63,6 +63,7 @@ RUN echo "===> Installing ${COMPONENT}..." \
     && mkdir -p /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /usr/logs \
     && chown appuser:appuser -R /etc/${COMPONENT} /usr/logs \
     && chmod -R ag+w /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars \
+    && chmod -R ag+w /etc/schema-registry \
     && mkdir -p /usr/share/confluent-hub-components \
     && chown appuser:appuser -R /usr/share/confluent-hub-components
 
