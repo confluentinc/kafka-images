@@ -25,7 +25,7 @@
 {% if env.get(k) != None -%}
 {{property}}={{env[k]}}
 {% endif -%}
-{% endfor -%}-%}
+{% endfor -%}
 
 {% set confluent_support_props = env_to_props('CONFLUENT_SUPPORT_', 'confluent.support.') -%}
 {% for name, value in confluent_support_props.items() -%}
