@@ -23,8 +23,6 @@ dub ensure CONNECT_OFFSET_STORAGE_TOPIC
 dub ensure CONNECT_STATUS_STORAGE_TOPIC
 dub ensure CONNECT_KEY_CONVERTER
 dub ensure CONNECT_VALUE_CONVERTER
-dub ensure CONNECT_INTERNAL_KEY_CONVERTER
-dub ensure CONNECT_INTERNAL_VALUE_CONVERTER
 # This is required to avoid config bugs. You should set this to a value that is
 # resolvable by all containers.
 dub ensure CONNECT_REST_ADVERTISED_HOST_NAME
@@ -35,7 +33,7 @@ if [ -z "$CONNECT_REST_PORT" ]; then
 fi
 
 # Fix for https://issues.apache.org/jira/browse/KAFKA-3988
-if [[ $CONNECT_INTERNAL_KEY_CONVERTER == "org.apache.kafka.connect.json.JsonConverter" ]] || [[ $CONNECT_INTERNAL_VALUE_CONVERTER == "org.apache.kafka.connect.json.JsonConverter" ]]
+if [[ ${CONNECT_INTERNAL_KEY_CONVERTER-} == "org.apache.kafka.connect.json.JsonConverter" ]] || [[ ${CONNECT_INTERNAL_VALUE_CONVERTER-} == "org.apache.kafka.connect.json.JsonConverter" ]]
 then
   export CONNECT_INTERNAL_KEY_CONVERTER_SCHEMAS_ENABLE=false
   export CONNECT_INTERNAL_VALUE_CONVERTER_SCHEMAS_ENABLE=false
