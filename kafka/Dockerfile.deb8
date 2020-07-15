@@ -34,7 +34,6 @@ ARG CONFLUENT_PACKAGES_REPO
 ARG CONFLUENT_PLATFORM_LABEL
 ARG CONFLUENT_DEB_VERSION
 ARG ALLOW_UNSIGNED
-ARG SCALA_VERSION
 
 # allow arg override of required env params
 ARG KAFKA_ZOOKEEPER_CONNECT
@@ -56,7 +55,7 @@ RUN echo "===> Installing ${COMPONENT}..." \
     && cat /etc/apt/sources.list \
     && apt-get install -y apt-transport-https \
     && apt-get update \
-    && apt-get install -y confluent-kafka-${SCALA_VERSION}=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
+    && apt-get install -y confluent-kafka=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
     && echo "===> clean up ..." \
     && apt-get clean && rm -rf /tmp/* /var/lib/apt/lists/* \
     && echo "===> Setting up ${COMPONENT} dirs..." \
