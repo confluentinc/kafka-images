@@ -37,7 +37,6 @@ LABEL io.confluent.docker.git.repo="confluentinc/kafka-images"
 ARG CONFLUENT_VERSION
 ARG CONFLUENT_PACKAGES_REPO
 ARG CONFLUENT_PLATFORM_LABEL
-ARG SCALA_VERSION
 
 # allow arg override of required env params
 ARG KAFKA_ZOOKEEPER_CONNECT
@@ -69,7 +68,7 @@ baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
 gpgcheck=1 \n\
 gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
 enabled=1 " > /etc/yum.repos.d/confluent.repo \
-    && yum install -y confluent-kafka-${SCALA_VERSION}-${CONFLUENT_VERSION} \
+    && yum install -y confluent-kafka-${CONFLUENT_VERSION} \
     && echo "===> clean up ..."  \
     && yum clean all \
     && rm -rf /tmp/* \
