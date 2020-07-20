@@ -49,7 +49,4 @@ RUN echo "===> Installing ${COMPONENT}..." \
     && yum clean all \
     && rm -rf /tmp/*
 
-RUN echo "===> Installing GCS Sink Connector ..." \
-    && confluent-hub install confluentinc/kafka-connect-gcs:latest --no-prompt
-
 USER appuser
