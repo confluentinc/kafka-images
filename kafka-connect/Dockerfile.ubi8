@@ -28,7 +28,7 @@ LABEL vendor="Confluent"
 LABEL version=$GIT_COMMIT
 LABEL release=$PROJECT_VERSION
 LABEL name=$ARTIFACT_ID
-LABEL summary="The Kafka Connect image extends the Kafka Connect Base image and includes several of the connectors supported by Confluent: JDBC, Elasticsearch, HDFS, S3, and JMS."
+LABEL summary="Confluent platform Kafka Connect."
 LABEL io.confluent.docker=true
 LABEL io.confluent.docker.git.id=$GIT_COMMIT
 ARG BUILD_NUMBER=-1
@@ -48,8 +48,5 @@ RUN echo "===> Installing ${COMPONENT}..." \
     && echo "===> Cleaning up ..." \
     && yum clean all \
     && rm -rf /tmp/*
-
-RUN echo "===> Installing GCS Sink Connector ..." \
-    && confluent-hub install confluentinc/kafka-connect-gcs:latest --no-prompt
 
 USER appuser
