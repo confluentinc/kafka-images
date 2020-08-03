@@ -47,7 +47,6 @@ EXPOSE 8083
 USER root
 
 RUN echo "===> Installing ${COMPONENT}..." \
-    && yum -q -y update \
     && echo "===> Installing Schema Registry (for Avro jars) ..." \
     && yum install -y confluent-schema-registry-${CONFLUENT_VERSION} \
     && echo "===> Installing Controlcenter for monitoring interceptors ..." \
