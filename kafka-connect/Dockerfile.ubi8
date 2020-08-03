@@ -44,7 +44,6 @@ ENV COMPONENT=kafka-connect
 USER root
 
 RUN echo "===> Installing ${COMPONENT}..." \
-    && yum -q -y update \
     && echo "===> Installing JDBC, Elasticsearch and Hadoop connectors ..." \
     && yum install -y \
         confluent-kafka-connect-jdbc-${CONFLUENT_VERSION} \
