@@ -44,7 +44,6 @@ ENV COMPONENT=kafka-connect
 USER root
 
 RUN echo "===> Installing ${COMPONENT}..." \
-    && yum -q -y update \
     && echo "===> Cleaning up ..." \
     && yum clean all \
     && rm -rf /tmp/*
