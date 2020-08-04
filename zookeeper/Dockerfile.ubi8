@@ -46,7 +46,6 @@ ENV COMPONENT=zookeeper
 USER root
 
 RUN echo "===> Installing ${COMPONENT}..." \
-    && yum -q -y update \
     && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
     && rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
     && printf "[Confluent.dist] \n\
