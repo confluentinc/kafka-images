@@ -47,7 +47,6 @@ EXPOSE 9092
 USER root
 
 RUN echo "===> Installing ${COMPONENT}..." \
-    && yum -q -y update \
     && echo "===> installing confluent-rebalancer ..." \
     && yum install -y confluent-rebalancer-${CONFLUENT_VERSION} \
     && echo "===> clean up ..."  \
