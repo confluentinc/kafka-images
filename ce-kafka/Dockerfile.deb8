@@ -42,13 +42,13 @@ ENV COMPONENT=kafka
 EXPOSE 9092
 
 RUN echo "===> Installing ${COMPONENT}..." \
-    && apt-get -qq update \
+    && apt-get update \
     && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
     && if [ "x$ALLOW_UNSIGNED" = "xtrue" ]; then echo "APT::Get::AllowUnauthenticated \"true\";" > /etc/apt/apt.conf.d/allow_unauthenticated; else curl -s -L ${CONFLUENT_PACKAGES_REPO}/archive.key -o /tmp/archive.key && apt-key add /tmp/archive.key; fi \
     && echo "deb [arch=amd64] ${CONFLUENT_PACKAGES_REPO} stable main" >> /etc/apt/sources.list \
     && cat /etc/apt/sources.list \
     && apt-get install -y apt-transport-https \
-    && apt-get -qq update \
+    && apt-get update \
     && echo "===> installing confluent-rebalancer ..." \
     && apt-get install -y confluent-rebalancer=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
     && echo "===> clean up ..." \
