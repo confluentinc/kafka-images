@@ -49,7 +49,7 @@ RUN echo "===> Installing ${COMPONENT}..." \
     && echo "deb [arch=amd64] ${CONFLUENT_PACKAGES_REPO} stable main" >> /etc/apt/sources.list \
     && cat /etc/apt/sources.list \
     && apt-get install -y apt-transport-https \
-    && apt-get -qq update \
+    && apt-get update \
     && echo "===> Installing Schema Registry (for Avro jars) ..." \
     && apt-get install -y confluent-schema-registry=${CONFLUENT_VERSION}${CONFLUENT_PLATFORM_LABEL}-${CONFLUENT_DEB_VERSION} \
     && echo "===> Installing Controlcenter for monitoring interceptors ..." \
