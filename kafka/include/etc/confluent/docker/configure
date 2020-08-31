@@ -36,6 +36,12 @@ then
   KAFKA_LOG_DIRS="/var/lib/kafka/data"
 fi
 
+if [[ -z "${KAFKA_CONFLUENT_BALANCER_ENABLE-}" ]]
+then
+  export KAFKA_CONFLUENT_BALANCER_ENABLE
+  KAFKA_CONFLUENT_BALANCER_ENABLE="true"
+fi
+
 # advertised.host, advertised.port, host and port are deprecated. Exit if these properties are set.
 if [[ -n "${KAFKA_ADVERTISED_PORT-}" ]]
 then
