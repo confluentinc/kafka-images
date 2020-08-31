@@ -118,6 +118,12 @@ then
   fi
 fi
 
+if [[ -z "${KAFKA_CONFLUENT_BALANCER_ENABLE-}" ]]
+then
+  export KAFKA_CONFLUENT_BALANCER_ENABLE
+  KAFKA_CONFLUENT_BALANCER_ENABLE="true"
+fi
+
 dub template "/etc/confluent/docker/${COMPONENT}.properties.template" "/etc/${COMPONENT}/${COMPONENT}.properties"
 dub template "/etc/confluent/docker/log4j.properties.template" "/etc/${COMPONENT}/log4j.properties"
 dub template "/etc/confluent/docker/tools-log4j.properties.template" "/etc/${COMPONENT}/tools-log4j.properties"
