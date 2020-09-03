@@ -73,8 +73,8 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && rm -rf /tmp/* \
     && echo "===> Setting up ${COMPONENT} dirs" \
     && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
-    && chown appuser:appuser -R /var/lib/${COMPONENT} /etc/${COMPONENT} \
-    && chmod -R ag+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets
+    && chmod -R ag+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
+    && chown -R appuser:appuser /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/zookeeper /etc/${COMPONENT}/secrets
 
 VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
 
