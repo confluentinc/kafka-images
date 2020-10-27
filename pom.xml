@@ -45,5 +45,6 @@
 
     <properties>
         <component.name>kafka</component.name>
+        <io.confluent.kafka-images.version>6.2.0-0</io.confluent.kafka-images.version>
     </properties>
 </project>
