@@ -30,7 +30,7 @@
     <packaging>pom</packaging>
     <name>Kafka and CE Kafka Docker Images</name>
     <description>Build files for Confluent's Kafka Docker images</description>
-    <version>6.2.0-beta201122193350</version>
+    <version>6.2.0-beta201122193350-cp1</version>
 
     <modules>
         <module>zookeeper</module>
