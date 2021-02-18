@@ -1,6 +1,6 @@
 # Confluent Enterprise Docker Image for Apache Kafka [Deprecated]
 
-**Whilst still published, this image is deprecated in favor of [cp-server](https://hub.docker.com/r/confluentinc/cp-server)**
+**This image is deprecated in favor of [cp-server](https://hub.docker.com/r/confluentinc/cp-server)**
 
 ----
 
