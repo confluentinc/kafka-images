@@ -1,8 +1,13 @@
-# Docker images for Kafka
+# Docker images for Apache Kafka
 
-This repo provides build files for [Kafka](https://www.confluent.io/what-is-apache-kafka/) Docker images.
+This repo provides build files for [Apache Kafka](https://www.confluent.io/what-is-apache-kafka/) and Confluent Docker images. The images can be found on [Docker Hub](https://hub.docker.com/u/confluentinc/), and sample Docker Compose files [here](examples).
 
-## Properties
+## Docker Image reference
+
+Information on using the Docker images is available in [the documentation](https://docs.confluent.io/platform/current/installation/docker/installation.html). 
+
+## Build files
+### Properties
 
 Properties are inherited from a top-level POM. Properties may be overridden on the command line (`-Ddocker.registry=testing.example.com:8080/`), or in a subproject's POM.
 
@@ -19,7 +24,7 @@ Properties are inherited from a top-level POM. Properties may be overridden on t
 - *CONFLUENT_VERSION*: (Required) Specify the full Confluent Platform release version. Example: 5.4.0
 
 
-## Building
+### Building
 
 This project uses `maven-assembly-plugin` and `dockerfile-maven-plugin` to build Docker images via Maven.
 
