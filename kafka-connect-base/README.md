@@ -2,7 +2,7 @@
 
 Docker image for deploying and running Kafka Connect. 
 
-_Functionally, the `cp-kafka-connect` and the `cp-kafka-connect-base` images are identical. Prior to Confluent Platform 6.0 the `cp-kafka-connect` image included several connectors pre-installed, but this is no longer the case._
+_Functionally, the `cp-kafka-connect` and the `cp-kafka-connect-base` images are identical. Prior to Confluent Platform 6.0 the `cp-kafka-connect` image included several connectors pre-installed, but **this is no longer the case**._
 
 ## What is Kafka Connect?
 
@@ -25,6 +25,7 @@ You will need to install plugins into the image in order to use them. This can b
 ### Configuration
 
 [Reference](https://docs.confluent.io/platform/current/installation/docker/config-reference.html#kconnect-long-configuration)
+
 ## Contribute
 
 Start by reading our guidelines on contributing to this project found here.
