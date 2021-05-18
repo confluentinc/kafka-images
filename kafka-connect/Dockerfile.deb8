@@ -58,4 +58,4 @@ RUN echo "===> Installing ${COMPONENT}..." \
     && apt-get clean && rm -rf /tmp/* /var/lib/apt/lists/*
 
 RUN echo "===> Installing GCS Sink Connector ..."
-RUN confluent-hub install confluentinc/kafka-connect-gcs:latest --no-prompt
+RUN confluent-hub install confluentinc/kafka-connect-gcs:5.4.6 --no-prompt
