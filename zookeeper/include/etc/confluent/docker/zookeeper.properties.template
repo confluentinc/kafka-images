@@ -69,7 +69,8 @@ dataLogDir=/var/lib/zookeeper/log
   'ZOOKEEPER_ADMIN_SERVER_ADDRESS' : 'admin.serverAddress',
   'ZOOKEEPER_ADMIN_SERVER_PORT' : 'admin.serverPort',
   'ZOOKEEPER_ADMIN_IDLE_TIMEOUT' : 'admin.idleTimeout',
-  'ZOOKEEPER_ADMIN_COMMAND_URL' : 'admin.commandURL'
+  'ZOOKEEPER_ADMIN_COMMAND_URL' : 'admin.commandURL',
+  '4LW___COMMANDS___WHITELIST': '4lw_commands_whitelist'
  } -%}
 
 {% for k, property in other_props.items() -%}
