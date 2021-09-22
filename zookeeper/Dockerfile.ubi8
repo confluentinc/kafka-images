@@ -50,7 +50,7 @@ RUN echo "===> Installing ${COMPONENT}..." \
     && rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
     && printf "[Confluent.dist] \n\
 name=Confluent repository (dist) \n\
-baseurl=${CONFLUENT_PACKAGES_REPO}/\$releasever \n\
+baseurl=${CONFLUENT_PACKAGES_REPO} \n\
 gpgcheck=1 \n\
 gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
 enabled=1 \n\
