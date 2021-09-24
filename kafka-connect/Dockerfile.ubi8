@@ -56,6 +56,6 @@ RUN echo "===> Installing ${COMPONENT}..." \
     && rm -rf /tmp/*
 
 RUN echo "===> Installing GCS Sink Connector ..." \
-    && confluent-hub install confluentinc/kafka-connect-gcs:5.4.7 --no-prompt
+    && confluent-hub install confluentinc/kafka-connect-gcs:latest --no-prompt
 
 USER appuser
