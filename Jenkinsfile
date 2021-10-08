@@ -8,7 +8,7 @@ dockerfile {
         'confluentinc/cp-server', 'confluentinc/cp-zookeeper']
     mvnPhase = 'package'
     mvnSkipDeploy = true
-    nodeLabel = 'docker-oraclejdk8-compose-swarm'
+    nodeLabel = 'docker-debian-jdk8-compose'
     slackChannel = 'kafka-warn'
     upstreamProjects = []
     dockerPullDeps = ['confluentinc/cp-base-new']
