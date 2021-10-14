@@ -44,6 +44,21 @@ ENV COMPONENT=kafka-connect
 USER root
 
 RUN echo "===> Installing ${COMPONENT}..." \
+    && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
+    && rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
+    && printf "[Confluent.dist] \n\
+name=Confluent repository (dist) \n\
+baseurl=${CONFLUENT_PACKAGES_REPO}/7 \n\
+gpgcheck=1 \n\
+gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
+enabled=1 \n\
+\n\
+[Confluent] \n\
+name=Confluent repository \n\
+baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
+gpgcheck=1 \n\
+gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
+enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && echo "===> Installing JDBC, Elasticsearch and Hadoop connectors ..." \
     && yum install -y \
         confluent-kafka-connect-jdbc-${CONFLUENT_VERSION} \
@@ -53,7 +68,7 @@ RUN echo "===> Installing ${COMPONENT}..." \
         confluent-kafka-connect-jms-${CONFLUENT_VERSION} \
     && echo "===> Cleaning up ..." \
     && yum clean all \
-    && rm -rf /tmp/*
+    && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo
 
 RUN echo "===> Installing GCS Sink Connector ..." \
     && confluent-hub install confluentinc/kafka-connect-gcs:latest --no-prompt
