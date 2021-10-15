@@ -64,7 +64,7 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && yum install -y confluent-kafka-${CONFLUENT_VERSION} \
     && echo "===> clean up ..."  \
     && yum clean all \
-    && rm -rf /tmp/* \
+    && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo \
     && echo "===> Setting up ${COMPONENT} dirs" \
     && mkdir -p /var/lib/${COMPONENT}/data /var/lib/${COMPONENT}/log /etc/${COMPONENT}/secrets \
     && chmod -R ag+w /etc/kafka /var/lib/${COMPONENT}/data /var/lib/${COMPONENT}/log /etc/${COMPONENT}/secrets \
