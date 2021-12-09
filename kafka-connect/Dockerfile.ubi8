@@ -71,6 +71,6 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo
 
 RUN echo "===> Installing GCS Sink Connector ..." \
-    && confluent-hub install confluentinc/kafka-connect-gcs:latest --no-prompt
+    && confluent-hub install confluentinc/kafka-connect-gcs:v5.5.11 --no-prompt
 
 USER appuser
