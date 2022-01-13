@@ -29,9 +29,15 @@
     <groupId>io.confluent.kafka-images</groupId>
     <artifactId>cp-server-connect</artifactId>
     <name>Server Connect Docker Image</name>
-
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
     <properties>
         <docker.skip-build>false</docker.skip-build>
-        <docker.skip-test>false</docker.skip-test>
+        <docker.skip-test>true</docker.skip-test>
     </properties>
 </project>
