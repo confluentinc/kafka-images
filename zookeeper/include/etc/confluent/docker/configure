@@ -16,7 +16,7 @@
 
 . /etc/confluent/docker/bash-config
 
-dub ensure ZOOKEEPER_CLIENT_PORT
+dub ensure-atleast-one ZOOKEEPER_CLIENT_PORT ZOOKEEPER_SECURE_CLIENT_PORT
 
 dub path /etc/kafka/ writable
 
