@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-. /bin/liblog.sh
+#. /bin/liblog.sh
 
 ########################
 # Configure libnss_wrapper so PostgreSQL commands work with a random user.
@@ -15,7 +15,7 @@ enable_nss_wrapper() {
   export DAEMON_USER="${DAEMON_USER:-appuser}"
   export DAEMON_GROUP="${DAEMON_GROUP:-appuser}"
   export DAEMON_BIN_DIR="${DAEMON_BIN_DIR:-/tmp}"
-  export NSS_WRAPPER_LIB="${NSS_WRAPPER_LIB:-/usr/lib64/libnss_wrapper.so}"
+  export NSS_WRAPPER_LIB="${NSS_WRAPPER_LIB:-./bin/libnss.sh}"
   if ! getent passwd "$(id -u)" &> /dev/null && [ -e "$NSS_WRAPPER_LIB" ]; then
     debug "Configuring libnss_wrapper..."
     export LD_PRELOAD="$NSS_WRAPPER_LIB"

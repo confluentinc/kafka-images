@@ -1,0 +1,21 @@
+name: Build Confluent/Kafka Image
+
+on:
+  pull:
+    branches:
+      - task/OP-32523
+jobs:
+  mage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install maven 
+        run: |
+          sudo apt update
+          sudo apt install maven
+      - name: Configure settings.xml
+        run: |
+          mv settings.xml ~/.m2
+      - name: Build image using maven
+        run: |
+          mvn clean package -Pdocker -DskipTests
+
