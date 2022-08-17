@@ -1,7 +1,7 @@
 name: Build Confluent/Kafka Image
 
 on:
-  pull:
+  pull_request:
     branches:
       - task/OP-32523
 jobs:
