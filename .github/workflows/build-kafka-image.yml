@@ -13,7 +13,7 @@ jobs:
           sudo apt install maven
       - name: Install docker
         run: |
-          sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+          sudo apt-get install docker-ce 
       - name: Configure settings.xml
         run: |
           ls
