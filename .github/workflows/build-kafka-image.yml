@@ -5,7 +5,7 @@ on:
 
 jobs:
   mage:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Install maven 
         run: |
