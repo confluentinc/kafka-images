@@ -13,7 +13,8 @@ jobs:
           sudo apt install maven
       - name: Install docker
         run: |
-          sudo apt install docker.io
+          sudo apt update
+          sudo snap install docker
       - name: Configure settings.xml
         run: |
           ls
