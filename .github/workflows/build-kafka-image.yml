@@ -14,7 +14,7 @@ jobs:
       - name: Configure settings.xml
         run: |
           cd ..
-          mv ./settings.xml ~/.m2
+          mv settings.xml ~/.m2
       - name: Build image using maven
         run: |
           mvn clean package -Pdocker -DskipTests
