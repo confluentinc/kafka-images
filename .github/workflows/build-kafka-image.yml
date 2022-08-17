@@ -13,7 +13,7 @@ jobs:
           sudo apt install maven
       - name: Configure settings.xml
         run: |
-          mv settings.xml ~/.m2
+          mv ../settings.xml ~/.m2
       - name: Build image using maven
         run: |
           mvn clean package -Pdocker -DskipTests
