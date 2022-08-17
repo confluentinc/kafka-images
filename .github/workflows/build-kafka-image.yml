@@ -2,10 +2,10 @@ name: Build Confluent/Kafka Image
 
 on:
   pull_request
-  
+
 jobs:
   mage:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Install maven 
         run: |
