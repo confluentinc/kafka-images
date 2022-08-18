@@ -35,10 +35,11 @@ jobs:
         uses: actions/checkout@v3
       - name: Login to ci-registry
         run: |
+          KEY_ID: ${{secrets.OPS_C3CI_DOCKER_CI_REGISTRY_URL }}
+          echo KEY_ID
+          docker login ${{secrets.OPS_C3CI_DOCKER_CI_REGISTRY_URL}} -u ${{secrets.OPS_C3CI_DOCKER_CI_USER}} -p ${{secrets.OPS_C3CI_DOCKER_CI_PASSWORD}} 
           docker login ${{secrets.OPS_C3CI_DOCKER_CI_REGISTRY_URL}} -u ${{secrets.OPS_C3CI_DOCKER_CI_USER}} -p ${{secrets.OPS_C3CI_DOCKER_CI_PASSWORD}}
-      - name: Build and publish image
-        run: |
-          docker push confluentinc/cp-kafka:6.0.5-ubi8
+     
+            
 
-          
      
