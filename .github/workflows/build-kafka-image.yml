@@ -6,10 +6,10 @@ on:
 jobs:
   mage:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./kafka
     steps:
-      - name: Switch to kafka directory
-        run: |
-          cd kafka
       - name: Install maven 
         run: |
           sudo apt update
