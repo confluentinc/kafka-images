@@ -30,5 +30,12 @@ jobs:
       - name: Build image using maven
         working-directory: ./
         run: |
-           mvn clean package -Ddocker.registry="" -Ddocker.upstream-tag=6.0.5 -DCONFLUENT_PACKAGES_REPO=https://packages.confluent.io/rpm/6.0 -DCONFLUENT_VERSION=6.0.5 -Pdocker -DskipTests -e
-        
+           mvn clean package -Ddocker.registry="" -Ddocker.upstream-tag=6.0.5 -DCONFLUENT_PACKAGES_REPO=https://packages.confluent.io/rpm/6.0 -DCONFLUENT_VERSION=6.0.5 -Pdocker -DskipTests 
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Login to ci-registry
+        run: |
+          docker login ${{secrets.OPS_C3CI_DOCKER_CI_REGISTRY_URL}} -u ${{secrets.OPS_C3CI_DOCKER_CI_USER}} -p ${{secrets.OPS_C3CI_DOCKER_CI_PASSWORD}}
+      - name: Publish image
+        run: |
+          docker push Kafka
