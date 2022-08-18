@@ -17,7 +17,6 @@ jobs:
           sudo snap install docker
       - name: Configure settings.xml
         run: |
-          cd kafka
           ls
       - name: Build image using maven
         run: |
