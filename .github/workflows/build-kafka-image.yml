@@ -7,6 +7,9 @@ jobs:
   mage:
     runs-on: ubuntu-latest
     steps:
+      - name: Switch to kafka directory
+        run: |
+          cd kafka
       - name: Install maven 
         run: |
           sudo apt update
@@ -18,7 +21,7 @@ jobs:
       - name: Configure settings.xml
         run: |
           ls
-      - name: Build image using maven
+      - name: Build image using 
         run: |
-          mvn clean package -Pdocker -DskipTests
+          docker build 
 
