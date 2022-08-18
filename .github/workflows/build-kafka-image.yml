@@ -26,8 +26,8 @@ jobs:
       - name: Configure settings.xml
         run: |
           ls
-      - name: Build image using 
+      - name: Build image using docker build 
         working-directory: ./kafka
         run: |
-          docker build 
+          docker build .
 
