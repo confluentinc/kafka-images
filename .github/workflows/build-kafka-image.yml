@@ -30,4 +30,5 @@ jobs:
       - name: Build image using maven
         working-directory: ./
         run: |
-          mvn clean package -Pdocker -DskipTests
+           mvn clean package -Ddocker.registry="" -Ddocker.upstream-tag=6.0.5 -DCONFLUENT_PACKAGES_REPO=https://packages.confluent.io/rpm/6.0 -DCONFLUENT_VERSION=6.0.5 -Pdocker -DskipTests -e
+        
