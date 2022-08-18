@@ -5,7 +5,7 @@ on:
 
 jobs:
   mage:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Install maven 
         run: |
@@ -17,6 +17,7 @@ jobs:
           sudo snap install docker
       - name: Configure settings.xml
         run: |
+          cd kafka
           ls
       - name: Build image using maven
         run: |
