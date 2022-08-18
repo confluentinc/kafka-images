@@ -24,10 +24,11 @@ jobs:
           sudo apt update
           sudo snap install docker
       - name: Configure settings.xml
+        working-directory: ./
         run: |
-          ls
+          mv settings.xml ~/.m2
       - name: Build image using docker build 
         working-directory: ./kafka
         run: |
-          docker build .
+          docker build -f Dockerfile.ubi8 .
 
