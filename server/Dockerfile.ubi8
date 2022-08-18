@@ -28,7 +28,6 @@ LABEL version=$GIT_COMMIT
 LABEL release=$PROJECT_VERSION
 LABEL name=$ARTIFACT_ID
 LABEL summary="Confluent platform server image."
-LABEL description="Confluent platform server image."
 LABEL io.confluent.docker=true
 LABEL io.confluent.docker.git.id=$GIT_COMMIT
 ARG BUILD_NUMBER=-1
@@ -79,8 +78,8 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo \
     && echo "===> Setting up ${COMPONENT} dirs" \
     && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
-    && chown -R appuser:root /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/zookeeper /etc/${COMPONENT}/secrets \
-    && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets /var/log/kafka
+    && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
+    && chown -R appuser:root /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/zookeeper /etc/${COMPONENT}/secrets
 
 VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
 

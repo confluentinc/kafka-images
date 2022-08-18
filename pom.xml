@@ -18,11 +18,16 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    <repositories>
+        <repository>
+            <id>confluent</id>
+            <url>https://packages.confluent.io/maven/</url>
+        </repository>
+    </repositories>
     <parent>
         <groupId>io.confluent</groupId>
         <artifactId>common-docker</artifactId>
-        <version>[7.4.0-0, 7.4.1-0)</version>
+        <version>6.0.5</version>
     </parent>
 
     <groupId>io.confluent.kafka-images</groupId>
@@ -30,7 +35,7 @@
     <packaging>pom</packaging>
     <name>Kafka and CE Kafka Docker Images</name>
     <description>Build files for Confluent's Kafka Docker images</description>
-    <version>7.4.0-0</version>
+    <version>6.0.5</version>
 
     <modules>
         <module>zookeeper</module>
@@ -45,6 +50,5 @@
 
     <properties>
         <component.name>kafka</component.name>
-        <io.confluent.kafka-images.version>7.4.0-0</io.confluent.kafka-images.version>
     </properties>
 </project>

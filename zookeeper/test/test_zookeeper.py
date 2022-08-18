@@ -54,7 +54,7 @@ class ConfigTest(unittest.TestCase):
         assert "PASS" in output
 
     def test_required_config_failure(self):
-        self.assertTrue("one of (ZOOKEEPER_CLIENT_PORT,ZOOKEEPER_SECURE_CLIENT_PORT) is required." in self.cluster.service_logs("failing-config", stopped=True))
+        self.assertTrue("ZOOKEEPER_CLIENT_PORT is required." in self.cluster.service_logs("failing-config", stopped=True))
         self.assertTrue("ZOOKEEPER_SERVER_ID is required." in self.cluster.service_logs("failing-config-server-id", stopped=True))
 
     def test_default_config(self):
