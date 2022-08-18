@@ -27,8 +27,8 @@ jobs:
         working-directory: ./
         run: |
           mv settings.xml ~/.m2
-      - name: Build image using docker build 
-        working-directory: ./kafka
+      - name: Build image using maven
+        working-directory: ./
         run: |
-          docker build -f Dockerfile.ubi8 .
+          mvn clean package -Pdocker -DskipTests
 
