@@ -34,8 +34,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Login to ci-registry
-        run: |
+        env:
           KEY_ID: ${{secrets.OPS_C3CI_DOCKER_CI_REGISTRY_URL }}
+        run: |
           echo KEY_ID
           docker login ${{secrets.OPS_C3CI_DOCKER_CI_REGISTRY_URL}} -u ${{secrets.OPS_C3CI_DOCKER_CI_USER}} -p ${{secrets.OPS_C3CI_DOCKER_CI_PASSWORD}} 
           docker login ${{secrets.OPS_C3CI_DOCKER_CI_REGISTRY_URL}} -u ${{secrets.OPS_C3CI_DOCKER_CI_USER}} -p ${{secrets.OPS_C3CI_DOCKER_CI_PASSWORD}}
