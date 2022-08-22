@@ -21,7 +21,7 @@ jobs:
           sudo apt install maven
       - name: Install docker
         run: |
-          sudo apt update
+          sudo apt update 
           sudo snap install docker
       - name: Configure settings.xml
         working-directory: ./
@@ -32,5 +32,5 @@ jobs:
         run: |
           mvn clean package -Ddocker.registry="" -Ddocker.upstream-tag=6.0.5 -DCONFLUENT_PACKAGES_REPO=https://packages.confluent.io/rpm/6.0 -DCONFLUENT_VERSION=6.0.5 -Pdocker -DskipTests
       
-          
+    
      
