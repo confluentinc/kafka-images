@@ -28,7 +28,7 @@ jobs:
         run: |
           mv settings.xml ~/.m2
       - name: Build image using maven
-        working-directory: ./
+        working-directory: ./kafka
         run: |
           mvn clean package -Pdocker -DskipTests -e
       
