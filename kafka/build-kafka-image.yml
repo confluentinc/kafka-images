@@ -1,0 +1,43 @@
+name: Build Confluent/Kafka Image
+
+on:
+  pull_request
+
+jobs:
+  mage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '2.10.0'
+      - name: Install maven 
+        run: |
+          sudo apt update
+          sudo apt install maven
+      - name: Install docker
+        run: |
+          sudo apt update
+          sudo snap install docker
+      - name: Configure settings.xml
+        working-directory: ./
+        run: |
+          mv settings.xml ~/.m2
+      - name: Build image using maven
+        working-directory: ./kafka
+        run: |
+          mvn clean package -Ddocker.registry="" -Ddocker.upstream-tag=6.0.5 -DCONFLUENT_PACKAGES_REPO=https://packages.confluent.io/rpm/6.0 -DCONFLUENT_VERSION=6.0.5 -Pdocker -DskipTests
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Login to ci-registry
+        env:
+          KEY_ID: ${{ secrets.OPS_C3CI_DOCKER_CI_USER }}
+        run: |
+          echo KEY_ID
+          docker login ${{secrets.OPS_C3CI_DOCKER_CI_REGISTRY_URL}} -u ${{secrets.OPS_C3CI_DOCKER_CI_USER}} -p ${{secrets.OPS_C3CI_DOCKER_CI_PASSWORD}} 
+          
+     
