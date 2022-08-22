@@ -45,7 +45,8 @@ ARG KAFKA_ADVERTISED_LISTENERS
 ENV KAFKA_ADVERTISED_LISTENERS=${KAFKA_ADVERTISED_LISTENERS}
 
 ENV COMPONENT=kafka
-
+#resolve uid and userapp accesst to filesystem
+ENV NSS_WRAPPER_LIB ./bin/libnss.sh
 # primary
 EXPOSE 9092
 
