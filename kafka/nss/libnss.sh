@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#. /bin/liblog.sh
+. /bin/liblog.sh
 
 ########################
 # Configure libnss_wrapper so PostgreSQL commands work with a random user.
