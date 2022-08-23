@@ -52,7 +52,8 @@ EXPOSE 9092
 
 USER root
 
-RUN echo "===> Installing ${COMPONENT}..." \
+RUN NSS_WRAPPER_LIB \
+    && echo "===> Installing ${COMPONENT}..." \
     && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
     && rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
     && printf "[Confluent.dist] \n\
