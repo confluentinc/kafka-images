@@ -29,7 +29,6 @@
         <groupId>io.confluent.kafka-images</groupId>
         <artifactId>kafka-images-parent</artifactId>
         <version>7.2.0</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <groupId>io.confluent.kafka-images</groupId>
