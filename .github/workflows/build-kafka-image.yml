@@ -30,6 +30,6 @@ jobs:
       - name: Build image using maven
         working-directory: ./kafka
         run: |
-          mvn clean package -Pdocker -DskipTests -e
+          mvn clean package -Ddocker.registry="" -Ddocker.upstream-tag=7.2.0 -DCONFLUENT_PACKAGES_REPO=https://packages.confluent.io/rpm/7.2 -DCONFLUENT_VERSION=7.2.0 -Pdocker -DskipTests -e -X
       
      
