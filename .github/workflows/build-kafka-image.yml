@@ -27,9 +27,16 @@ jobs:
         working-directory: ./
         run: |
           mv settings.xml ~/.m2
-      - name: Build image using maven
+      - name: Build Confluent Kafka image using maven
         working-directory: ./kafka
         run: |
           mvn clean package -Ddocker.registry="" -Ddocker.upstream-tag=7.2.0 -DCONFLUENT_PACKAGES_REPO=https://packages.confluent.io/rpm/7.2 -DCONFLUENT_VERSION=7.2.0 -Pdocker -DskipTests -e -X
-      
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Login to ci-registry
+        env:
+          KEY_ID: ${{ secrets.OPS_C3CI_DOCKER_CI_USER }}
+        run: |
+          echo KEY_ID
+          docker login ${{secrets.OPS_C3CI_DOCKER_CI_REGISTRY_URL}} -u ${{secrets.OPS_C3CI_DOCKER_CI_USER}} -p ${{secrets.OPS_C3CI_DOCKER_CI_PASSWORD}} 
      
