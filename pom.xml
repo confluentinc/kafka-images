@@ -48,3 +48,4 @@
         <io.confluent.kafka-images.version>7.2.0</io.confluent.kafka-images.version>
     </properties>
 </project>
+

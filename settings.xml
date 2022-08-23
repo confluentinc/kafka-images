@@ -8,7 +8,7 @@
     <repositories>
       <repository>
         <id>confluent</id>
-        <url>https://packages.confluent.io/maven/io/confluent/common-docker/7.2.0/</url>
+        <url>https://packages.confluent.io/maven</url>
       </repository>
     </repositories>
   </profiles>
