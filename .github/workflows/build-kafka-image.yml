@@ -34,6 +34,6 @@ jobs:
       - name: Login to ci-registry
         run: |
           docker login ${{secrets.OPS_C3CI_DOCKER_CI_REGISTRY_URL}} -u ${{secrets.OPS_C3CI_DOCKER_CI_USER}} -p ${{secrets.OPS_C3CI_DOCKER_CI_PASSWORD}} 
-      - name: Push image to CI registry
+      
 
      
