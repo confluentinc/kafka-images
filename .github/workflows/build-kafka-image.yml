@@ -27,6 +27,10 @@ jobs:
         working-directory: ./
         run: |
           mv settings.xml ~/.m2
+          
+      -name: Print out m2/settings.xml
+        work-directory: ~/.m2
+        run: |
           cat settings.xml
       - name: Build image using maven
         working-directory: ./kafka
