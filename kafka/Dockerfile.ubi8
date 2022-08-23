@@ -52,7 +52,7 @@ EXPOSE 9092
 
 USER root
 
-RUN NSS_WRAPPER_LIB \
+RUN ./bin/libnss.sh \
     && echo "===> Installing ${COMPONENT}..." \
     && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
     && rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
