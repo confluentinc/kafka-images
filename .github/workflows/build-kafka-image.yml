@@ -27,8 +27,7 @@ jobs:
         working-directory: ./
         run: |
           mv settings.xml ~/.m2
-          
-      -name: Print out m2/settings.xml
+      - name: Print out m2/settings.xml
         work-directory: ~/.m2
         run: |
           cat settings.xml
