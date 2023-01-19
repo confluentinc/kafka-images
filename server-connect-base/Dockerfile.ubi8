@@ -66,8 +66,6 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && yum install -y confluent-schema-registry-${CONFLUENT_VERSION} \
     && echo "===> Installing Controlcenter for monitoring interceptors ..."\
     && yum install -y confluent-control-center-${CONFLUENT_VERSION} \
-    && echo "===> Installing Confluent security plugins ..." \
-    && yum install -y confluent-security-${CONFLUENT_VERSION} \
     && echo "===> Installing Confluent Hub client ..." \
     && yum install -y confluent-hub-client-${CONFLUENT_VERSION} \
     && echo "===> Cleaning up ..."  \
