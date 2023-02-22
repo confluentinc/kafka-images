@@ -36,6 +36,7 @@ if [[ -n "${KAFKA_QUORUM_CONTROLLER_MODE-}" ]] && [[ $KAFKA_QUORUM_CONTROLLER_MO
 then
     if [[ -z "${KAFKA_CLUSTER_ID}" ]]
     then
+        export KAFKA_CLUSTER_ID
         KAFKA_CLUSTER_ID=$(kafka-storage random-uuid)
         echo "===> Using a new cluster id $KAFKA_CLUSTER_ID ..."
     else

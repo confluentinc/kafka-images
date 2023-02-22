@@ -19,6 +19,7 @@
 # Figure out what quorum controller is being used.  If not defined, assume Zookeeper
 if [[ -z "${KAFKA_QUORUM_CONTROLLER_MODE-}" ]]
 then
+  export KAFKA_QUORUM_CONTROLLER_MODE
   KAFKA_QUORUM_CONTROLLER_MODE="zookeeper"
 fi
 
