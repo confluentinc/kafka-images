@@ -16,7 +16,24 @@
 
 . /etc/confluent/docker/bash-config
 
-dub ensure KAFKA_ZOOKEEPER_CONNECT
+# Figure out what quorum controller is being used.  If not defined, assume Zookeeper
+if [[ -z "${KAFKA_QUORUM_CONTROLLER_MODE-}" ]]
+then
+  KAFKA_QUORUM_CONTROLLER_MODE="zookeeper"
+fi
+
+if [[ $KAFKA_QUORUM_CONTROLLER_MODE == "kraft" ]]
+then
+  echo "Running in KRaft mode..."
+elif [[ $KAFKA_QUORUM_CONTROLLER_MODE == "zookeeper" ]]
+then
+  echo "Running in Zookeeper mode..."
+  dub ensure KAFKA_ZOOKEEPER_CONNECT
+else
+  echo "Invalid KAFKA_QUORUM_CONTROLLER_MODE.  Valid modes are 'kraft' or 'zookeeper'"
+  exit 1
+fi
+
 dub ensure KAFKA_ADVERTISED_LISTENERS
 
 # By default, LISTENERS is derived from ADVERTISED_LISTENERS by replacing
