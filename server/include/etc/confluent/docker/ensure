@@ -23,7 +23,17 @@ dub path "$KAFKA_DATA_DIRS" writable
 if [[ -n "${KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE-}" ]] && [[ $KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE == "true" ]]
 then
     echo "===> Skipping Zookeeper health check for SSL connections..."
+elif [[ -n "${KAFKA_CONTROLLER_QUORUM_MODE-}" ]] && [[ $KAFKA_CONTROLLER_QUORUM_MODE == "kraft" ]]
+then 
+    echo "===> Running in KRaft mode, skipping Zookeeper health check..."
 else
     echo "===> Check if Zookeeper is healthy ..."
     cub zk-ready "$KAFKA_ZOOKEEPER_CONNECT" "${KAFKA_CUB_ZK_TIMEOUT:-40}"
+fi
+
+# KRaft required step: Format the storage directory with provided cluster ID
+if [[ -n "${KAFKA_CONTROLLER_QUORUM_MODE-}" ]] && [[ $KAFKA_CONTROLLER_QUORUM_MODE == "kraft" ]]
+then
+    echo "===> Using provided cluster id $KAFKA_CLUSTER_ID ..."
+    kafka-storage format --cluster-id=$KAFKA_CLUSTER_ID -c /etc/kafka/kafka.properties
 fi
