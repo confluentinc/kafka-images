@@ -16,13 +16,45 @@
 
 . /etc/confluent/docker/bash-config
 
-dub ensure KAFKA_ZOOKEEPER_CONNECT
-dub ensure KAFKA_ADVERTISED_LISTENERS
+# Figure out what quorum controller is being used.  If not defined, assume Zookeeper
+if [[ -z "${KAFKA_CONTROLLER_QUORUM_MODE-}" ]]
+then
+  export KAFKA_CONTROLLER_QUORUM_MODE
+  KAFKA_CONTROLLER_QUORUM_MODE="zookeeper"
+fi
+
+# unset KAFKA_ADVERTISED_LISTENERS from ENV in KRaft mode when running as controller only
+if [[ $KAFKA_CONTROLLER_QUORUM_MODE == "kraft" ]]
+then
+  echo "Running in KRaft mode..."
+  dub ensure KAFKA_CLUSTER_ID
+  if [[ -n "${KAFKA_PROCESS_ROLES-}" ]] && [[ $KAFKA_PROCESS_ROLES == "controller" ]]
+  then
+    if [[ -n "${KAFKA_ADVERTISED_LISTENERS-}" ]]
+    then
+      echo "KAFKA_ADVERTISED_LISTENERS is not supported on a KRaft controller."
+      exit 1
+    else
+      unset KAFKA_ADVERTISED_LISTENERS
+    fi
+  else
+    dub ensure KAFKA_ADVERTISED_LISTENERS
+  fi 
+elif [[ $KAFKA_CONTROLLER_QUORUM_MODE == "zookeeper" ]]
+then
+  echo "Running in Zookeeper mode..."
+  dub ensure KAFKA_ZOOKEEPER_CONNECT
+  dub ensure KAFKA_ADVERTISED_LISTENERS
+else
+  echo "Invalid KAFKA_CONTROLLER_QUORUM_MODE.  Valid modes are 'kraft' or 'zookeeper'."
+  exit 1
+fi
+
 
 # By default, LISTENERS is derived from ADVERTISED_LISTENERS by replacing
 # hosts with 0.0.0.0. This is good default as it ensures that the broker
 # process listens on all ports.
-if [[ -z "${KAFKA_LISTENERS-}" ]]
+if [[ -z "${KAFKA_LISTENERS-}" ]] && [[ -n "${KAFKA_PROCESS_ROLES-}" ]] && [[ $KAFKA_PROCESS_ROLES != "controller" ]]
 then
   export KAFKA_LISTENERS
   KAFKA_LISTENERS=$(cub listeners "$KAFKA_ADVERTISED_LISTENERS")
@@ -62,7 +94,7 @@ then
 fi
 
 # Set if ADVERTISED_LISTENERS has SSL:// or SASL_SSL:// endpoints.
-if [[ $KAFKA_ADVERTISED_LISTENERS == *"SSL://"* ]]
+if [[ -n "${KAFKA_ADVERTISED_LISTENERS-}" ]] && [[ $KAFKA_ADVERTISED_LISTENERS == *"SSL://"* ]]
 then
   echo "SSL is enabled."
 
@@ -98,7 +130,7 @@ then
 fi
 
 # Set if KAFKA_ADVERTISED_LISTENERS has SASL_PLAINTEXT:// or SASL_SSL:// endpoints.
-if [[ $KAFKA_ADVERTISED_LISTENERS =~ .*SASL_.*://.* ]]
+if [[ -n "${KAFKA_ADVERTISED_LISTENERS-}" ]] && [[ $KAFKA_ADVERTISED_LISTENERS =~ .*SASL_.*://.* ]]
 then
   echo "SASL" is enabled.
 
