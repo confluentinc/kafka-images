@@ -62,7 +62,7 @@ then
 fi
 
 # Set if ADVERTISED_LISTENERS has SSL:// or SASL_SSL:// endpoints.
-if [[ $KAFKA_ADVERTISED_LISTENERS == *"SSL://"* ]]
+if [[ $KAFKA_ADVERTISED_LISTENERS == *"SSL://"* ]] || [[ $KAFKA_LISTENER_SECURITY_PROTOCOL_MAP == *":SSL"* ]]
 then
   echo "SSL is enabled."
 
