@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+#
+# Copyright 2016 Confluent Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+. /etc/confluent/docker/bash-config
+. /etc/confluent/docker/utility
+
+path /etc/kafka/ writable
+
+if [[ -z "${KAFKA_LOG_DIRS-}" ]]
+then
+  export KAFKA_LOG_DIRS
+  KAFKA_LOG_DIRS="/var/lib/kafka/data"
+fi
+
+
+# for broker
+exclude_props=("KAFKA_VERSION" "KAFKA_HEAP_OPTS" "KAFKA_LOG4J_OPTS" "KAFKA_JMX_OPTS" "KAFKA_JVM_PERFORMANCE_OPTS" "KAFKA_GC_LOG_OPTS"
+        "KAFKA_LOG4J_ROOT_LOGLEVEL" "KAFKA_LOG4J_LOGGERS" "KAFKA_TOOLS_LOG4J_LOGLEVEL" "KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET" "KAFKA_REST_")
+parse_props "/etc/confluent/docker/kafka.properties" "/etc/kafka/kafka.properties" KAFKA_ "${exclude_props[@]}"
+build_log4j_properties_kafka "/etc/confluent/docker/log4j.properties" "/etc/kafka/log4j.properties"
+build_tools_log4j_properties_kafka "/etc/confluent/docker/tools-log4j.properties" "/etc/kafka/tools-log4j.properties"
+
+
+# for rest proxy
+exclude_props=("KAFKA_REST_LOG4J_ROOT_LOGLEVEL" "KAFKA_REST_LOG4J_LOGGERS")
+parse_props "/etc/confluent/docker/kafka-rest.properties" "/etc/kafka-rest/kafka-rest.properties" KAFKA_REST_ "${exclude_props[@]}"
+build_log4j_properties_kafka_rest "/etc/confluent/docker/log4j-kafka-rest.properties" "/etc/kafka-rest/log4j.properties"
+parse_props "/etc/confluent/docker/admin.properties" "/etc/kafka-rest/admin.properties" KAFKA_REST_CLIENT_ "${exclude_props[@]}"

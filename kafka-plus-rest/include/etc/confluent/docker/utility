@@ -1,0 +1,178 @@
+#!/usr/bin/env bash
+#
+# Copyright 2016 Confluent Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+# checks path for permission
+# $1 - path to check for
+# $2 - permission to check for
+path () {
+    if [[ "$2" == 'writable' ]]
+    then
+        if [ -w $1 ]; then return 0; else return 1; fi
+    elif [[ "$2" = 'readable' ]]
+    then
+        if [ -r $1 ]; then return 0; else return 1; fi
+    elif [[ "$2" = 'executable' ]]
+    then
+        if [ -x $1 ]; then return 0; else return 1; fi
+    elif [[ "$2" = 'existence' ]]
+    then
+        if [ -d $1 ]; then return 0; else return 1; fi
+    fi
+}
+
+
+# checks whether the environment variable is set
+# $1 - env variable to check
+ensure() {
+    if ! [[ -z "${1}" ]]; then return 0; else return 1; fi
+}
+
+
+# builds tool log4j props file for broker
+# $1 - source base file prepopulated with required log4j configs
+# $2 - final location of tools log4j props file
+build_tools_log4j_properties_kafka() {
+    src_base_file=$1
+    dest_file=$2
+    cp $src_base_file $dest_file
+    if [[ -n "${KAFKA_TOOLS_LOG4J_LOGLEVEL-}" ]];
+    then
+        sed -i "s|log4j.rootLogger=WARN, stderr|log4j.rootLogger=$KAFKA_TOOLS_LOG4J_LOGLEVEL, stderr|" $dest_file
+    fi
+}
+
+
+# builds tool log4j props file for broker
+# $1 - source base file prepopulated with required log4j configs
+# $2 - final location of tools log4j props file
+build_log4j_properties_kafka() {
+    local src_base_file=$1
+    local dest_file=$2
+    cp $src_base_file $dest_file
+    if [[ -n "${KAFKA_LOG4J_ROOT_LOGLEVEL-}" ]];
+    then
+        sed -i "s|^log4j.rootLogger=.*|log4j.rootLogger=$KAFKA_LOG4J_ROOT_LOGLEVEL, stdout|" $dest_file
+    fi
+
+    if [[ -n "${KAFKA_LOG4J_LOGGERS-}" ]];
+    then
+        IFS=','
+        set -f
+        for line in $KAFKA_LOG4J_LOGGERS; do
+            separator="="
+            key=${line%$separator*}
+            val=${line#*$separator}
+            key=$(echo $key | sed -e 's|^[[:space:]]*||' -e 's|[[:space:]]*$||')
+            val=$(echo $val | sed -e 's|^[[:space:]]*||' -e 's|[[:space:]]*$||')
+
+            if grep -q ^log4j.logger.$key $dest_file
+            then
+                sed -i "s|^log4j.logger.$key.*|log4j.logger.$key=$val|" $dest_file
+            else
+                echo log4j.logger.$key=$val >> $dest_file
+            fi
+        done
+        set +f
+        unset IFS
+    fi
+}
+
+
+# builds tool log4j props file for broker
+# $1 - source base file prepopulated with required log4j configs
+# $2 - final location of tools log4j props file
+build_log4j_properties_kafka_rest() {
+    local src_base_file=$1
+    local dest_file=$2
+    cp $src_base_file $dest_file
+    if [[ -n "${KAFKA_REST_LOG4J_ROOT_LOGLEVEL-}" ]];
+    then
+        sed -i "s|^log4j.rootLogger=.*|log4j.rootLogger=$KAFKA_REST_LOG4J_ROOT_LOGLEVEL, stdout|" $dest_file
+    fi
+
+    if [[ -n "${KAFKA_REST_LOG4J_LOGGERS-}" ]];
+    then
+        IFS=','
+        set -f
+        for line in $KAFKA_REST_LOG4J_LOGGERS; do
+            separator="="
+            key=${line%$separator*}
+            val=${line#*$separator}
+            key=$(echo $key | sed -e 's|^[[:space:]]*||' -e 's|[[:space:]]*$||')
+            val=$(echo $val | sed -e 's|^[[:space:]]*||' -e 's|[[:space:]]*$||')
+
+            if grep -q ^log4j.logger.$key $dest_file
+            then
+                sed -i "s|^log4j.logger.$key.*|log4j.logger.$key=$val, stdout|" $dest_file
+            else
+                echo log4j.logger.$key=$val, stdout >> $dest_file
+            fi
+        done
+        set +f
+        unset IFS
+    fi
+}
+
+
+# build service property file for any component
+# $1 - source base file prepopulated with required props
+# $2 - final location of the props file
+# $3 - prefix to use for parsing the env variables
+# $4 - list of all env variables to be ignored while building props file
+parse_props() {
+    
+    local src_base_file=$1
+    local dest_file=$2
+    local prefix=$3
+    shift 3
+    local exclude_props=("$@")
+    cp $src_base_file $dest_file
+
+    # loop over all env variables 
+    env -0 | while IFS='=' read -r -d '' n v; 
+    do
+        # ignore the ones not having the specified prefix
+        if ! [[ $n == $prefix* ]]; then continue; fi
+        # ignore if the value is empty
+        if [[ $v == "" ]]; then continue; fi
+
+        # ignore the variables present in the exclude_props array
+        var='include' 
+        for str in ${exclude_props[@]};
+        do
+            if [[ $n == $str* ]];
+            then 
+                var='exclude'
+                break
+            fi
+        done
+        if [[ $var == 'exclude' ]]; then continue; fi
+
+        n=${n//$prefix/} # remove prefix KAFKA_
+        n=$(echo $n | tr '[:upper:]' '[:lower:]') # convert to lower-case
+        n=${n//__/-} # replace __ with -
+        n=${n//_/.} # replace _ with .
+
+        # if property already present, override. if not present, append to file
+        if grep -q ^$n $dest_file
+        then
+            sed -i "s|^$n.*|$n=$v|" $dest_file
+        else
+            echo $n=$v >> $dest_file
+        fi
+    done
+}
