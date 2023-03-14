@@ -53,7 +53,7 @@ fi
 # By default, LISTENERS is derived from ADVERTISED_LISTENERS by replacing
 # hosts with 0.0.0.0. This is good default as it ensures that the broker
 # process listens on all ports.
-if [[ -z "${KAFKA_LISTENERS-}" ]] && [[ -n "${KAFKA_PROCESS_ROLES-}" ]] && [[ $KAFKA_PROCESS_ROLES != "controller" ]]
+if [[ -z "${KAFKA_LISTENERS-}" ]] && ( [[ -z "${KAFKA_PROCESS_ROLES-}" ]] || [[ $KAFKA_PROCESS_ROLES != "controller" ]] )
 then
   export KAFKA_LISTENERS
   KAFKA_LISTENERS=$(cub listeners "$KAFKA_ADVERTISED_LISTENERS")
