@@ -37,8 +37,17 @@ path () {
 
 # checks whether the environment variable is set
 # $1 - env variable to check
+# $2 - value of the env variables
 ensure() {
-    if ! [[ -z "${1}" ]]; then return 0; else return 1; fi
+    set -e
+    if [ $# -ge 2 ] && [ -n "$2" ]
+    then
+        set +e
+        return 0
+    else
+        echo $1 is required
+        return 1
+    fi
 }
 
 
