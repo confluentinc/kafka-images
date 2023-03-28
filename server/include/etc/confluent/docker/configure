@@ -22,7 +22,7 @@
 if [[ -n "${KAFKA_PROCESS_ROLES-}" ]]
 then
   echo "Running in KRaft mode..."
-  dub ensure KAFKA_CLUSTER_ID
+  dub ensure CLUSTER_ID
   if [[ $KAFKA_PROCESS_ROLES == "controller" ]]
   then
     if [[ -n "${KAFKA_ADVERTISED_LISTENERS-}" ]]
