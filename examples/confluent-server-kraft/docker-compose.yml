@@ -14,7 +14,7 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
       KAFKA_LISTENERS: 'CONTROLLER://controller-1:9093'
-      KAFKA_CLUSTER_ID: '4L6g3nShT-eMCtK--X86sw'
+      CLUSTER_ID: '4L6g3nShT-eMCtK--X86sw'
       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: localhost:19092
 
   kafka-1:
@@ -32,7 +32,7 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:29092
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
-      KAFKA_CLUSTER_ID: '4L6g3nShT-eMCtK--X86sw'
+      CLUSTER_ID: '4L6g3nShT-eMCtK--X86sw'
       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: localhost:29092
     depends_on:
       - controller-1
@@ -52,7 +52,7 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:39092
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
-      KAFKA_CLUSTER_ID: '4L6g3nShT-eMCtK--X86sw'
+      CLUSTER_ID: '4L6g3nShT-eMCtK--X86sw'
       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: localhost:39092
     depends_on:
       - controller-1
@@ -72,7 +72,7 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:49092
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
-      KAFKA_CLUSTER_ID: '4L6g3nShT-eMCtK--X86sw'
+      CLUSTER_ID: '4L6g3nShT-eMCtK--X86sw'
       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: localhost:49092
     depends_on:
       - controller-1
