@@ -23,7 +23,7 @@ dub path "$KAFKA_DATA_DIRS" writable
 if [[ -n "${KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE-}" ]] && [[ $KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE == "true" ]]
 then
     echo "===> Skipping Zookeeper health check for SSL connections..."
-elif [[ -n "${KAFKA_CONTROLLER_QUORUM_MODE-}" ]] && [[ $KAFKA_CONTROLLER_QUORUM_MODE == "kraft" ]]
+elif [[ -n "${KAFKA_PROCESS_ROLES-}" ]]
 then 
     echo "===> Running in KRaft mode, skipping Zookeeper health check..."
 else
@@ -32,12 +32,12 @@ else
 fi
 
 # KRaft required step: Format the storage directory with provided cluster ID unless it already exists.
-if [[ -n "${KAFKA_CONTROLLER_QUORUM_MODE-}" ]] && [[ $KAFKA_CONTROLLER_QUORUM_MODE == "kraft" ]]
+if [[ -n "${KAFKA_PROCESS_ROLES-}" ]]
 then
-    echo "===> Using provided cluster id $KAFKA_CLUSTER_ID ..."
+    echo "===> Using provided cluster id $CLUSTER_ID ..."
 
     # A bit of a hack to not error out if the storage is already formatted.  Need storage-tool to support this
-    result=$(kafka-storage format --cluster-id=$KAFKA_CLUSTER_ID -c /etc/kafka/kafka.properties 2>&1) || \
+    result=$(kafka-storage format --cluster-id=$CLUSTER_ID -c /etc/kafka/kafka.properties 2>&1) || \
         echo $result | grep -i "already formatted" || \
         { echo $result && (exit 1) }
 fi
