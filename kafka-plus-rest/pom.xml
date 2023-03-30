@@ -27,7 +27,7 @@
     </parent>
 
     <groupId>io.confluent.kafka-images</groupId>
-    <artifactId>cp-kafka-lite</artifactId>
+    <artifactId>cp-kafka-kraft</artifactId>
     <name>Kafka Docker Image with Rest Proxy</name>
 
     <properties>
