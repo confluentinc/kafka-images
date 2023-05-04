@@ -15,8 +15,6 @@
 # limitations under the License.
 
 . /etc/confluent/docker/bash-config
-. /etc/confluent/docker/utility
-
 
 # --- for broker
 
@@ -26,7 +24,7 @@
 if [[ -n "${KAFKA_PROCESS_ROLES-}" ]]
 then
   echo "Running in KRaft mode..."
-  ensure CLUSTER_ID $CLUSTER_ID
+  ub ensure CLUSTER_ID
   if [[ $KAFKA_PROCESS_ROLES == "controller" ]]
   then
     if [[ -n "${KAFKA_ADVERTISED_LISTENERS-}" ]]
@@ -37,12 +35,12 @@ then
       unset KAFKA_ADVERTISED_LISTENERS
     fi
   else
-    ensure KAFKA_ADVERTISED_LISTENERS $KAFKA_ADVERTISED_LISTENERS
+    ub ensure KAFKA_ADVERTISED_LISTENERS
   fi 
 else
   echo "Running in Zookeeper mode..."
-  ensure KAFKA_ZOOKEEPER_CONNECT $KAFKA_ZOOKEEPER_CONNECT
-  ensure KAFKA_ADVERTISED_LISTENERS $KAFKA_ADVERTISED_LISTENERS
+  ub ensure KAFKA_ZOOKEEPER_CONNECT
+  ub ensure KAFKA_ADVERTISED_LISTENERS
 fi
 
 # By default, LISTENERS is derived from ADVERTISED_LISTENERS by replacing
@@ -51,10 +49,10 @@ fi
 if [[ -z "${KAFKA_LISTENERS-}" ]] && ( [[ -z "${KAFKA_PROCESS_ROLES-}" ]] || [[ $KAFKA_PROCESS_ROLES != "controller" ]] )
 then
   export KAFKA_LISTENERS
-  KAFKA_LISTENERS=$(echo "$KAFKA_ADVERTISED_LISTENERS" | sed -e 's|://[[:alpha:]]*:|://0.0.0.0:|g')
+  KAFKA_LISTENERS=$(echo "$KAFKA_ADVERTISED_LISTENERS" | sed -e 's|://[^:]*:|://0.0.0.0:|g')
 fi
 
-path /etc/kafka/ writable
+ub path /etc/kafka/ writable
 
 if [[ -z "${KAFKA_LOG_DIRS-}" ]]
 then
@@ -146,7 +144,8 @@ fi
 
 
 # --- for rest proxy
-ensure KAFKA_REST_BOOTSTRAP_SERVERS $KAFKA_REST_BOOTSTRAP_SERVERS
+ub ensure KAFKA_REST_BOOTSTRAP_SERVERS
+ub path /etc/kafka-rest/ writable
 
 if [[ -n "${KAFKA_REST_PORT-}" ]]
 then
@@ -164,15 +163,11 @@ fi
 
 
 # --- for broker
-exclude_props=("KAFKA_VERSION" "KAFKA_HEAP_OPTS" "KAFKA_LOG4J_OPTS" "KAFKA_JMX_OPTS" "KAFKA_JVM_PERFORMANCE_OPTS" "KAFKA_GC_LOG_OPTS"
-        "KAFKA_LOG4J_ROOT_LOGLEVEL" "KAFKA_LOG4J_LOGGERS" "KAFKA_TOOLS_LOG4J_LOGLEVEL" "KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET" "KAFKA_REST_")
-parse_props "/etc/confluent/docker/kafka.properties" "/etc/kafka/kafka.properties" KAFKA_ "${exclude_props[@]}"
-build_log4j_properties_kafka "/etc/confluent/docker/log4j.properties" "/etc/kafka/log4j.properties"
-build_tools_log4j_properties_kafka "/etc/confluent/docker/tools-log4j.properties" "/etc/kafka/tools-log4j.properties"
-
+ub render-properties /etc/confluent/docker/kafka-propertiesSpec.json > /etc/kafka/kafka.properties
+ub render-template /etc/confluent/docker/kafka-log4j.properties.template > /etc/kafka/log4j.properties
+ub render-template /etc/confluent/docker/kafka-tools-log4j.properties.template > /etc/kafka/tools-log4j.properties
 
 # --- for rest proxy
-exclude_props=("KAFKA_REST_LOG4J_ROOT_LOGLEVEL" "KAFKA_REST_LOG4J_LOGGERS")
-parse_props "/etc/confluent/docker/kafka-rest.properties" "/etc/kafka-rest/kafka-rest.properties" KAFKA_REST_ "${exclude_props[@]}"
-build_log4j_properties_kafka_rest "/etc/confluent/docker/log4j-kafka-rest.properties" "/etc/kafka-rest/log4j.properties"
-parse_props "/etc/confluent/docker/admin.properties" "/etc/kafka-rest/admin.properties" KAFKA_REST_CLIENT_ "${exclude_props[@]}"
+ub render-properties /etc/confluent/docker/kafka-rest-propertiesSpec.json > /etc/kafka-rest/kafka-rest.properties
+ub render-properties /etc/confluent/docker/admin-propertiesSpec.json > /etc/kafka-rest/admin.properties
+ub render-template /etc/confluent/docker/kafka-rest-log4j.properties.template > /etc/kafka-rest/log4j.properties
