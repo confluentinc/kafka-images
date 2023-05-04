@@ -15,11 +15,10 @@
 # limitations under the License.
 
 . /etc/confluent/docker/bash-config
-. /etc/confluent/docker/utility
 
 export KAFKA_DATA_DIRS=${KAFKA_DATA_DIRS:-"/var/lib/kafka/data"}
 echo "===> Check if $KAFKA_DATA_DIRS is writable ..."
-path "$KAFKA_DATA_DIRS" writable
+ub path "$KAFKA_DATA_DIRS" writable
 
 # KRaft required step: Format the storage directory with provided cluster ID unless it already exists.
 if [[ -n "${KAFKA_PROCESS_ROLES-}" ]]
