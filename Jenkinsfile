@@ -6,7 +6,7 @@ dockerfile {
         'confluentinc/cp-kafka-connect', 'confluentinc/cp-kafka-connect-base',
         'confluentinc/cp-enterprise-kafka', 'confluentinc/cp-kafka', 'confluentinc/cp-kafka-kraft',
         'confluentinc/cp-server', 'confluentinc/cp-zookeeper']
-    mvnPhase = 'package'
+    mvnPhase = 'verify'
     mvnSkipDeploy = true
     nodeLabel = 'docker-debian-jdk8-compose'
     slackChannel = 'kafka-warn'
