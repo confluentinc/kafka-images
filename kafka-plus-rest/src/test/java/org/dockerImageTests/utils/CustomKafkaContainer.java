@@ -19,9 +19,11 @@ public class CustomKafkaContainer extends GenericContainer<CustomKafkaContainer>
 
     private static final String DOCKER_REGISTRY = System.getenv("DOCKER_REGISTRY");
 
+    private static final String IMAGE_NAME = "confluentinc/cp-kafka-kraft";
+
     private static final String DOCKER_TAG = System.getenv("DOCKER_TAG");
     public CustomKafkaContainer() {
-        super(DockerImageName.parse(String.format("%s:%s",DOCKER_REGISTRY,DOCKER_TAG)));
+        super(DockerImageName.parse(String.format("%s%s:%s",DOCKER_REGISTRY,IMAGE_NAME,DOCKER_TAG)));
         System.out.println("Using image " + String.format("%s:%s",DOCKER_REGISTRY,DOCKER_TAG));
         Map<String,String> env = new HashMap<String,String >();
         env.put("KAFKA_NODE_ID","1");
