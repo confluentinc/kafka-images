@@ -27,7 +27,7 @@
 
 
     <groupId>io.confluent.kafka-images</groupId>
-    <artifactId>cp-kafka-kraft</artifactId>
+    <artifactId>confluent-local</artifactId>
     <name>Kafka Docker Image with Rest Proxy</name>
 <!--    <packaging>pom</packaging>-->
 

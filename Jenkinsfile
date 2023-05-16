@@ -4,7 +4,7 @@ dockerfile {
     dockerPush = true
     dockerRepos = ['confluentinc/cp-server-connect', 'confluentinc/cp-server-connect-base',
         'confluentinc/cp-kafka-connect', 'confluentinc/cp-kafka-connect-base',
-        'confluentinc/cp-enterprise-kafka', 'confluentinc/cp-kafka', 'confluentinc/cp-kafka-kraft',
+        'confluentinc/cp-enterprise-kafka', 'confluentinc/cp-kafka', 'confluentinc/confluent-local',
         'confluentinc/cp-server', 'confluentinc/cp-zookeeper']
     mvnPhase = 'package'
     mvnSkipDeploy = true
