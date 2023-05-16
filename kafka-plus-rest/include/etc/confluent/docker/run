@@ -28,6 +28,9 @@ fi
 echo "===> User"
 id
 
+echo "===> Setting default values of environment variables if not already set."
+. /etc/confluent/docker/configureDefaults
+
 echo "===> Configuring ..."
 /etc/confluent/docker/configure
 
