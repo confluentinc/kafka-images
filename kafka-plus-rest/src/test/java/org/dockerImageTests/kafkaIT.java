@@ -76,6 +76,7 @@ public class kafkaIT {
    @AfterAll
    public void teardown(){
        System.out.println("tearing down");
+       System.out.println(container1.getLogs());
        container1.stop();
        System.out.println(container1.isRunning());
        producer.close();
