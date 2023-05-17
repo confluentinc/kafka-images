@@ -2,6 +2,7 @@ package org.dockerImageTests.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.KeyStore;
 import java.util.*;
 
 import org.apache.http.HttpEntity;
@@ -10,22 +11,30 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.config.TopicConfig;
+
+import javax.net.ssl.SSLContext;
 
 public class Admin {
     private final String bootstrapServers;
     private final String restEndpoint;
     AdminClient adminClient;
-    public Admin(String bootstrapServers, String restEndpoint) {
+
+    private final Boolean isSsl;
+    public Admin(String bootstrapServers, String restEndpoint,Properties props,Boolean isSsl) {
         this.bootstrapServers = bootstrapServers;
         this.restEndpoint = restEndpoint;
-        Properties props = new Properties();
         props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         adminClient = AdminClient.create(props);
+        this.isSsl = isSsl;
 
     }
 
@@ -76,9 +85,29 @@ public class Admin {
 
 
 
-    public List<String> listTopicsUsingRestApi() throws IOException {
+    public List<String> listTopicsUsingRestApi() throws Exception {
         String endpoint = restEndpoint + "/topics";
-        HttpClient httpClient = HttpClientBuilder.create().build();
+        HttpClient httpClient = HttpClientBuilder.create().build();;
+        if (isSsl == true) {
+            String truststoreFile = "/client-creds/kafka.client.truststore.pkcs12";
+            InputStream truststoreStream = getClass().getResourceAsStream(truststoreFile);
+            KeyStore truststore = KeyStore.getInstance(KeyStore.getDefaultType());
+            truststore.load(truststoreStream, "confluent".toCharArray());
+
+            // Build SSL context
+            SSLContext sslContext = SSLContextBuilder.create()
+                    .loadTrustMaterial(truststore, new TrustSelfSignedStrategy())
+                    .build();
+
+            // Create SSL connection socket factory
+            SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext);
+
+            //   Create HTTP client
+            httpClient = HttpClients.custom()
+                    .setSSLSocketFactory(sslSocketFactory)
+                    .build();
+        }
+
         HttpGet getRequest = new HttpGet(endpoint);
         HttpResponse response = httpClient.execute(getRequest);
         HttpEntity responseBody = response.getEntity();
@@ -90,6 +119,7 @@ public class Admin {
 
         return Arrays.asList(responseString.replaceAll("\\[|\\]", "").split(","));
     }
+
 
     public void deleteTopicUsingKafkaApi(String topicName) throws Exception {
         Properties props = new Properties();

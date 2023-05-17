@@ -1,10 +1,21 @@
 package org.dockerImageTests.utils;
 
 import okhttp3.*;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.protocol.types.Field;
 
+import javax.net.ssl.*;
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
@@ -14,10 +25,17 @@ public class Producer {
     private OkHttpClient client;
     private String baseUrl;
 
-    public Producer(Properties props, String baseUrl) {
+    private Boolean isSsl;
+
+    public Producer(String baseUrl, String bootstrapUrl,Properties props,Boolean isSsl) {
+        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        props.put("bootstrap.servers", bootstrapUrl);
+        props.put("acks", "all");
         this.producer = new KafkaProducer(props);
         this.client = new OkHttpClient();
         this.baseUrl = baseUrl;
+        this.isSsl = isSsl;
     }
 
     public void send(String topic, int value) throws IOException, ExecutionException, InterruptedException {
@@ -27,13 +45,35 @@ public class Producer {
         }
     }
 
-    public void sendRest(String topic, int value) throws IOException {
+    public void sendRest(String topic, int value) throws Exception {
         // Configure request body
 
         // Configure request URL
         String endpoint = String.format("/topics/%s", topic);
         String url = baseUrl + endpoint;
+        OkHttpClient client = new OkHttpClient.Builder().build();
+        if (isSsl == true) {
+            String truststoreFile = "/client-creds/kafka.client.truststore.pkcs12";
+            InputStream truststoreStream = getClass().getResourceAsStream(truststoreFile);
+            KeyStore truststore = KeyStore.getInstance(KeyStore.getDefaultType());
+            truststore.load(truststoreStream, "confluent".toCharArray());
 
+            // Build SSL context
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(truststore);
+            TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, trustManagers, new SecureRandom());
+
+            SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+
+            // Create HTTP client
+            client = new OkHttpClient.Builder()
+                    .sslSocketFactory(sslSocketFactory, (X509TrustManager) trustManagers[0])
+                    .build();
+
+        }
         // Configure request headers
         MediaType mediaType = MediaType.parse("application/vnd.kafka.json.v2+json");
         Headers headers = new Headers.Builder()
