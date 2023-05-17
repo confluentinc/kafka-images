@@ -35,7 +35,7 @@ import static org.junit.Assert.fail;
 public class kafkaIT {
    private static final int KAFKA_PORT = 19092;
     private static final int KAFKA_REST_PORT = 8082;
-    private static final String IMAGE_NAME = "confluentinc/confluent-local";
+    private static final String IMAGE_NAME = "confluentinc/cp-kafka-kraft";
     private static final String DOCKER_REGISTRY = System.getenv("DOCKER_REGISTRY");
 
     private static final String DOCKER_TAG = System.getenv("DOCKER_TAG");
