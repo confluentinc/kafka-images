@@ -104,10 +104,13 @@ if [ -d "$directory" ]; then
 else
     echo "Directory not found: $directory"
 fi
+
   ub path "$KAFKA_SSL_KEYSTORE_LOCATION" existence
 
   ub ensure KAFKA_SSL_KEY_CREDENTIALS
   KAFKA_SSL_KEY_CREDENTIALS_LOCATION="/etc/kafka/secrets/$KAFKA_SSL_KEY_CREDENTIALS"
+
+  sleep 3000
   ub path "$KAFKA_SSL_KEY_CREDENTIALS_LOCATION" existence
   export KAFKA_SSL_KEY_PASSWORD
   KAFKA_SSL_KEY_PASSWORD=$(cat "$KAFKA_SSL_KEY_CREDENTIALS_LOCATION")
