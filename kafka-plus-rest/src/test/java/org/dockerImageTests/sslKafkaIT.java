@@ -68,6 +68,7 @@ public class sslKafkaIT {
         String baseUrl = String.format("https://%s:%s",container1.getHost(),container1.getMappedPort(KAFKA_REST_PORT));
         String bootstrapUrl = String.format("%s:%s",container1.getHost(),container1.getMappedPort(KAFKA_PORT));
         Properties props = new Properties();
+        props.put("ssl.keystore.type", "PKCS12");
         props.put(AdminClientConfig.SECURITY_PROTOCOL_CONFIG, "SSL");
         props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG,getClass().getResource("/client-creds/kafka.client.truststore.pkcs12").getPath());
         props.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, "confluent");
