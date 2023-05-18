@@ -34,7 +34,7 @@ import static org.junit.Assert.fail;
 @Tag("IntegrationTest")
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class sslKafkaIT throws InterruptedException {
+public class sslKafkaIT {
     private static final int KAFKA_PORT = 19093;
     private static final int KAFKA_REST_PORT = 8082;
     private static final String IMAGE_NAME = "confluentinc/cp-kafka-kraft";
@@ -50,7 +50,7 @@ public class sslKafkaIT throws InterruptedException {
 
     public GenericContainer container1;;
     @BeforeAll
-    public void setup(){
+    public void setup() throws InterruptedException {
         Yaml yaml = new Yaml();
         InputStream inputStream = getClass().getResourceAsStream("/sslconfigs.yml");
         Map<String,String> env = yaml.load(inputStream);
