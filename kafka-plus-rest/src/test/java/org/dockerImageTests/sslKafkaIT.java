@@ -34,7 +34,7 @@ import static org.junit.Assert.fail;
 @Tag("IntegrationTest")
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class sslKafkaIT {
+public class sslKafkaIT throws InterruptedException {
     private static final int KAFKA_PORT = 19093;
     private static final int KAFKA_REST_PORT = 8082;
     private static final String IMAGE_NAME = "confluentinc/cp-kafka-kraft";
@@ -65,6 +65,7 @@ public class sslKafkaIT {
         catch(Exception  e) {
             System.out.println(container1.getLogs());
         }
+        Thread.sleep(3600000);
         String baseUrl = String.format("https://%s:%s",container1.getHost(),container1.getMappedPort(KAFKA_REST_PORT));
         String bootstrapUrl = String.format("%s:%s",container1.getHost(),container1.getMappedPort(KAFKA_PORT));
         Properties props = new Properties();
