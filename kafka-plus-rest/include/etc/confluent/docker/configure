@@ -92,6 +92,18 @@ then
 
   ub ensure KAFKA_SSL_KEYSTORE_FILENAME
   export KAFKA_SSL_KEYSTORE_LOCATION="/etc/kafka/secrets/$KAFKA_SSL_KEYSTORE_FILENAME"
+  directory="/etc/kafka/secrets"
+
+# Check if the directory exists
+if [ -d "$directory" ]; then
+    # Loop through each file and subdirectory in the directory
+    for file in "$directory"/*; do
+        # Echo the file or subdirectory name
+        echo "$(basename "$file")"
+    done
+else
+    echo "Directory not found: $directory"
+fi
   ub path "$KAFKA_SSL_KEYSTORE_LOCATION" existence
 
   ub ensure KAFKA_SSL_KEY_CREDENTIALS
