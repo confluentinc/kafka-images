@@ -50,7 +50,7 @@ public class sslKafkaIT {
 
     public GenericContainer container1;;
     @BeforeAll
-    public void setup() throws InterruptedException {
+    public void setup() {
         Yaml yaml = new Yaml();
         InputStream inputStream = getClass().getResourceAsStream("/sslconfigs.yml");
         Map<String,String> env = yaml.load(inputStream);
@@ -65,16 +65,26 @@ public class sslKafkaIT {
         catch(Exception  e) {
             System.out.println(container1.getLogs());
         }
-        Thread.sleep(3600000);
+     //   Thread.sleep(3600000);
         String baseUrl = String.format("https://%s:%s",container1.getHost(),container1.getMappedPort(KAFKA_REST_PORT));
         String bootstrapUrl = String.format("%s:%s",container1.getHost(),container1.getMappedPort(KAFKA_PORT));
         Properties props = new Properties();
+        String path = "src/test/resources/client-creds/kafka.client.truststore.pkcs12";
+        File file = new File(path);
+        String absolutePath1 = file.getAbsolutePath();
+        System.out.println(absolutePath1);
+        path = "src/test/resources/client-creds/kafka.client.keystore.pkcs12";
+        File file1 = new File(path);
+        String absolutePath2 = file1.getAbsolutePath();
+        System.out.println(absolutePath2);
         props.put("ssl.keystore.type", "PKCS12");
         props.put(AdminClientConfig.SECURITY_PROTOCOL_CONFIG, "SSL");
-        props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG,getClass().getResource("/client-creds/kafka.client.truststore.pkcs12").getPath());
+       // props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG,getClass().getResource("/client-creds/kafka.client.truststore.pkcs12").getPath());
         props.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, "confluent");
-        props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, getClass().getResource("/client-creds/kafka.client.keystore.pkcs12").getPath());
+      //  props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, getClass().getResource("/client-creds/kafka.client.keystore.pkcs12").getPath());
         props.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, "confluent");
+        props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG,absolutePath1);
+        props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, absolutePath2);
         admin =  new Admin(bootstrapUrl,baseUrl,props,true);
         consumer = new Consumer(bootstrapUrl,"test-1",baseUrl,props,true);
         producer = new Producer(baseUrl,bootstrapUrl,props,true);
