@@ -70,9 +70,9 @@ public class sslKafkaIT {
         Properties props = new Properties();
         props.put("ssl.keystore.type", "PKCS12");
         props.put(AdminClientConfig.SECURITY_PROTOCOL_CONFIG, "SSL");
-        props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG,getClass().getResource("/client-creds/kafka.client.truststore.pkcs12").getPath());
+        props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG,getClass().getResource("/client-creds/kafka.client.truststore.pkcs121").getPath());
         props.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, "confluent");
-        props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, getClass().getResource("/client-creds/kafka.client.keystore.pkcs12").getPath());
+        props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, getClass().getResource("/client-creds/kafka.client.keystore.pkcs121").getPath());
         props.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, "confluent");
         admin =  new Admin(bootstrapUrl,baseUrl,props,true);
         consumer = new Consumer(bootstrapUrl,"test-1",baseUrl,props,true);
