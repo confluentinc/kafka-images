@@ -57,8 +57,8 @@ public class sslKafkaIT {
         String imageName = String.format("%s%s:%s",DOCKER_REGISTRY,IMAGE_NAME,DOCKER_TAG);
        // String imageName = String.format("placeholder/confluentinc/kafka-local:7.4.0-80-ubi8");
         container1=new CustomKafkaContainer(imageName,env)
-                .withClasspathResourceMapping("/kafka-1-creds","/etc/kafka/secrets", BindMode.READ_WRITE)
-                .withClasspathResourceMapping("/restproxy-creds","/etc/restproxy/secrets",BindMode.READ_WRITE);
+                .withClasspathResourceMapping("/kafka-1-creds","/etc/kafka/secrets", BindMode.READ_ONLY)
+                .withClasspathResourceMapping("/restproxy-creds","/etc/restproxy/secrets",BindMode.READ_ONLY);
         try {
             container1.start();
         }
