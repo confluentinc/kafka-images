@@ -50,7 +50,7 @@ public class sslKafkaIT {
 
     public GenericContainer container1;;
     @BeforeAll
-    public void setup() throws InterruptedException {
+    public void setup() {
         Yaml yaml = new Yaml();
         InputStream inputStream = getClass().getResourceAsStream("/sslconfigs.yml");
         Map<String,String> env = yaml.load(inputStream);
@@ -65,7 +65,6 @@ public class sslKafkaIT {
         catch(Exception  e) {
             System.out.println(container1.getLogs());
         }
-        Thread.sleep(3600000);
         String baseUrl = String.format("https://%s:%s",container1.getHost(),container1.getMappedPort(KAFKA_REST_PORT));
         String bootstrapUrl = String.format("%s:%s",container1.getHost(),container1.getMappedPort(KAFKA_PORT));
         Properties props = new Properties();
@@ -82,6 +81,7 @@ public class sslKafkaIT {
     @AfterAll
     public void teardown(){
         System.out.println("tearing down");
+        System.out.println(container1.getLogs());
         container1.stop();
         producer.close();
     }

@@ -42,7 +42,6 @@ else
   ub ensure KAFKA_ZOOKEEPER_CONNECT
   ub ensure KAFKA_ADVERTISED_LISTENERS
 fi
-sleep 3000
 # By default, LISTENERS is derived from ADVERTISED_LISTENERS by replacing
 # hosts with 0.0.0.0. This is good default as it ensures that the broker
 # process listens on all ports.
