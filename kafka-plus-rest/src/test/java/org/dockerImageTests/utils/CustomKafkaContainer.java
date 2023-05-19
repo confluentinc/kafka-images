@@ -45,7 +45,8 @@ public class CustomKafkaContainer extends GenericContainer<CustomKafkaContainer>
         Integer mappedSslPort = getMappedPort(KAFKA_SSL_PORT);
 
         // use the mapped port to configure the application
-        String url = String.format("PLAINTEXT://0.0.0.0:%s,SSL://0.0.0.0:%s",mappedOpenPort,mappedSslPort);
+        //String url = String.format("PLAINTEXT://0.0.0.0:%s,SSL://0.0.0.0:%s",mappedOpenPort,mappedSslPort);
+        String url = String.format("PLAINTEXT://%s:%s,SSL://%s:%s",getHost(),mappedOpenPort,getHost(),mappedSslPort);
         System.out.println(url);
         String command = "#!/bin/bash\n";
         // exporting KAFKA_ADVERTISED_LISTENERS with the container hostname
