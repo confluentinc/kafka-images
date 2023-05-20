@@ -105,6 +105,7 @@ public class Admin {
             //   Create HTTP client
             httpClient = HttpClients.custom()
                     .setSSLSocketFactory(sslSocketFactory)
+                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
                     .build();
         }
 

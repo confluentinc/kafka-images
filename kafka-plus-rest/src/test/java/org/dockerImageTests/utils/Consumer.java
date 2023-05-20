@@ -107,6 +107,7 @@ public class Consumer {
             // Create HTTP client
             httpClient = HttpClients.custom()
                     .setSSLSocketFactory(sslSocketFactory)
+                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
                     .build();
 
         }
@@ -141,6 +142,7 @@ public class Consumer {
                 // Create HTTP client
                 httpClient = HttpClients.custom()
                         .setSSLSocketFactory(sslSocketFactory)
+                        .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
                         .build();
 
             }
@@ -187,6 +189,7 @@ public class Consumer {
                 // Create HTTP client
                 httpClient = HttpClients.custom()
                         .setSSLSocketFactory(sslSocketFactory)
+                        .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
                         .build();
 
             }

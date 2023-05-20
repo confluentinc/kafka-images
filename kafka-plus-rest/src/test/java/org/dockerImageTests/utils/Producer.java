@@ -71,6 +71,13 @@ public class Producer {
             // Create HTTP client
             client = new OkHttpClient.Builder()
                     .sslSocketFactory(sslSocketFactory, (X509TrustManager) trustManagers[0])
+                    .hostnameVerifier(new HostnameVerifier() {
+                        @Override
+                        public boolean verify(String hostname, SSLSession session) {
+                            // Allow all hostnames
+                            return true;
+                        }
+                    })
                     .build();
 
         }
