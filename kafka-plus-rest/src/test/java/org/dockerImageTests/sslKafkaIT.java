@@ -87,6 +87,7 @@ public class sslKafkaIT {
        // props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG,absolutePath1);
        // props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, absolutePath2);
        props.put(SslConfigs.DEFAULT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM, "");
+       props.put("ssl.endpoint.identification.algorithm", "");
        props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG,getClass().getResource("/client-creds/client-truststore.jks").getPath());
        props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, getClass().getResource("/client-creds/client.jks").getPath());
         admin =  new Admin(bootstrapUrl,baseUrl,props,true);
