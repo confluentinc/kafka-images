@@ -89,7 +89,7 @@ public class Admin {
         String endpoint = restEndpoint + "/topics";
         HttpClient httpClient = HttpClientBuilder.create().build();;
         if (isSsl == true) {
-            String truststoreFile = "/client-creds/kafka.client.truststore.pkcs12";
+            String truststoreFile = "/client-creds/client-truststore.jks";
             InputStream truststoreStream = getClass().getResourceAsStream(truststoreFile);
             KeyStore truststore = KeyStore.getInstance(KeyStore.getDefaultType());
             truststore.load(truststoreStream, "confluent".toCharArray());
