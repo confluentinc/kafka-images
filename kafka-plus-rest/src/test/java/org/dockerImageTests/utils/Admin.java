@@ -101,12 +101,11 @@ public class Admin {
                     .build();
 
             // Create SSL connection socket factory
-            SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext);
+            SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext,NoopHostnameVerifier.INSTANCE);
 
             //   Create HTTP client
             httpClient = HttpClients.custom()
                     .setSSLSocketFactory(sslSocketFactory)
-                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
                     .build();
         }
 
