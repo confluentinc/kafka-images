@@ -11,6 +11,7 @@ import org.dockerImageTests.utils.Producer;
 import org.junit.experimental.categories.Category;
 import org.junit.jupiter.api.*;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.Map;
 
