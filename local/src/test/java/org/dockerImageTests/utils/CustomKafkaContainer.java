@@ -26,8 +26,8 @@ public class CustomKafkaContainer extends GenericContainer < CustomKafkaContaine
         withImagePullPolicy(PullPolicy.defaultPolicy());
         withEnv(env);
         withExposedPorts(KAFKA_REST_PORT, KAFKA_PORT, KAFKA_PLAIN_PORT, KAFKA_SSL_PORT);
-        withCreateContainerCmdModifier(cmd - > {
-            cmd.withEntrypoint("sh");
+        withCreateContainerCmdModifier(cmd -> {
+                cmd.withEntrypoint("sh");
         });
         withCommand("-c", "while [ ! -f " + STARTER_SCRIPT + " ]; do sleep 0.1; done; " + STARTER_SCRIPT);
 
@@ -44,10 +44,10 @@ public class CustomKafkaContainer extends GenericContainer < CustomKafkaContaine
         String command = "#!/bin/bash\n";
         // exporting KAFKA_ADVERTISED_LISTENERS with the container hostname
         command +=
-            String.format(
-                "export KAFKA_ADVERTISED_LISTENERS=%s,SSL-INT://kafka-1:9093,BROKER://kafka-1:9092\n",
-                url
-            );
+                String.format(
+                        "export KAFKA_ADVERTISED_LISTENERS=%s,SSL-INT://kafka-1:9093,BROKER://kafka-1:9092\n",
+                        url
+                );
 
         command += "/etc/confluent/docker/run \n";
         copyFileToContainer(Transferable.of(command, 0777), STARTER_SCRIPT);
