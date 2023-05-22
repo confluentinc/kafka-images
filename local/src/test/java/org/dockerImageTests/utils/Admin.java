@@ -1,15 +1,10 @@
 package org.dockerImageTests.utils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.util.*;
-
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -23,6 +18,10 @@ import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.config.TopicConfig;
 
 import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.util.*;
 
 public class Admin {
     private final String bootstrapServers;
@@ -30,7 +29,7 @@ public class Admin {
     AdminClient adminClient;
 
     private final Boolean isSsl;
-    public Admin(String bootstrapServers, String restEndpoint,Properties props,Boolean isSsl) {
+    public Admin(String bootstrapServers, String restEndpoint, Properties props, Boolean isSsl) {
         this.bootstrapServers = bootstrapServers;
         this.restEndpoint = restEndpoint;
         props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -39,13 +38,13 @@ public class Admin {
 
     }
 
-    public List<String> listTopicsUsingKafkaApi() throws Exception {
+    public List < String > listTopicsUsingKafkaApi() throws Exception {
         ListTopicsResult topics = adminClient.listTopics();
-        return new ArrayList<>(topics.names().get());
+        return new ArrayList < > (topics.names().get());
     }
 
     public void createTopic(String topicName, int numPartitions, short replicationFactor) throws Exception {
-        Map<String, String> configs = new HashMap<>();
+        Map < String, String > configs = new HashMap < > ();
         configs.put(TopicConfig.RETENTION_MS_CONFIG, "86400000");
 
         NewTopic newTopic = new NewTopic(topicName, numPartitions, replicationFactor).configs(configs);
@@ -59,10 +58,10 @@ public class Admin {
         String url = restEndpoint + "/topics/";
 
         String requestBody = String.format(
-                "{\"topic_name\" : \"%s\",\"partitions_count\": %d,\"replication-factor\": %d}",
-                topicName,
-                numPartitions,
-                replicationFactor
+            "{\"topic_name\" : \"%s\",\"partitions_count\": %d,\"replication-factor\": %d}",
+            topicName,
+            numPartitions,
+            replicationFactor
         );
 
 
@@ -86,7 +85,7 @@ public class Admin {
 
 
 
-    public List<String> listTopicsUsingRestApi() throws Exception {
+    public List < String > listTopicsUsingRestApi() throws Exception {
         String endpoint = restEndpoint + "/topics";
         HttpClient httpClient = HttpClientBuilder.create().build();;
         if (isSsl == true) {
@@ -97,16 +96,16 @@ public class Admin {
 
             // Build SSL context
             SSLContext sslContext = SSLContextBuilder.create()
-                    .loadTrustMaterial(truststore, new TrustSelfSignedStrategy())
-                    .build();
+                .loadTrustMaterial(truststore, new TrustSelfSignedStrategy())
+                .build();
 
             // Create SSL connection socket factory
-            SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext,NoopHostnameVerifier.INSTANCE);
+            SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
 
             //   Create HTTP client
             httpClient = HttpClients.custom()
-                    .setSSLSocketFactory(sslSocketFactory)
-                    .build();
+                .setSSLSocketFactory(sslSocketFactory)
+                .build();
         }
 
         HttpGet getRequest = new HttpGet(endpoint);
@@ -142,7 +141,7 @@ public class Admin {
         props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         AdminClient adminClient = AdminClient.create(props);
         ListTopicsResult topics = adminClient.listTopics();
-        for (TopicListing topic : topics.listings().get()) {
+        for (TopicListing topic: topics.listings().get()) {
             if (topic.name().equals(topicName)) {
                 return true;
             }

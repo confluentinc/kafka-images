@@ -1,7 +1,5 @@
 package org.dockerImageTests;
 
-//import org.junit.Test;
-
 import io.confluent.common.utils.IntegrationTest;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.common.config.SslConfigs;
@@ -47,33 +45,32 @@ public class sslKafkaIT {
     public void setup() {
         Yaml yaml = new Yaml();
         InputStream inputStream = getClass().getResourceAsStream("/sslconfigs.yml");
-        Map<String,String> env = yaml.load(inputStream);
-        String imageName = String.format("%s%s:%s",DOCKER_REGISTRY,IMAGE_NAME,DOCKER_TAG);
-        container1=new CustomKafkaContainer(imageName,env)
-                .withClasspathResourceMapping("/kafka-1-creds","/etc/kafka/secrets", BindMode.READ_ONLY)
-                .withClasspathResourceMapping("/restproxy-creds","/etc/restproxy/secrets",BindMode.READ_ONLY);
+        Map < String, String > env = yaml.load(inputStream);
+        String imageName = String.format("%s%s:%s", DOCKER_REGISTRY, IMAGE_NAME, DOCKER_TAG);
+        container1 = new CustomKafkaContainer(imageName, env)
+            .withClasspathResourceMapping("/kafka-1-creds", "/etc/kafka/secrets", BindMode.READ_ONLY)
+            .withClasspathResourceMapping("/restproxy-creds", "/etc/restproxy/secrets", BindMode.READ_ONLY);
         try {
             container1.start();
-        }
-        catch(Exception  e) {
+        } catch (Exception e) {
             System.out.println(container1.getLogs());
         }
-        String baseUrl = String.format("https://%s:%s",container1.getHost(),container1.getMappedPort(KAFKA_REST_PORT));
-        String bootstrapUrl = String.format("%s:%s",container1.getHost(),container1.getMappedPort(KAFKA_PORT));
+        String baseUrl = String.format("https://%s:%s", container1.getHost(), container1.getMappedPort(KAFKA_REST_PORT));
+        String bootstrapUrl = String.format("%s:%s", container1.getHost(), container1.getMappedPort(KAFKA_PORT));
         Properties props = new Properties();;
         props.put(AdminClientConfig.SECURITY_PROTOCOL_CONFIG, "SSL");
         props.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, "confluent");
         props.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, "confluent");
         props.put(SslConfigs.DEFAULT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM, "");
         props.put("ssl.endpoint.identification.algorithm", "");
-        props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG,getClass().getResource("/client-creds/client-truststore.jks").getPath());
+        props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, getClass().getResource("/client-creds/client-truststore.jks").getPath());
         props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, getClass().getResource("/client-creds/client.jks").getPath());
-        admin =  new Admin(bootstrapUrl,baseUrl,props,true);
-        consumer = new Consumer(bootstrapUrl,"test-1",baseUrl,props,true);
-        producer = new Producer(baseUrl,bootstrapUrl,props,true);
+        admin = new Admin(bootstrapUrl, baseUrl, props, true);
+        consumer = new Consumer(bootstrapUrl, "test-1", baseUrl, props, true);
+        producer = new Producer(baseUrl, bootstrapUrl, props, true);
     }
     @AfterAll
-    public void teardown(){
+    public void teardown() {
         System.out.println("tearing down");
         container1.stop();
         producer.close();
@@ -81,20 +78,20 @@ public class sslKafkaIT {
 
     @Test
     public void kafkaApiSslTest() throws Exception {
-        admin.createTopic(TOPIC_1,3, (short) 1);
-        List<String> topics = admin.listTopicsUsingRestApi();
-        assertTrue(topics.stream().anyMatch((String.format("\"%s\"",TOPIC_1))::equals));
-        producer.send(TOPIC_1,10);
-        assertTrue(consumer.consume(10,TOPIC_1));
+        admin.createTopic(TOPIC_1, 3, (short) 1);
+        List < String > topics = admin.listTopicsUsingRestApi();
+        assertTrue(topics.stream().anyMatch((String.format("\"%s\"", TOPIC_1))::equals));
+        producer.send(TOPIC_1, 10);
+        assertTrue(consumer.consume(10, TOPIC_1));
 
     }
     @Test
     public void kafkaRestApiSslTest() throws Exception {
-        admin.createTopic(TOPIC_2,3, (short) 1);
-        List<String> topics = admin.listTopicsUsingRestApi();
-        assertTrue(topics.stream().anyMatch((String.format("\"%s\"",TOPIC_2))::equals));
+        admin.createTopic(TOPIC_2, 3, (short) 1);
+        List < String > topics = admin.listTopicsUsingRestApi();
+        assertTrue(topics.stream().anyMatch((String.format("\"%s\"", TOPIC_2))::equals));
         consumer.subscribeTopicRest(TOPIC_2);
-        producer.sendRest(TOPIC_2,10);
+        producer.sendRest(TOPIC_2, 10);
         assertTrue(consumer.consumeWithRetry(10));
 
     }

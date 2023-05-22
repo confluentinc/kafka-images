@@ -20,7 +20,7 @@ public class Producer {
 
     private Boolean isSsl;
 
-    public Producer(String baseUrl, String bootstrapUrl,Properties props,Boolean isSsl) {
+    public Producer(String baseUrl, String bootstrapUrl, Properties props, Boolean isSsl) {
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("bootstrap.servers", bootstrapUrl);
@@ -32,16 +32,13 @@ public class Producer {
     }
 
     public void send(String topic, int value) throws IOException, ExecutionException, InterruptedException {
-        for(int start=0;start<value;start++) {
+        for (int start = 0; start < value; start++) {
             ProducerRecord record = new ProducerRecord(topic, Integer.toString(start));
             producer.send(record).get();
         }
     }
 
     public void sendRest(String topic, int value) throws Exception {
-        // Configure request body
-
-        // Configure request URL
         String endpoint = String.format("/topics/%s", topic);
         String url = baseUrl + endpoint;
         OkHttpClient client = new OkHttpClient.Builder().build();
@@ -63,30 +60,30 @@ public class Producer {
 
             // Create HTTP client
             client = new OkHttpClient.Builder()
-                    .sslSocketFactory(sslSocketFactory, (X509TrustManager) trustManagers[0])
-                    .hostnameVerifier(new HostnameVerifier() {
-                        @Override
-                        public boolean verify(String hostname, SSLSession session) {
-                            // Allow all hostnames
-                            return true;
-                        }
-                    })
-                    .build();
+                .sslSocketFactory(sslSocketFactory, (X509TrustManager) trustManagers[0])
+                .hostnameVerifier(new HostnameVerifier() {
+                    @Override
+                    public boolean verify(String hostname, SSLSession session) {
+                        // Allow all hostnames
+                        return true;
+                    }
+                })
+                .build();
 
         }
         // Configure request headers
         MediaType mediaType = MediaType.parse("application/vnd.kafka.json.v2+json");
         Headers headers = new Headers.Builder()
-                .add("Content-Type", "application/vnd.kafka.binary.v2+json")
-                .build();
+            .add("Content-Type", "application/vnd.kafka.binary.v2+json")
+            .build();
         // Send message to topic
-        for(int start=0;start<value;start++) {
-            String requestBody = String.format("{\"records\":[{\"value\":{\"message\":\" %s \"}}]}",start);
+        for (int start = 0; start < value; start++) {
+            String requestBody = String.format("{\"records\":[{\"value\":{\"message\":\" %s \"}}]}", start);
             Request request = new Request.Builder()
-                    .url(url)
-                    .post(RequestBody.create(requestBody, mediaType))
-                    .headers(headers)
-                    .build();
+                .url(url)
+                .post(RequestBody.create(requestBody, mediaType))
+                .headers(headers)
+                .build();
             Response response = client.newCall(request).execute();
             // Handle response
             if (!response.isSuccessful()) {

@@ -1,38 +1,35 @@
 package org.dockerImageTests.utils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyStore;
-import java.time.Duration;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 
 import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
+import java.time.Duration;
+import java.util.Collections;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 public class Consumer {
     private final String bootstrapServers;
@@ -45,7 +42,7 @@ public class Consumer {
     private static final String CONSUMER_GROUP_ID = "dockerTests";
     private static final String CONSUMER_INSTANCE_ID = "instance1";
 
-    public Consumer(String bootstrapServers, String groupId, String restEndpoint,Properties props,Boolean isSsl) {
+    public Consumer(String bootstrapServers, String groupId, String restEndpoint, Properties props, Boolean isSsl) {
         this.bootstrapServers = bootstrapServers;
         this.groupId = groupId;
         this.restEndpoint = restEndpoint;
@@ -53,7 +50,7 @@ public class Consumer {
         this.isSsl = isSsl;
     }
 
-    public boolean consume(int numMessages,String topicName) throws Exception {
+    public boolean consume(int numMessages, String topicName) throws Exception {
         props.put("bootstrap.servers", bootstrapServers);
         props.put("group.id", groupId);
         props.put("auto.offset.reset", "earliest");
@@ -61,29 +58,29 @@ public class Consumer {
         props.put("auto.commit.interval.ms", "1000");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
+        KafkaConsumer < String, String > consumer = new KafkaConsumer < > (props);
         consumer.subscribe(Collections.singletonList(topicName));
-        ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
+        ConsumerRecords < String, String > records = consumer.poll(Duration.ofMillis(100));
         int tries = 0;
-        while (records.isEmpty() && tries < 3){
+        while (records.isEmpty() && tries < 3) {
             TimeUnit.SECONDS.sleep(1);
             records = consumer.poll(Duration.ofMillis(100));
             tries += 1;
         }
         System.out.println("subcscribed to topic" + consumer.subscription());
-        for (ConsumerRecord<String, String> record : records) {
+        for (ConsumerRecord < String, String > record: records) {
             handleMessage(record.value());
             numMessages--;
         }
         System.out.println("records === " + records.count());
         consumer.commitSync();
-        if (numMessages>0){
+        if (numMessages > 0) {
             return false;
         }
         return true;
 
     }
-    private  void createConsumerInstance() throws Exception {
+    private void createConsumerInstance() throws Exception {
         String url = restEndpoint + "/consumers/" + CONSUMER_GROUP_ID;
         String requestBody = "{\"name\":\"" + CONSUMER_INSTANCE_ID + "\",\"format\":\"binary\",\"auto.offset.reset\":\"earliest\"}";
         // Kafka REST API URL
@@ -99,16 +96,16 @@ public class Consumer {
 
             // Build SSL context
             SSLContext sslContext = SSLContextBuilder.create()
-                    .loadTrustMaterial(truststore, new TrustSelfSignedStrategy())
-                    .build();
+                .loadTrustMaterial(truststore, new TrustSelfSignedStrategy())
+                .build();
 
             // Create SSL connection socket factory
-            SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext,NoopHostnameVerifier.INSTANCE);
+            SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
 
             // Create HTTP client
             httpClient = HttpClients.custom()
-                    .setSSLSocketFactory(sslSocketFactory)
-                    .build();
+                .setSSLSocketFactory(sslSocketFactory)
+                .build();
 
         }
         request.addHeader("Content-Type", "application/vnd.kafka.v2+json");
@@ -121,11 +118,11 @@ public class Consumer {
         }
         System.out.println("successfully created the consumer instance");
     }
-    public boolean subscribeTopicRest(String topicName) throws Exception{
+    public boolean subscribeTopicRest(String topicName) throws Exception {
         try {
             createConsumerInstance();
             HttpClient httpClient = HttpClientBuilder.create().build();
-            if (isSsl==true) {
+            if (isSsl == true) {
                 String truststoreFile = "/client-creds/client-truststore.jks";
                 InputStream truststoreStream = getClass().getResourceAsStream(truststoreFile);
                 KeyStore truststore = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -133,20 +130,19 @@ public class Consumer {
 
                 // Build SSL context
                 SSLContext sslContext = SSLContextBuilder.create()
-                        .loadTrustMaterial(truststore, new TrustSelfSignedStrategy())
-                        .build();
+                    .loadTrustMaterial(truststore, new TrustSelfSignedStrategy())
+                    .build();
 
                 // Create SSL connection socket factory
-                SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext,NoopHostnameVerifier.INSTANCE);
+                SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
 
                 // Create HTTP client
                 httpClient = HttpClients.custom()
-                        .setSSLSocketFactory(sslSocketFactory)
-                        .build();
+                    .setSSLSocketFactory(sslSocketFactory)
+                    .build();
 
             }
 
-        //    CloseableHttpClient httpClient = HttpClients.createDefault();
             String subscriptionUrl = restEndpoint + "/consumers/" + CONSUMER_GROUP_ID + "/instances/" + CONSUMER_INSTANCE_ID + "/subscription";
             HttpPost subscriptionRequest = new HttpPost(subscriptionUrl);
             String subscriptionJson = "{ \"topics\": [ \"" + topicName + "\" ] }";
@@ -160,7 +156,8 @@ public class Consumer {
                 return true;
             } else {
                 System.out.println("Failed to subscribe to Kafka topic. Response code: " + subscriptionResponse.getStatusLine().getStatusCode());
-               return false;}
+                return false;
+            }
         } catch (IOException e) {
             System.out.println("Error subscribing to Kafka topic: " + e.getMessage());
             return false;
@@ -168,10 +165,9 @@ public class Consumer {
     }
     public boolean consumeRest(int numMessages) throws Exception {
 
-        // Continuously fetch messages from the Kafka topic
         try {
             HttpClient httpClient = HttpClientBuilder.create().build();
-            if (isSsl==true) {
+            if (isSsl == true) {
                 String truststoreFile = "/client-creds/client-truststore.jks";
                 InputStream truststoreStream = getClass().getResourceAsStream(truststoreFile);
                 KeyStore truststore = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -179,24 +175,23 @@ public class Consumer {
 
                 // Build SSL context
                 SSLContext sslContext = SSLContextBuilder.create()
-                        .loadTrustMaterial(truststore, new TrustSelfSignedStrategy())
-                        .build();
+                    .loadTrustMaterial(truststore, new TrustSelfSignedStrategy())
+                    .build();
 
                 // Create SSL connection socket factory
-                SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext,NoopHostnameVerifier.INSTANCE);
+                SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
 
                 // Create HTTP client
                 httpClient = HttpClients.custom()
-                        .setSSLSocketFactory(sslSocketFactory)
-                        .build();
+                    .setSSLSocketFactory(sslSocketFactory)
+                    .build();
 
             }
-       //     CloseableHttpClient httpClient = HttpClients.createDefault();
             String fetchUrl = restEndpoint + "/consumers/" + CONSUMER_GROUP_ID + "/instances/" + CONSUMER_INSTANCE_ID + "/records?timeout=10000";
             HttpGet fetchRequest = new HttpGet(fetchUrl);
             HttpResponse fetchResponse = httpClient.execute(fetchRequest);
             HttpEntity fetchEntity = fetchResponse.getEntity();
-            while(fetchEntity==null){
+            while (fetchEntity == null) {
                 fetchResponse = httpClient.execute(fetchRequest);
                 fetchEntity = fetchResponse.getEntity();
             }
@@ -206,7 +201,7 @@ public class Consumer {
                 for (int i = 0; i < jsonArray.length(); i++) {
                     numMessages--;
                 }
-                if (numMessages>0){
+                if (numMessages > 0) {
                     System.out.println("numMessages = " + numMessages);
                     return false;
                 }
@@ -223,7 +218,7 @@ public class Consumer {
         Boolean isConsumeSuccessful = false;
         int tries = 0;
         isConsumeSuccessful = consumeRest(numMessages);
-        while (isConsumeSuccessful == false && tries < 3){
+        while (isConsumeSuccessful == false && tries < 3) {
             TimeUnit.SECONDS.sleep(1);
             isConsumeSuccessful = consumeRest(numMessages);
             tries += 1;
