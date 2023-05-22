@@ -1,10 +1,14 @@
 package org.dockerImageTests.utils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
 import java.time.Duration;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -12,35 +16,44 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
+
+import javax.net.ssl.SSLContext;
 
 public class Consumer {
     private final String bootstrapServers;
     private final String groupId;
-    private final String topic;
     private final String restEndpoint;
+
+    private final Boolean isSsl;
+    Properties props;
 
     private static final String CONSUMER_GROUP_ID = "dockerTests";
     private static final String CONSUMER_INSTANCE_ID = "instance1";
 
-    public Consumer(String bootstrapServers, String groupId, String topic, String restEndpoint) {
+    public Consumer(String bootstrapServers, String groupId, String restEndpoint,Properties props,Boolean isSsl) {
         this.bootstrapServers = bootstrapServers;
         this.groupId = groupId;
-        this.topic = topic;
         this.restEndpoint = restEndpoint;
+        this.props = props;
+        this.isSsl = isSsl;
     }
 
-    public boolean consume(int numMessages,String topicName) {
-        Properties props = new Properties();
+    public boolean consume(int numMessages,String topicName) throws Exception {
         props.put("bootstrap.servers", bootstrapServers);
         props.put("group.id", groupId);
         props.put("auto.offset.reset", "earliest");
@@ -51,10 +64,11 @@ public class Consumer {
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
         consumer.subscribe(Collections.singletonList(topicName));
         ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
-        int retry=0;
-        while(records.count()==0){
-            System.out.println("Polling again");
+        int tries = 0;
+        while (records.isEmpty() && tries < 3){
+            TimeUnit.SECONDS.sleep(1);
             records = consumer.poll(Duration.ofMillis(100));
+            tries += 1;
         }
         System.out.println("subcscribed to topic" + consumer.subscription());
         for (ConsumerRecord<String, String> record : records) {
@@ -69,12 +83,34 @@ public class Consumer {
         return true;
 
     }
-    private  void createConsumerInstance() throws IOException {
+    private  void createConsumerInstance() throws Exception {
         String url = restEndpoint + "/consumers/" + CONSUMER_GROUP_ID;
         String requestBody = "{\"name\":\"" + CONSUMER_INSTANCE_ID + "\",\"format\":\"binary\",\"auto.offset.reset\":\"earliest\"}";
-
-        HttpClient httpClient = HttpClientBuilder.create().build();
+        // Kafka REST API URL
         HttpPost request = new HttpPost(url);
+
+        // Create HTTP POST request
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        if (isSsl == true) {
+            String truststoreFile = "/client-creds/client-truststore.jks";
+            InputStream truststoreStream = getClass().getResourceAsStream(truststoreFile);
+            KeyStore truststore = KeyStore.getInstance(KeyStore.getDefaultType());
+            truststore.load(truststoreStream, "confluent".toCharArray());
+
+            // Build SSL context
+            SSLContext sslContext = SSLContextBuilder.create()
+                    .loadTrustMaterial(truststore, new TrustSelfSignedStrategy())
+                    .build();
+
+            // Create SSL connection socket factory
+            SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext,NoopHostnameVerifier.INSTANCE);
+
+            // Create HTTP client
+            httpClient = HttpClients.custom()
+                    .setSSLSocketFactory(sslSocketFactory)
+                    .build();
+
+        }
         request.addHeader("Content-Type", "application/vnd.kafka.v2+json");
         request.setEntity(new StringEntity(requestBody));
 
@@ -85,17 +121,39 @@ public class Consumer {
         }
         System.out.println("successfully created the consumer instance");
     }
-
-    public boolean subscribeTopicRest(String topicName){
+    public boolean subscribeTopicRest(String topicName) throws Exception{
         try {
             createConsumerInstance();
-            CloseableHttpClient httpClient = HttpClients.createDefault();
+            HttpClient httpClient = HttpClientBuilder.create().build();
+            if (isSsl==true) {
+                String truststoreFile = "/client-creds/client-truststore.jks";
+                InputStream truststoreStream = getClass().getResourceAsStream(truststoreFile);
+                KeyStore truststore = KeyStore.getInstance(KeyStore.getDefaultType());
+                truststore.load(truststoreStream, "confluent".toCharArray());
+
+                // Build SSL context
+                SSLContext sslContext = SSLContextBuilder.create()
+                        .loadTrustMaterial(truststore, new TrustSelfSignedStrategy())
+                        .build();
+
+                // Create SSL connection socket factory
+                SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext,NoopHostnameVerifier.INSTANCE);
+
+                // Create HTTP client
+                httpClient = HttpClients.custom()
+                        .setSSLSocketFactory(sslSocketFactory)
+                        .build();
+
+            }
+
+        //    CloseableHttpClient httpClient = HttpClients.createDefault();
             String subscriptionUrl = restEndpoint + "/consumers/" + CONSUMER_GROUP_ID + "/instances/" + CONSUMER_INSTANCE_ID + "/subscription";
             HttpPost subscriptionRequest = new HttpPost(subscriptionUrl);
             String subscriptionJson = "{ \"topics\": [ \"" + topicName + "\" ] }";
             StringEntity subscriptionEntity = new StringEntity(subscriptionJson, ContentType.APPLICATION_JSON);
             subscriptionRequest.setEntity(subscriptionEntity);
             subscriptionRequest.addHeader("Content-Type", "application/vnd.kafka.json.v2+json");
+
             HttpResponse subscriptionResponse = httpClient.execute(subscriptionRequest);
             if (subscriptionResponse.getStatusLine().getStatusCode() == 204) {
                 System.out.println("Subscribed to Kafka topic: " + topicName);
@@ -112,7 +170,28 @@ public class Consumer {
 
         // Continuously fetch messages from the Kafka topic
         try {
-            CloseableHttpClient httpClient = HttpClients.createDefault();
+            HttpClient httpClient = HttpClientBuilder.create().build();
+            if (isSsl==true) {
+                String truststoreFile = "/client-creds/client-truststore.jks";
+                InputStream truststoreStream = getClass().getResourceAsStream(truststoreFile);
+                KeyStore truststore = KeyStore.getInstance(KeyStore.getDefaultType());
+                truststore.load(truststoreStream, "confluent".toCharArray());
+
+                // Build SSL context
+                SSLContext sslContext = SSLContextBuilder.create()
+                        .loadTrustMaterial(truststore, new TrustSelfSignedStrategy())
+                        .build();
+
+                // Create SSL connection socket factory
+                SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext,NoopHostnameVerifier.INSTANCE);
+
+                // Create HTTP client
+                httpClient = HttpClients.custom()
+                        .setSSLSocketFactory(sslSocketFactory)
+                        .build();
+
+            }
+       //     CloseableHttpClient httpClient = HttpClients.createDefault();
             String fetchUrl = restEndpoint + "/consumers/" + CONSUMER_GROUP_ID + "/instances/" + CONSUMER_INSTANCE_ID + "/records?timeout=10000";
             HttpGet fetchRequest = new HttpGet(fetchUrl);
             HttpResponse fetchResponse = httpClient.execute(fetchRequest);
@@ -122,9 +201,7 @@ public class Consumer {
                 fetchEntity = fetchResponse.getEntity();
             }
             if (fetchEntity != null) {
-                String messageJson = EntityUtils.toString(fetchEntity, StandardCharsets.UTF_8);
-                System.out.println(messageJson);
-                JSONArray jsonArray = new JSONArray(messageJson);
+                JSONArray jsonArray = parseJson(fetchEntity);
 
                 for (int i = 0; i < jsonArray.length(); i++) {
                     numMessages--;
@@ -139,6 +216,27 @@ public class Consumer {
             return false;
         }
         return true;
+    }
+
+    @NotNull
+    public Boolean consumeWithRetry(int numMessages) throws Exception {
+        Boolean isConsumeSuccessful = false;
+        int tries = 0;
+        isConsumeSuccessful = consumeRest(numMessages);
+        while (isConsumeSuccessful == false && tries < 3){
+            TimeUnit.SECONDS.sleep(1);
+            isConsumeSuccessful = consumeRest(numMessages);
+            tries += 1;
+        }
+        return isConsumeSuccessful;
+    }
+
+    @NotNull
+    private static JSONArray parseJson(HttpEntity fetchEntity) throws IOException {
+        String messageJson = EntityUtils.toString(fetchEntity, StandardCharsets.UTF_8);
+        System.out.println(messageJson);
+        JSONArray jsonArray = new JSONArray(messageJson);
+        return jsonArray;
     }
 
     private void handleMessage(String message) {
