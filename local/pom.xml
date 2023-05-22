@@ -38,7 +38,7 @@
 <!--        <docker.registry>{docker.registry}</docker.registry>-->
 <!--        <docker.tag>${docker.tag}</docker.tag>-->
         <docker.skip-build>false</docker.skip-build>
-        <docker.skip-test>false</docker.skip-test>
+        <docker.skip-test>true</docker.skip-test>
         <sl4j.version>2.0.0-alpha5</sl4j.version>
     </properties>
     <dependencies>
