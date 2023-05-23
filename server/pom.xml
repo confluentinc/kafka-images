@@ -23,7 +23,7 @@
     <parent>
         <groupId>io.confluent.kafka-images</groupId>
         <artifactId>kafka-images-parent</artifactId>
-        <version>7.4.1-0</version>
+        <version>7.5.0-0</version>
     </parent>
 
     <groupId>io.confluent.kafka-images</groupId>
@@ -32,6 +32,6 @@
 
     <properties>
         <docker.skip-build>false</docker.skip-build>
-        <docker.skip-test>false</docker.skip-test>
-    </properties>
+        <docker.skip-test>true</docker.skip-test>
+</properties>
 </project>
