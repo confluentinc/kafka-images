@@ -48,4 +48,12 @@
         <component.name>kafka</component.name>
         <io.confluent.kafka-images.version>7.5.0-0</io.confluent.kafka-images.version>
     </properties>
+
+     <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>
