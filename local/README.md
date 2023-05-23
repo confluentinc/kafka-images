@@ -1,6 +1,6 @@
 # Confluent Community Docker Image for Apache Kafka and Kafka Rest
 
-Docker image for deploying and running the Community Version of Kafka alongwith Kafka Rest Proxy.
+Docker image for deploying and running the Community Version of Kafka alongwith Kafka Rest Proxy for local development only.
 
 ## Using the image
 
