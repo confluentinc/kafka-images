@@ -1,31 +1,27 @@
-# Confluent Community Docker Image for Apache Kafka and Kafka Rest
+# Confluent Local Docker Image
 
-Docker image for deploying and running the Community Version of Kafka alongwith Kafka Rest Proxy for local development only.
+Docker image to quickly start Apache Kafka® in KRaft mode with zero configuration setup.
+
+Please refer to the officially supported [CP-Server](https://hub.docker.com/r/confluentinc/cp-server) image for Confluent Enterprise Kafka and see the [CP-Kafka](https://hub.docker.com/r/confluentinc/cp-kafka) image for Apache Kafka.
+
+Confluent-Local image deploys Apache Kafka along with Confluent Community RestProxy. It is experimental, built for local development workflows and is not officially supported for production workloads. 
 
 ## Using the image
-
-* [Notes on using the image](https://docs.confluent.io/platform/current/installation/docker/installation.html) 
-* [Configuration Reference](https://docs.confluent.io/platform/current/installation/docker/config-reference.html#confluent-ak-configuration)
+This Docker image starts with KRaft as the default mode. Check [here](https://docs.confluent.io/platform/current/installation/docker/config-reference.html#confluent-enterprise-ak-configuration) to modify the default configurations. 
 
 ## Resources
 
-* [Docker Quick Start for Apache Kafka using Confluent Platform](https://docs.confluent.io/platform/current/quickstart/ce-docker-quickstart.html#ce-docker-quickstart)
+[What is Apache Kafka?](https://developer.confluent.io/learn-kafka)
 
-* [Learn Kafka](https://developer.confluent.io/learn-kafka)
+[What Does Kafka Do?](https://developer.confluent.io/)
 
-* [Confluent Developer](https://developer.confluent.io): blogs, tutorials, videos, and podcasts for learning all about Apache Kafka and Confluent Platform
-
-* [confluentinc/cp-demo](https://github.com/confluentinc/cp-demo): GitHub demo that you can run locally. The demo uses this Docker image to showcase Confluent Server in a secured, end-to-end event streaming platform. It has an accompanying playbook that shows users how to use Confluent Control Center to manage and monitor Kafka connect, Schema Registry, REST Proxy, KSQL, and Kafka Streams.
-
-* [confluentinc/examples](https://github.com/confluentinc/examples): additional curated examples in GitHub that you can run locally.
 
 ## Contribute
 
-Start by reading our guidelines on contributing to this project found here.
+[How to contribute to the source code?](https://github.com/confluentinc/kafka-images)
 
-* [Source Code](https://github.com/confluentinc/kafka-images)
-* [Issue Tracker](https://github.com/confluentinc/kafka-images/issues)
+[How to raise/track an issue?](https://github.com/confluentinc/kafka-images/issues)
 
 ## License
 
-This Docker image is licensed under the Apache 2 license. For more information on the licenses for each of the individual Confluent Platform components packaged in this image, please refer to the respective [Confluent Platform documentation](https://docs.confluent.io/platform/current/installation/docker/image-reference.html).
+Usage of this image is subject to the license terms of the software contained within. Please refer to Confluent's Docker image software license terms [here](https://docs.confluent.io/platform/current/installation/docker/image-reference.html)
