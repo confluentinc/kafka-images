@@ -24,4 +24,4 @@ This Docker image starts with KRaft as the default mode. Check [here](https://do
 
 ## License
 
-Usage of this image is subject to the license terms of the software contained within. Please refer to Confluent's Docker image software license terms [here](https://docs.confluent.io/platform/current/installation/docker/image-reference.html)
+Usage of this image is subject to the license terms of the software contained within. Please refer to Confluent's Docker images documentation [reference](https://docs.confluent.io/platform/current/installation/docker/image-reference.html) for further information.
