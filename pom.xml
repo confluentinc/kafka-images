@@ -36,6 +36,7 @@
         <module>zookeeper</module>
         <module>server</module>
         <module>kafka</module>
+        <module>local</module>
         <module>ce-kafka</module>
         <module>kafka-connect-base</module>
         <module>kafka-connect</module>
@@ -47,4 +48,12 @@
         <component.name>kafka</component.name>
         <io.confluent.kafka-images.version>7.4.0</io.confluent.kafka-images.version>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>
