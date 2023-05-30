@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+#
+# Copyright 2016 Confluent Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+# Start kafka broker
+echo "===> Launching kafka ... "
+kafka-server-start /etc/kafka/kafka.properties & # your first application
+P1=$! # capture PID of the process
+
+echo "===> Check if kafka brokers are up"
+
+if [[ -n "${KAFKA_REST_CLIENT_SECURITY_PROTOCOL-}" ]] && [[ $KAFKA_REST_CLIENT_SECURITY_PROTOCOL != "PLAINTEXT" ]]
+then
+    ub kafka-ready \
+        "${KAFKA_REST_CUB_KAFKA_MIN_BROKERS:-1}" \
+        "${KAFKA_REST_CUB_KAFKA_TIMEOUT:-40}" \
+        -b "${KAFKA_REST_BOOTSTRAP_SERVERS}" \
+        -c /etc/kafka-rest/admin.properties
+else
+    if [[ -n "${KAFKA_REST_BOOTSTRAP_SERVERS-}" ]]
+    then
+        ub kafka-ready \
+            "${KAFKA_REST_CUB_KAFKA_MIN_BROKERS:-1}" \
+            "${KAFKA_REST_CUB_KAFKA_TIMEOUT:-40}" \
+            -b "${KAFKA_REST_BOOTSTRAP_SERVERS}"
+    fi
+fi
+
+# Start kafka rest
+echo "===> Launching kafka-rest ... "
+kafka-rest-start /etc/kafka-rest/kafka-rest.properties & # your second application
+P2=$! # capture PID of the process
+
+# Wait for either of these 2 process to exit
+wait -n $P1 $P2
+# Exit with status of process that exited first
+exit $?
