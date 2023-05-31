@@ -1,0 +1,9 @@
+{
+  "prefixes": {
+    "KAFKA_REST": false
+  },
+  "excludes": [
+    "KAFKA_REST_LOG4J_ROOT_LOGLEVEL",
+    "KAFKA_REST_LOG4J_LOGGERS"
+  ]
+}
