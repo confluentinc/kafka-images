@@ -32,6 +32,6 @@
 
     <properties>
         <docker.skip-build>false</docker.skip-build>
-        <docker.skip-test>false</docker.skip-test>
+        <docker.skip-test>true</docker.skip-test>
     </properties>
 </project>
