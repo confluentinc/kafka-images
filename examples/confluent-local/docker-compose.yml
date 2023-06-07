@@ -27,3 +27,4 @@ services:
       KAFKA_REST_BOOTSTRAP_SERVERS: 'broker:29092'
       KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
       CLUSTER_ID: '4L6g3nShT-eMCtK--X86sw'
+      
