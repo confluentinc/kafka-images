@@ -20,7 +20,7 @@
     <parent>
         <groupId>io.confluent</groupId>
         <artifactId>common-docker</artifactId>
-        <version>6.1.2</version>
+        <version>6.1.2-cp3</version>
     </parent>
 
     <groupId>io.confluent.kafka-images</groupId>
@@ -28,7 +28,7 @@
     <packaging>pom</packaging>
     <name>Kafka and CE Kafka Docker Images</name>
     <description>Build files for Confluent's Kafka Docker images</description>
-    <version>6.1.2</version>
+    <version>6.1.2-cp3</version>
 
     <modules>
         <module>zookeeper</module>
@@ -43,6 +43,6 @@
 
     <properties>
         <component.name>kafka</component.name>
-        <io.confluent.kafka-images.version>6.1.2</io.confluent.kafka-images.version>
+        <io.confluent.kafka-images.version>6.1.2-cp3</io.confluent.kafka-images.version>
     </properties>
 </project>
