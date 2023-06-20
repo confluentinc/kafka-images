@@ -32,4 +32,4 @@ Start by reading our guidelines on contributing to this project found here.
 
 ## License
 
-This Docker image is licensed under the Apache 2 license. For more information on the licenses for each of the individual Confluent Platform components packaged in this image, please refer to the respective [Confluent Platform documentation](https://docs.confluent.io/platform/current/installation/docker/image-reference.html).
+Usage of this image is subject to the license terms of the software contained within. Please refer to Confluent's Docker images documentation [reference](https://docs.confluent.io/platform/current/installation/docker/image-reference.html) for further information. The software to extend and build the custom Docker images is available under the Apache 2.0 License.
