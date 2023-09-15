@@ -19,3 +19,4 @@ dockerfile {
     nanoVersion = true
     buildArm = true
 }
+
