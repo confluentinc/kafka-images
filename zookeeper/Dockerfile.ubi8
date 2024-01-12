@@ -74,6 +74,16 @@ VOLUME ["/var/lib/${COMPONENT}/data", "/var/lib/${COMPONENT}/log", "/etc/${COMPO
 
 COPY --chown=appuser:appuser include/etc/confluent/docker /etc/confluent/docker
 
+# Remove setuid/setgid permissions on binaries
+RUN chmod g-s /usr/bin/chage /usr/bin/gpasswd /usr/bin/ksu \
+    /usr/bin/mount /usr/bin/newgrp /usr/bin/su /usr/bin/umount \
+    /usr/bin/write /usr/libexec/dbus-1/dbus-daemon-launch-helper \
+    /usr/libexec/utempter/utempter /usr/sbin/pam_timestamp_check /usr/sbin/unix_chkpwd
+RUN chmod a-s /usr/bin/chage /usr/bin/gpasswd /usr/bin/ksu \
+    /usr/bin/mount /usr/bin/newgrp /usr/bin/su /usr/bin/umount \
+    /usr/bin/write /usr/libexec/dbus-1/dbus-daemon-launch-helper \
+    /usr/libexec/utempter/utempter /usr/sbin/pam_timestamp_check /usr/sbin/unix_chkpwd
+
 USER appuser
 
 CMD ["/etc/confluent/docker/run"]
