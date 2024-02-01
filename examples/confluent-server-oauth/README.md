@@ -2,10 +2,10 @@
 
 ## Overview
 
-OAuth is an open standard to obtain limited access to an account, such as Keycloak, or Okta, without
-exposing user credentials.
+OAuth 2.0 is an open standard to obtain limited access to an account without
+exposing user credentials. Example OAuth 2.0 providers include [Keycloak](https://www.keycloak.org/) and [Okta](https://www.okta.com/).
 This Docker Compose setup provides a container-based experience for getting started with Confluent
-Platform OAuth.
+Platform's OAuth support.
 This creates a minimal CP setup (consisting only of the broker and MDS) operating seamlessly *
 *without** LDAP.
 
@@ -26,10 +26,9 @@ This will:
 
 ## RBAC using OAuth
 
-1. Get the Kafka cluster ID from docker-compose file or broker logs or following REST
-   API : http://localhost:8091/v1/metadata/id
+1. Get the Kafka cluster ID from the `CLUSTER_ID` environment variable defined in the `docker-compose.yml` file, or via the following GET REST request: http://localhost:8091/v1/metadata/id
 
-2. Get an access token from Keycloak passing the client credentials of super user client app:
+2. Get an access token from Keycloak passing the client credentials of super user client app. The client credentials are base64 encoded `client_id:client_secret` and is configured in `keycloak-realm-export.json`.
 
     ```shell
     curl -X POST \
@@ -51,7 +50,7 @@ This will:
       -d '{"scope":{"clusters":{"kafka-cluster":"vHCgQyIrRHG8Jv27qI2h3Q"}}, "resourcePatterns":[{"resourceType":"Topic", "name":"test", "patternType":"LITERAL"}]}'
     ```
 
-   Also assign access a consumer group.
+   Also assign access to a consumer group.
    ```shell
     curl -v \
       -H "Authorization: Bearer <access-token>" \
