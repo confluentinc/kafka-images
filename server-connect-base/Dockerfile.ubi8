@@ -50,6 +50,8 @@ RUN echo "===> Installing ${COMPONENT}..." \
     && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
     && rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
     && printf "[Confluent.dist] \n\
+    && rm -rf /usr/share/java/kafka/grpc-*.jar
+    && rm -rf /usr/share/java/confluent-metadata-service/grpc-*.jar
 name=Confluent repository (dist) \n\
 baseurl=${CONFLUENT_PACKAGES_REPO}/7 \n\
 gpgcheck=1 \n\
