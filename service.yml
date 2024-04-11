@@ -9,20 +9,20 @@ semaphore:
   enable: true
   pipeline_type: cp-dockerfile
   docker_repos: [
-    'unsynced-confluentinc/cp-server-connect',
-    'unsynced-confluentinc/cp-server-connect-base',
-    'unsynced-confluentinc/cp-kafka-connect',
-    'unsynced-confluentinc/cp-kafka-connect-base',
-    'unsynced-confluentinc/cp-enterprise-kafka',
-    'unsynced-confluentinc/cp-kafka',
-    'unsynced-confluentinc/confluent-local',
-    'unsynced-confluentinc/cp-server',
-    'unsynced-confluentinc/cp-zookeeper'
-  ]                                                   # Required: Replaces dockerRepos: value should be the similar as dockerRepos in your Jenkinsfile. Replace confluentinc with unsynced-confluentinc
-  maven_phase: 'verify'                               # Optional: Replaces mvnPhase: "mvn install" is run by default
-  maven_skip_deploy: true                             # Optional: Replaces mvnSkipDeploy: If you do produce maven artifacts in this repo you can deploy both maven artifacts and docker images; by default it's set to true
-  build_arm: true                                     # Optional: Replaces buildArm
-  os_types: ['ubi8']                                  # Optional: Replaces osTypes. Replaces the current
-  nano_version: true                                  # Optional: Replaces nanoVersion
-  use_packages: true                                  # Optional: Replaces usePackages.
-  cp_images: true                                     # Optional: Replaces cpImages.
+    'confluentinc/cp-server-connect',
+    'confluentinc/cp-server-connect-base',
+    'confluentinc/cp-kafka-connect',
+    'confluentinc/cp-kafka-connect-base',
+    'confluentinc/cp-enterprise-kafka',
+    'confluentinc/cp-kafka',
+    'confluentinc/confluent-local',
+    'confluentinc/cp-server',
+    'confluentinc/cp-zookeeper'
+  ]
+  maven_phase: 'verify'
+  maven_skip_deploy: true
+  build_arm: true
+  os_types: ['ubi8']
+  nano_version: true
+  use_packages: true
+  cp_images: true
