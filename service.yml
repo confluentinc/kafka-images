@@ -1,0 +1,30 @@
+name: kafka-images
+lang: unknown
+lang_version: unknown
+git:
+  enable: true
+codeowners:
+  enable: true
+sonarqube:
+  enable: true
+semaphore:
+  enable: true
+  pipeline_type: cp-dockerfile
+  docker_repos: [
+    'confluentinc/cp-server-connect',
+    'confluentinc/cp-server-connect-base',
+    'confluentinc/cp-kafka-connect',
+    'confluentinc/cp-kafka-connect-base',
+    'confluentinc/cp-enterprise-kafka',
+    'confluentinc/cp-kafka',
+    'confluentinc/confluent-local',
+    'confluentinc/cp-server',
+    'confluentinc/cp-zookeeper'
+  ]
+  maven_phase: 'verify'
+  maven_skip_deploy: true
+  build_arm: true
+  os_types: ['ubi8']
+  nano_version: true
+  use_packages: true
+  cp_images: true
