@@ -1,0 +1,5 @@
+{
+  "prefixes": {
+    "KAFKA_REST_CLIENT": false
+  }
+}
