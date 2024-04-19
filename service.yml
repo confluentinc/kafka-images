@@ -28,4 +28,5 @@ semaphore:
   nano_version: true
   use_packages: true
   cp_images: true
+  sign_image: true
   pip_install_package: 'tox==3.28.0'
