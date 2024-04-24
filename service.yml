@@ -32,7 +32,7 @@ semaphore:
   pip_install_package: 'tox==3.28.0'
   tasks:
     - name: cp-dockerfile-build
-      branch: master
+      branch: 7.4.x
       pipeline_file: .semaphore/cp_dockerfile_build.yml
       parameters:
         - name: CONFLUENT_VERSION
@@ -53,7 +53,7 @@ semaphore:
           required: true
           default_value: '1'
     - name: cp-dockerfile-promote
-      branch: master
+      branch: 7.4.x
       pipeline_file: .semaphore/cp_dockerfile_promote.yml
       parameters:
         - name: CONFLUENT_VERSION
