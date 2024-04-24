@@ -23,7 +23,7 @@ semaphore:
   ]
   maven_phase: 'package'
   maven_skip_deploy: true
-  build_arm: true
+  build_arm: false
   os_types: ['ubi8']
   nano_version: true
   use_packages: true
