@@ -34,8 +34,11 @@ global_job_config:
       # For PR Builds using Packaging
       - pip install confluent-release-tools
       - if [ $BRANCH_TAG == "master" ]; then export BUILD_KEY=$(pinto get-master-version); else export BUILD_KEY=$BRANCH_TAG; fi
-      - export LATEST_PACKAGING_BUILD_NUMBER=$(aws s3 ls s3://jenkins-confluent-packages/$BRANCH_TAG/ --no-paginate --recursive | grep "$BRANCH_TAG/[0-9]" | sort | tail -n 1 | awk '{print $4}' | awk -F
-        / '{print $2}')
+      - export PACKAGING_BUCKET="s3://jenkins-confluent-packages/$BRANCH_TAG/"
+      - export LATEST_PACKAGING_BUILD_NUMBER=$(aws s3 ls $PACKAGING_BUCKET --no-paginate | grep 'PRE' | awk '{print $NF}' | awk '{print substr($1, 1, length($1)-1)}' | sort -n | tail -n 1)
+      # Check if version is complete, otherwise use the previous version
+      - (aws s3 ls $PACKAGING_BUCKET$LATEST_PACKAGING_BUILD_NUMBER/deb/ && aws s3 ls $PACKAGING_BUCKET$LATEST_PACKAGING_BUILD_NUMBER/rpm/ && aws s3 ls $PACKAGING_BUCKET$LATEST_PACKAGING_BUILD_NUMBER/archive/)
+        || export LATEST_PACKAGING_BUILD_NUMBER=$(aws s3 ls $PACKAGING_BUCKET --no-paginate | grep 'PRE' | awk '{print $NF}' | awk '{print substr($1, 1, length($1)-1)}' | sort -n | tail -n 2 | head -n 1)
       - export CONFLUENT_VERSION=$(pinto get-version --build $BUILD_KEY --key confluent.version)
       - export DEFAULT_OS_TYPE="ubi"
       - export URL_CONFLUENT_VERSION=$(echo $CONFLUENT_VERSION | awk -F . '{print $1"."$2}')
