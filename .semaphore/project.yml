@@ -46,7 +46,7 @@ spec:
   tasks:
   - name: cp-dockerfile-build
     scheduled: False
-    branch: "master"
+    branch: "7.0.x"
     pipeline_file: .semaphore/cp_dockerfile_build.yml
     parameters:
     - name: CONFLUENT_VERSION
@@ -68,7 +68,7 @@ spec:
       default_value: "1"
   - name: cp-dockerfile-promote
     scheduled: False
-    branch: "master"
+    branch: "7.0.x"
     pipeline_file: .semaphore/cp_dockerfile_promote.yml
     parameters:
     - name: CONFLUENT_VERSION
