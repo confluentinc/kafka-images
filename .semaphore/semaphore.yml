@@ -76,10 +76,9 @@ global_job_config:
       - export LATEST_TAG=$BRANCH_TAG-latest
       - export DOCKER_UPSTREAM_TAG="$LATEST_TAG"
       - export DOCKER_REPOS="confluentinc/cp-server-connect confluentinc/cp-server-connect-base confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-enterprise-kafka confluentinc/cp-kafka
-        confluentinc/confluent-local confluentinc/cp-server confluentinc/cp-zookeeper"
+        confluentinc/cp-server confluentinc/cp-zookeeper"
       - export DOCKER_DEV_TAG="dev-$BRANCH_TAG-$BUILD_NUMBER"
       - export AMD_ARCH=.amd64
-      - export ARM_ARCH=.arm64
 blocks:
   - name: Build, Test, & Scan AMD
     dependencies: []
@@ -111,34 +110,6 @@ blocks:
             - . publish-test-results
             - artifact push workflow target/test-results
             - artifact push workflow target --destination target-AMD
-  - name: Build & Test ARM
-    dependencies: []
-    run:
-      when: "pull_request =~ '.*'"
-    task:
-      agent:
-        machine:
-          type: s1-prod-ubuntu20-04-arm64-1
-      jobs:
-        - name: Build & Test ubi8
-          commands:
-            - export OS_TAG="-ubi8"
-            - export DOCKER_DEV_FULL_IMAGES=$DOCKER_DEV_REGISTRY${DOCKER_REPOS// /:$DOCKER_DEV_TAG$OS_TAG $DOCKER_DEV_REGISTRY}:$DOCKER_DEV_TAG$OS_TAG
-            - export ARM_DOCKER_DEV_FULL_IMAGES=${DOCKER_DEV_FULL_IMAGES// /$ARM_ARCH }$ARM_ARCH
-            - export OS_PACKAGES_URL=$(echo "$PACKAGES_URL" | sed "s/PACKAGE_TYPE/rpm/g")
-            - export PACKAGING_BUILD_ARGS="$PACKAGING_BUILD_ARGS -DCONFLUENT_PACKAGES_REPO=$OS_PACKAGES_URL"
-            - ci-tools ci-update-version
-            - mvn -Dmaven.wagon.http.retryHandler.count=3 --batch-mode -P jenkins,docker clean package dependency:analyze validate -U -Ddocker.registry=$DOCKER_DEV_REGISTRY -Ddocker.upstream-registry=$DOCKER_UPSTREAM_REGISTRY
-              -DBUILD_NUMBER=$BUILD_NUMBER -DGIT_COMMIT=$GIT_COMMIT -Ddocker.tag=$DOCKER_DEV_TAG$OS_TAG$ARM_ARCH -Ddocker.upstream-tag=$DOCKER_UPSTREAM_TAG$OS_TAG -Darch.type=$ARM_ARCH -Ddocker.os_type=ubi8
-              $PACKAGING_BUILD_ARGS
-            - . cache-maven store
-            - for image in $ARM_DOCKER_DEV_FULL_IMAGES; do echo "Pushing $image" && docker push $image; done
-      epilogue:
-        always:
-          commands:
-            - . publish-test-results
-            - artifact push workflow target/test-results
-            - artifact push workflow target --destination target-ARM
 after_pipeline:
   task:
     agent:
@@ -156,5 +127,4 @@ after_pipeline:
           - checkout
           - sem-version java 11
           - artifact pull workflow target-AMD
-          - artifact pull workflow target-ARM
           - emit-sonarqube-data --run_only_sonar_scan
