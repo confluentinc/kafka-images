@@ -45,7 +45,6 @@ global_job_config:
       - if [[ ! "$PACKAGING_BUILD_NUMBER" ]]; then export $PACKAGING_BUILD_NUMBER="latest"; fi
       - docker login --username $DOCKERHUB_USER --password $DOCKERHUB_APIKEY
       - export AMD_ARCH=.amd64
-      - export ARM_ARCH=.arm64
 
 blocks:
   - name: Promote AMD
@@ -220,34 +219,6 @@ blocks:
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
                   docker push $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
               fi
-        - name: Promote confluentinc/confluent-local ubi8 AMD
-          commands:
-            - export OS_TYPE="ubi8"
-            - export DOCKER_REPO="confluentinc/confluent-local"
-            - if [[ "$OS_TYPE" =~ "$PROMOTE_OS_TYPE*" || ! "$OS_TYPE" ]]; then export OS_TAG=""; else export OS_TAG="-$OS_TYPE"; fi
-            - export INTERNAL_IMAGE_TAG="$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG"
-            - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG$AMD_ARCH"
-            - docker pull $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG
-            - docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$PROMOTED_TAG
-            - docker run --rm $DOCKER_REPO:$PROMOTED_TAG sh -c "grep staging /etc/yum.repos.d/confluent.repo || grep staging /etc/apt/sources.list" || export STAGING_CHECK_SUCCEED="true"
-            - if [[ ! "$STAGING_CHECK_SUCCEED" ]]; then echo "Detected there was a staging repo in image $DOCKER_REPO:$PROMOTED_TAG refusing to promote." && exit 1; fi
-            - docker push $DOCKER_REPO:$PROMOTED_TAG
-            - >-
-              if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ "ubi*" ]]; then
-                  export APPLY_TAG=$CONFLUENT_VERSION$AMD_ARCH
-                  docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$APPLY_TAG
-                  docker push $DOCKER_REPO:$APPLY_TAG
-                  export APPLIED="true"
-              fi
-            - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
-                  if [[ $APPLIED ]]; then
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$AMD_ARCH
-                  docker push $DOCKER_REPO:latest$AMD_ARCH
-                  fi
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
-                  docker push $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
-              fi
         - name: Promote confluentinc/cp-server ubi8 AMD
           commands:
             - export OS_TYPE="ubi8"
@@ -304,264 +275,8 @@ blocks:
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
                   docker push $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
               fi
-  - name: Promote ARM
-    dependencies: []
-    task:
-      jobs:
-        - name: Promote confluentinc/cp-server-connect ubi8 ARM
-          commands:
-            - export OS_TYPE="ubi8"
-            - export DOCKER_REPO="confluentinc/cp-server-connect"
-            - if [[ "$OS_TYPE" =~ "$PROMOTE_OS_TYPE*" || ! "$OS_TYPE" ]]; then export OS_TAG=""; else export OS_TAG="-$OS_TYPE"; fi
-            - export INTERNAL_IMAGE_TAG="$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG"
-            - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG$ARM_ARCH"
-            - docker pull $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG
-            - docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$PROMOTED_TAG
-            - docker run --rm $DOCKER_REPO:$PROMOTED_TAG sh -c "grep staging /etc/yum.repos.d/confluent.repo || grep staging /etc/apt/sources.list" || export STAGING_CHECK_SUCCEED="true"
-            - if [[ ! "$STAGING_CHECK_SUCCEED" ]]; then echo "Detected there was a staging repo in image $DOCKER_REPO:$PROMOTED_TAG refusing to promote." && exit 1; fi
-            - docker push $DOCKER_REPO:$PROMOTED_TAG
-            - >-
-              if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ "ubi*" ]]; then
-                  export APPLY_TAG=$CONFLUENT_VERSION$ARM_ARCH
-                  docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$APPLY_TAG
-                  docker push $DOCKER_REPO:$APPLY_TAG
-                  export APPLIED="true"
-              fi
-            - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
-                  if [[ $APPLIED ]]; then
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$ARM_ARCH
-                  docker push $DOCKER_REPO:latest$ARM_ARCH
-                  fi
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
-                  docker push $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
-              fi
-        - name: Promote confluentinc/cp-server-connect-base ubi8 ARM
-          commands:
-            - export OS_TYPE="ubi8"
-            - export DOCKER_REPO="confluentinc/cp-server-connect-base"
-            - if [[ "$OS_TYPE" =~ "$PROMOTE_OS_TYPE*" || ! "$OS_TYPE" ]]; then export OS_TAG=""; else export OS_TAG="-$OS_TYPE"; fi
-            - export INTERNAL_IMAGE_TAG="$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG"
-            - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG$ARM_ARCH"
-            - docker pull $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG
-            - docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$PROMOTED_TAG
-            - docker run --rm $DOCKER_REPO:$PROMOTED_TAG sh -c "grep staging /etc/yum.repos.d/confluent.repo || grep staging /etc/apt/sources.list" || export STAGING_CHECK_SUCCEED="true"
-            - if [[ ! "$STAGING_CHECK_SUCCEED" ]]; then echo "Detected there was a staging repo in image $DOCKER_REPO:$PROMOTED_TAG refusing to promote." && exit 1; fi
-            - docker push $DOCKER_REPO:$PROMOTED_TAG
-            - >-
-              if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ "ubi*" ]]; then
-                  export APPLY_TAG=$CONFLUENT_VERSION$ARM_ARCH
-                  docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$APPLY_TAG
-                  docker push $DOCKER_REPO:$APPLY_TAG
-                  export APPLIED="true"
-              fi
-            - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
-                  if [[ $APPLIED ]]; then
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$ARM_ARCH
-                  docker push $DOCKER_REPO:latest$ARM_ARCH
-                  fi
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
-                  docker push $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
-              fi
-        - name: Promote confluentinc/cp-kafka-connect ubi8 ARM
-          commands:
-            - export OS_TYPE="ubi8"
-            - export DOCKER_REPO="confluentinc/cp-kafka-connect"
-            - if [[ "$OS_TYPE" =~ "$PROMOTE_OS_TYPE*" || ! "$OS_TYPE" ]]; then export OS_TAG=""; else export OS_TAG="-$OS_TYPE"; fi
-            - export INTERNAL_IMAGE_TAG="$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG"
-            - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG$ARM_ARCH"
-            - docker pull $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG
-            - docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$PROMOTED_TAG
-            - docker run --rm $DOCKER_REPO:$PROMOTED_TAG sh -c "grep staging /etc/yum.repos.d/confluent.repo || grep staging /etc/apt/sources.list" || export STAGING_CHECK_SUCCEED="true"
-            - if [[ ! "$STAGING_CHECK_SUCCEED" ]]; then echo "Detected there was a staging repo in image $DOCKER_REPO:$PROMOTED_TAG refusing to promote." && exit 1; fi
-            - docker push $DOCKER_REPO:$PROMOTED_TAG
-            - >-
-              if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ "ubi*" ]]; then
-                  export APPLY_TAG=$CONFLUENT_VERSION$ARM_ARCH
-                  docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$APPLY_TAG
-                  docker push $DOCKER_REPO:$APPLY_TAG
-                  export APPLIED="true"
-              fi
-            - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
-                  if [[ $APPLIED ]]; then
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$ARM_ARCH
-                  docker push $DOCKER_REPO:latest$ARM_ARCH
-                  fi
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
-                  docker push $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
-              fi
-        - name: Promote confluentinc/cp-kafka-connect-base ubi8 ARM
-          commands:
-            - export OS_TYPE="ubi8"
-            - export DOCKER_REPO="confluentinc/cp-kafka-connect-base"
-            - if [[ "$OS_TYPE" =~ "$PROMOTE_OS_TYPE*" || ! "$OS_TYPE" ]]; then export OS_TAG=""; else export OS_TAG="-$OS_TYPE"; fi
-            - export INTERNAL_IMAGE_TAG="$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG"
-            - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG$ARM_ARCH"
-            - docker pull $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG
-            - docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$PROMOTED_TAG
-            - docker run --rm $DOCKER_REPO:$PROMOTED_TAG sh -c "grep staging /etc/yum.repos.d/confluent.repo || grep staging /etc/apt/sources.list" || export STAGING_CHECK_SUCCEED="true"
-            - if [[ ! "$STAGING_CHECK_SUCCEED" ]]; then echo "Detected there was a staging repo in image $DOCKER_REPO:$PROMOTED_TAG refusing to promote." && exit 1; fi
-            - docker push $DOCKER_REPO:$PROMOTED_TAG
-            - >-
-              if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ "ubi*" ]]; then
-                  export APPLY_TAG=$CONFLUENT_VERSION$ARM_ARCH
-                  docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$APPLY_TAG
-                  docker push $DOCKER_REPO:$APPLY_TAG
-                  export APPLIED="true"
-              fi
-            - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
-                  if [[ $APPLIED ]]; then
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$ARM_ARCH
-                  docker push $DOCKER_REPO:latest$ARM_ARCH
-                  fi
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
-                  docker push $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
-              fi
-        - name: Promote confluentinc/cp-enterprise-kafka ubi8 ARM
-          commands:
-            - export OS_TYPE="ubi8"
-            - export DOCKER_REPO="confluentinc/cp-enterprise-kafka"
-            - if [[ "$OS_TYPE" =~ "$PROMOTE_OS_TYPE*" || ! "$OS_TYPE" ]]; then export OS_TAG=""; else export OS_TAG="-$OS_TYPE"; fi
-            - export INTERNAL_IMAGE_TAG="$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG"
-            - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG$ARM_ARCH"
-            - docker pull $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG
-            - docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$PROMOTED_TAG
-            - docker run --rm $DOCKER_REPO:$PROMOTED_TAG sh -c "grep staging /etc/yum.repos.d/confluent.repo || grep staging /etc/apt/sources.list" || export STAGING_CHECK_SUCCEED="true"
-            - if [[ ! "$STAGING_CHECK_SUCCEED" ]]; then echo "Detected there was a staging repo in image $DOCKER_REPO:$PROMOTED_TAG refusing to promote." && exit 1; fi
-            - docker push $DOCKER_REPO:$PROMOTED_TAG
-            - >-
-              if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ "ubi*" ]]; then
-                  export APPLY_TAG=$CONFLUENT_VERSION$ARM_ARCH
-                  docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$APPLY_TAG
-                  docker push $DOCKER_REPO:$APPLY_TAG
-                  export APPLIED="true"
-              fi
-            - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
-                  if [[ $APPLIED ]]; then
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$ARM_ARCH
-                  docker push $DOCKER_REPO:latest$ARM_ARCH
-                  fi
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
-                  docker push $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
-              fi
-        - name: Promote confluentinc/cp-kafka ubi8 ARM
-          commands:
-            - export OS_TYPE="ubi8"
-            - export DOCKER_REPO="confluentinc/cp-kafka"
-            - if [[ "$OS_TYPE" =~ "$PROMOTE_OS_TYPE*" || ! "$OS_TYPE" ]]; then export OS_TAG=""; else export OS_TAG="-$OS_TYPE"; fi
-            - export INTERNAL_IMAGE_TAG="$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG"
-            - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG$ARM_ARCH"
-            - docker pull $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG
-            - docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$PROMOTED_TAG
-            - docker run --rm $DOCKER_REPO:$PROMOTED_TAG sh -c "grep staging /etc/yum.repos.d/confluent.repo || grep staging /etc/apt/sources.list" || export STAGING_CHECK_SUCCEED="true"
-            - if [[ ! "$STAGING_CHECK_SUCCEED" ]]; then echo "Detected there was a staging repo in image $DOCKER_REPO:$PROMOTED_TAG refusing to promote." && exit 1; fi
-            - docker push $DOCKER_REPO:$PROMOTED_TAG
-            - >-
-              if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ "ubi*" ]]; then
-                  export APPLY_TAG=$CONFLUENT_VERSION$ARM_ARCH
-                  docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$APPLY_TAG
-                  docker push $DOCKER_REPO:$APPLY_TAG
-                  export APPLIED="true"
-              fi
-            - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
-                  if [[ $APPLIED ]]; then
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$ARM_ARCH
-                  docker push $DOCKER_REPO:latest$ARM_ARCH
-                  fi
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
-                  docker push $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
-              fi
-        - name: Promote confluentinc/confluent-local ubi8 ARM
-          commands:
-            - export OS_TYPE="ubi8"
-            - export DOCKER_REPO="confluentinc/confluent-local"
-            - if [[ "$OS_TYPE" =~ "$PROMOTE_OS_TYPE*" || ! "$OS_TYPE" ]]; then export OS_TAG=""; else export OS_TAG="-$OS_TYPE"; fi
-            - export INTERNAL_IMAGE_TAG="$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG"
-            - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG$ARM_ARCH"
-            - docker pull $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG
-            - docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$PROMOTED_TAG
-            - docker run --rm $DOCKER_REPO:$PROMOTED_TAG sh -c "grep staging /etc/yum.repos.d/confluent.repo || grep staging /etc/apt/sources.list" || export STAGING_CHECK_SUCCEED="true"
-            - if [[ ! "$STAGING_CHECK_SUCCEED" ]]; then echo "Detected there was a staging repo in image $DOCKER_REPO:$PROMOTED_TAG refusing to promote." && exit 1; fi
-            - docker push $DOCKER_REPO:$PROMOTED_TAG
-            - >-
-              if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ "ubi*" ]]; then
-                  export APPLY_TAG=$CONFLUENT_VERSION$ARM_ARCH
-                  docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$APPLY_TAG
-                  docker push $DOCKER_REPO:$APPLY_TAG
-                  export APPLIED="true"
-              fi
-            - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
-                  if [[ $APPLIED ]]; then
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$ARM_ARCH
-                  docker push $DOCKER_REPO:latest$ARM_ARCH
-                  fi
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
-                  docker push $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
-              fi
-        - name: Promote confluentinc/cp-server ubi8 ARM
-          commands:
-            - export OS_TYPE="ubi8"
-            - export DOCKER_REPO="confluentinc/cp-server"
-            - if [[ "$OS_TYPE" =~ "$PROMOTE_OS_TYPE*" || ! "$OS_TYPE" ]]; then export OS_TAG=""; else export OS_TAG="-$OS_TYPE"; fi
-            - export INTERNAL_IMAGE_TAG="$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG"
-            - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG$ARM_ARCH"
-            - docker pull $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG
-            - docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$PROMOTED_TAG
-            - docker run --rm $DOCKER_REPO:$PROMOTED_TAG sh -c "grep staging /etc/yum.repos.d/confluent.repo || grep staging /etc/apt/sources.list" || export STAGING_CHECK_SUCCEED="true"
-            - if [[ ! "$STAGING_CHECK_SUCCEED" ]]; then echo "Detected there was a staging repo in image $DOCKER_REPO:$PROMOTED_TAG refusing to promote." && exit 1; fi
-            - docker push $DOCKER_REPO:$PROMOTED_TAG
-            - >-
-              if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ "ubi*" ]]; then
-                  export APPLY_TAG=$CONFLUENT_VERSION$ARM_ARCH
-                  docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$APPLY_TAG
-                  docker push $DOCKER_REPO:$APPLY_TAG
-                  export APPLIED="true"
-              fi
-            - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
-                  if [[ $APPLIED ]]; then
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$ARM_ARCH
-                  docker push $DOCKER_REPO:latest$ARM_ARCH
-                  fi
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
-                  docker push $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
-              fi
-        - name: Promote confluentinc/cp-zookeeper ubi8 ARM
-          commands:
-            - export OS_TYPE="ubi8"
-            - export DOCKER_REPO="confluentinc/cp-zookeeper"
-            - if [[ "$OS_TYPE" =~ "$PROMOTE_OS_TYPE*" || ! "$OS_TYPE" ]]; then export OS_TAG=""; else export OS_TAG="-$OS_TYPE"; fi
-            - export INTERNAL_IMAGE_TAG="$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG"
-            - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG$ARM_ARCH"
-            - docker pull $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG
-            - docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$PROMOTED_TAG
-            - docker run --rm $DOCKER_REPO:$PROMOTED_TAG sh -c "grep staging /etc/yum.repos.d/confluent.repo || grep staging /etc/apt/sources.list" || export STAGING_CHECK_SUCCEED="true"
-            - if [[ ! "$STAGING_CHECK_SUCCEED" ]]; then echo "Detected there was a staging repo in image $DOCKER_REPO:$PROMOTED_TAG refusing to promote." && exit 1; fi
-            - docker push $DOCKER_REPO:$PROMOTED_TAG
-            - >-
-              if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ "ubi*" ]]; then
-                  export APPLY_TAG=$CONFLUENT_VERSION$ARM_ARCH
-                  docker tag $DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG $DOCKER_REPO:$APPLY_TAG
-                  docker push $DOCKER_REPO:$APPLY_TAG
-                  export APPLIED="true"
-              fi
-            - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
-                  if [[ $APPLIED ]]; then
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$ARM_ARCH
-                  docker push $DOCKER_REPO:latest$ARM_ARCH
-                  fi
-                  docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
-                  docker push $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
-              fi
   - name: Create Manifest
-    dependencies: ["Promote AMD", "Promote ARM"]
+    dependencies: ["Promote AMD"]
     task:
       jobs:
         - name: Create Manifest confluentinc/cp-server-connect ubi8
@@ -569,21 +284,21 @@ blocks:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-server-connect"
             - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG"
-            - docker manifest create $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:$PROMOTED_TAG$AMD_ARCH $DOCKER_REPO:$PROMOTED_TAG$ARM_ARCH
+            - docker manifest create $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:$PROMOTED_TAG$AMD_ARCH
             - docker manifest push $DOCKER_REPO:$PROMOTED_TAG
             - >-
               if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ "ubi*" ]]; then
-                  docker manifest create $DOCKER_REPO:$CONFLUENT_VERSION $DOCKER_REPO:$CONFLUENT_VERSION$AMD_ARCH $DOCKER_REPO:$CONFLUENT_VERSION$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:$CONFLUENT_VERSION $DOCKER_REPO:$CONFLUENT_VERSION$AMD_ARCH
                   docker manifest push $DOCKER_REPO:$CONFLUENT_VERSION
                   export APPLIED="true"
               fi
             - >-
               if [[ $UPDATE_LATEST_TAG ]]; then
                   if [[ $APPLIED ]]; then
-                  docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH $DOCKER_REPO:latest$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH
                   docker manifest push $DOCKER_REPO:latest
                   fi
-                  docker manifest create $DOCKER_REPO:latest-$OS_TYPE $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:latest-$OS_TYPE $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
                   docker manifest push $DOCKER_REPO:latest-$OS_TYPE
               fi
         - name: Create Manifest confluentinc/cp-server-connect-base ubi8
@@ -591,21 +306,21 @@ blocks:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-server-connect-base"
             - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG"
-            - docker manifest create $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:$PROMOTED_TAG$AMD_ARCH $DOCKER_REPO:$PROMOTED_TAG$ARM_ARCH
+            - docker manifest create $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:$PROMOTED_TAG$AMD_ARCH
             - docker manifest push $DOCKER_REPO:$PROMOTED_TAG
             - >-
               if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ "ubi*" ]]; then
-                  docker manifest create $DOCKER_REPO:$CONFLUENT_VERSION $DOCKER_REPO:$CONFLUENT_VERSION$AMD_ARCH $DOCKER_REPO:$CONFLUENT_VERSION$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:$CONFLUENT_VERSION $DOCKER_REPO:$CONFLUENT_VERSION$AMD_ARCH
                   docker manifest push $DOCKER_REPO:$CONFLUENT_VERSION
                   export APPLIED="true"
               fi
             - >-
               if [[ $UPDATE_LATEST_TAG ]]; then
                   if [[ $APPLIED ]]; then
-                  docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH $DOCKER_REPO:latest$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH
                   docker manifest push $DOCKER_REPO:latest
                   fi
-                  docker manifest create $DOCKER_REPO:latest-$OS_TYPE $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:latest-$OS_TYPE $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
                   docker manifest push $DOCKER_REPO:latest-$OS_TYPE
               fi
         - name: Create Manifest confluentinc/cp-kafka-connect ubi8
@@ -613,21 +328,21 @@ blocks:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-kafka-connect"
             - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG"
-            - docker manifest create $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:$PROMOTED_TAG$AMD_ARCH $DOCKER_REPO:$PROMOTED_TAG$ARM_ARCH
+            - docker manifest create $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:$PROMOTED_TAG$AMD_ARCH
             - docker manifest push $DOCKER_REPO:$PROMOTED_TAG
             - >-
               if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ "ubi*" ]]; then
-                  docker manifest create $DOCKER_REPO:$CONFLUENT_VERSION $DOCKER_REPO:$CONFLUENT_VERSION$AMD_ARCH $DOCKER_REPO:$CONFLUENT_VERSION$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:$CONFLUENT_VERSION $DOCKER_REPO:$CONFLUENT_VERSION$AMD_ARCH
                   docker manifest push $DOCKER_REPO:$CONFLUENT_VERSION
                   export APPLIED="true"
               fi
             - >-
               if [[ $UPDATE_LATEST_TAG ]]; then
                   if [[ $APPLIED ]]; then
-                  docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH $DOCKER_REPO:latest$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH
                   docker manifest push $DOCKER_REPO:latest
                   fi
-                  docker manifest create $DOCKER_REPO:latest-$OS_TYPE $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:latest-$OS_TYPE $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
                   docker manifest push $DOCKER_REPO:latest-$OS_TYPE
               fi
         - name: Create Manifest confluentinc/cp-kafka-connect-base ubi8
@@ -635,21 +350,21 @@ blocks:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-kafka-connect-base"
             - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG"
-            - docker manifest create $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:$PROMOTED_TAG$AMD_ARCH $DOCKER_REPO:$PROMOTED_TAG$ARM_ARCH
+            - docker manifest create $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:$PROMOTED_TAG$AMD_ARCH
             - docker manifest push $DOCKER_REPO:$PROMOTED_TAG
             - >-
               if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ "ubi*" ]]; then
-                  docker manifest create $DOCKER_REPO:$CONFLUENT_VERSION $DOCKER_REPO:$CONFLUENT_VERSION$AMD_ARCH $DOCKER_REPO:$CONFLUENT_VERSION$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:$CONFLUENT_VERSION $DOCKER_REPO:$CONFLUENT_VERSION$AMD_ARCH
                   docker manifest push $DOCKER_REPO:$CONFLUENT_VERSION
                   export APPLIED="true"
               fi
             - >-
               if [[ $UPDATE_LATEST_TAG ]]; then
                   if [[ $APPLIED ]]; then
-                  docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH $DOCKER_REPO:latest$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH
                   docker manifest push $DOCKER_REPO:latest
                   fi
-                  docker manifest create $DOCKER_REPO:latest-$OS_TYPE $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:latest-$OS_TYPE $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
                   docker manifest push $DOCKER_REPO:latest-$OS_TYPE
               fi
         - name: Create Manifest confluentinc/cp-enterprise-kafka ubi8
@@ -657,21 +372,21 @@ blocks:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-enterprise-kafka"
             - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG"
-            - docker manifest create $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:$PROMOTED_TAG$AMD_ARCH $DOCKER_REPO:$PROMOTED_TAG$ARM_ARCH
+            - docker manifest create $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:$PROMOTED_TAG$AMD_ARCH
             - docker manifest push $DOCKER_REPO:$PROMOTED_TAG
             - >-
               if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ "ubi*" ]]; then
-                  docker manifest create $DOCKER_REPO:$CONFLUENT_VERSION $DOCKER_REPO:$CONFLUENT_VERSION$AMD_ARCH $DOCKER_REPO:$CONFLUENT_VERSION$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:$CONFLUENT_VERSION $DOCKER_REPO:$CONFLUENT_VERSION$AMD_ARCH
                   docker manifest push $DOCKER_REPO:$CONFLUENT_VERSION
                   export APPLIED="true"
               fi
             - >-
               if [[ $UPDATE_LATEST_TAG ]]; then
                   if [[ $APPLIED ]]; then
-                  docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH $DOCKER_REPO:latest$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH
                   docker manifest push $DOCKER_REPO:latest
                   fi
-                  docker manifest create $DOCKER_REPO:latest-$OS_TYPE $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:latest-$OS_TYPE $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
                   docker manifest push $DOCKER_REPO:latest-$OS_TYPE
               fi
         - name: Create Manifest confluentinc/cp-kafka ubi8
@@ -679,43 +394,21 @@ blocks:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-kafka"
             - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG"
-            - docker manifest create $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:$PROMOTED_TAG$AMD_ARCH $DOCKER_REPO:$PROMOTED_TAG$ARM_ARCH
+            - docker manifest create $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:$PROMOTED_TAG$AMD_ARCH
             - docker manifest push $DOCKER_REPO:$PROMOTED_TAG
             - >-
               if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ "ubi*" ]]; then
-                  docker manifest create $DOCKER_REPO:$CONFLUENT_VERSION $DOCKER_REPO:$CONFLUENT_VERSION$AMD_ARCH $DOCKER_REPO:$CONFLUENT_VERSION$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:$CONFLUENT_VERSION $DOCKER_REPO:$CONFLUENT_VERSION$AMD_ARCH
                   docker manifest push $DOCKER_REPO:$CONFLUENT_VERSION
                   export APPLIED="true"
               fi
             - >-
               if [[ $UPDATE_LATEST_TAG ]]; then
                   if [[ $APPLIED ]]; then
-                  docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH $DOCKER_REPO:latest$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH
                   docker manifest push $DOCKER_REPO:latest
                   fi
-                  docker manifest create $DOCKER_REPO:latest-$OS_TYPE $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
-                  docker manifest push $DOCKER_REPO:latest-$OS_TYPE
-              fi
-        - name: Create Manifest confluentinc/confluent-local ubi8
-          commands:
-            - export OS_TYPE="ubi8"
-            - export DOCKER_REPO="confluentinc/confluent-local"
-            - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG"
-            - docker manifest create $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:$PROMOTED_TAG$AMD_ARCH $DOCKER_REPO:$PROMOTED_TAG$ARM_ARCH
-            - docker manifest push $DOCKER_REPO:$PROMOTED_TAG
-            - >-
-              if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ "ubi*" ]]; then
-                  docker manifest create $DOCKER_REPO:$CONFLUENT_VERSION $DOCKER_REPO:$CONFLUENT_VERSION$AMD_ARCH $DOCKER_REPO:$CONFLUENT_VERSION$ARM_ARCH
-                  docker manifest push $DOCKER_REPO:$CONFLUENT_VERSION
-                  export APPLIED="true"
-              fi
-            - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
-                  if [[ $APPLIED ]]; then
-                  docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH $DOCKER_REPO:latest$ARM_ARCH
-                  docker manifest push $DOCKER_REPO:latest
-                  fi
-                  docker manifest create $DOCKER_REPO:latest-$OS_TYPE $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:latest-$OS_TYPE $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
                   docker manifest push $DOCKER_REPO:latest-$OS_TYPE
               fi
         - name: Create Manifest confluentinc/cp-server ubi8
@@ -723,21 +416,21 @@ blocks:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-server"
             - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG"
-            - docker manifest create $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:$PROMOTED_TAG$AMD_ARCH $DOCKER_REPO:$PROMOTED_TAG$ARM_ARCH
+            - docker manifest create $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:$PROMOTED_TAG$AMD_ARCH
             - docker manifest push $DOCKER_REPO:$PROMOTED_TAG
             - >-
               if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ "ubi*" ]]; then
-                  docker manifest create $DOCKER_REPO:$CONFLUENT_VERSION $DOCKER_REPO:$CONFLUENT_VERSION$AMD_ARCH $DOCKER_REPO:$CONFLUENT_VERSION$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:$CONFLUENT_VERSION $DOCKER_REPO:$CONFLUENT_VERSION$AMD_ARCH
                   docker manifest push $DOCKER_REPO:$CONFLUENT_VERSION
                   export APPLIED="true"
               fi
             - >-
               if [[ $UPDATE_LATEST_TAG ]]; then
                   if [[ $APPLIED ]]; then
-                  docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH $DOCKER_REPO:latest$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH
                   docker manifest push $DOCKER_REPO:latest
                   fi
-                  docker manifest create $DOCKER_REPO:latest-$OS_TYPE $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:latest-$OS_TYPE $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
                   docker manifest push $DOCKER_REPO:latest-$OS_TYPE
               fi
         - name: Create Manifest confluentinc/cp-zookeeper ubi8
@@ -745,20 +438,20 @@ blocks:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-zookeeper"
             - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG"
-            - docker manifest create $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:$PROMOTED_TAG$AMD_ARCH $DOCKER_REPO:$PROMOTED_TAG$ARM_ARCH
+            - docker manifest create $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:$PROMOTED_TAG$AMD_ARCH
             - docker manifest push $DOCKER_REPO:$PROMOTED_TAG
             - >-
               if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ "ubi*" ]]; then
-                  docker manifest create $DOCKER_REPO:$CONFLUENT_VERSION $DOCKER_REPO:$CONFLUENT_VERSION$AMD_ARCH $DOCKER_REPO:$CONFLUENT_VERSION$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:$CONFLUENT_VERSION $DOCKER_REPO:$CONFLUENT_VERSION$AMD_ARCH
                   docker manifest push $DOCKER_REPO:$CONFLUENT_VERSION
                   export APPLIED="true"
               fi
             - >-
               if [[ $UPDATE_LATEST_TAG ]]; then
                   if [[ $APPLIED ]]; then
-                  docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH $DOCKER_REPO:latest$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH
                   docker manifest push $DOCKER_REPO:latest
                   fi
-                  docker manifest create $DOCKER_REPO:latest-$OS_TYPE $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
+                  docker manifest create $DOCKER_REPO:latest-$OS_TYPE $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
                   docker manifest push $DOCKER_REPO:latest-$OS_TYPE
               fi
