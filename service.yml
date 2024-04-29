@@ -17,7 +17,6 @@ semaphore:
     'confluentinc/cp-kafka-connect-base',
     'confluentinc/cp-enterprise-kafka',
     'confluentinc/cp-kafka',
-    'confluentinc/confluent-local',
     'confluentinc/cp-server',
     'confluentinc/cp-zookeeper'
   ]
