@@ -29,6 +29,7 @@ semaphore:
   cp_images: true
   sign_images: true
   pip_install_package: 'tox==3.28.0'
+  push_latest: true
   tasks:
     - name: cp-dockerfile-build
       branch: master
