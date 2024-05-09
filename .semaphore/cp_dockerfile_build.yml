@@ -67,7 +67,7 @@ global_job_config:
           elif [[ $IS_PREVIEW ]]; then
               export MAVEN_PACKAGES_URL="https://s3.us-west-2.amazonaws.com/jenkins-confluent-packages-alpha-maven/$BRANCH_NAME/$PACKAGING_BUILD_NUMBER/maven"
           elif [[ $IS_RC ]]; then
-              export MAVEN_PACKAGES_URL="https://s3.us-west-2.amazonaws.com/staging-confluent-packages-maven/v$BRANCH_NAME/maven"
+              export MAVEN_PACKAGES_URL="https://s3.us-west-2.amazonaws.com/staging-confluent-packages-maven-654654529379-us-west-2/v$BRANCH_NAME/maven"
               if [[ $PACKAGES_MAVEN_URL ]]; then
                   export MAVEN_PACKAGES_URL=$PACKAGES_MAVEN_URL
               fi
