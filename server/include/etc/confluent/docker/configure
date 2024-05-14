@@ -84,8 +84,11 @@ then
   exit 1
 fi
 
-# Set if ADVERTISED_LISTENERS has SSL:// or SASL_SSL:// endpoints.
-if [[ -n "${KAFKA_ADVERTISED_LISTENERS-}" ]] && [[ $KAFKA_ADVERTISED_LISTENERS == *"SSL://"* ]]
+# Set various SSL env vars. 
+# We do this in KRaft mode if KAFKA_LISTENER_SECURITY_PROTOCOL_MAP has CONTROLLER:SSL or CONTROLLER:SASL_SSL
+# We do this in ZK mode if ADVERTISED_LISTENERS has SSL:// or SASL_SSL:// endpoints
+if ( [[ -n "${KAFKA_PROCESS_ROLES-}" ]] && [[ -n "${KAFKA_LISTENER_SECURITY_PROTOCOL_MAP-}" ]] && [[ $KAFKA_LISTENER_SECURITY_PROTOCOL_MAP =~ CONTROLLER:(SSL|SASL_SSL) ]] ) || \
+   ( [[ -n "${KAFKA_ADVERTISED_LISTENERS-}" ]] && [[ $KAFKA_ADVERTISED_LISTENERS == *"SSL://"* ]] )
 then
   echo "SSL is enabled."
 
