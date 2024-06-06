@@ -675,7 +675,10 @@ blocks:
             - export DOCKER_PROD_IMAGE_NAME=$DOCKER_PROD_REGISTRY${DOCKER_REPOS// / $DOCKER_PROD_REGISTRY}
             - ci-tools ci-update-version
             - ci-tools ci-push-tag
-            - echo "Skipping Maven Deploy"
+            - |-
+              if [[ ! $IS_RELEASE && ! $IS_PREVIEW ]]; then
+                mvn -Dmaven.wagon.http.retryHandler.count=3 --batch-mode -P jenkins,docker -DaltDeploymentRepository=confluent-codeartifact-internal::default::https://confluent-519856050701.d.codeartifact.us-west-2.amazonaws.com/maven/maven-snapshots/ -DrepositoryId=confluent-codeartifact-internal deploy -DskipTests -Ddocker.skip-build=true -Ddocker.skip-test=true 
+              fi
             # Create manifest
             - >-
               for image in $DOCKER_PROD_IMAGE_NAME;
