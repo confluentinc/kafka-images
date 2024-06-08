@@ -88,8 +88,17 @@ global_job_config:
       - export AMD_ARCH=.amd64
       - export ARM_ARCH=.arm64
 blocks:
-  - name: Build, Test, & Scan AMD
+  - name: Validation
     dependencies: []
+    run:
+      when: "branch = 'master'"
+    task:
+      jobs:
+        - name: Validation
+          commands:
+            - . sem-pint -c
+  - name: Build, Test, & Scan AMD
+    dependencies: ["Validation"]
     run:
       # don't run the tests on non-functional changes...
       when: "change_in('/', {exclude: ['/.deployed-versions/', '.github/']})"
@@ -363,7 +372,7 @@ blocks:
             - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
             - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
   - name: Build & Test ARM
-    dependencies: []
+    dependencies: ["Validation"]
     run:
       # don't run the tests on non-functional changes...
       when: "change_in('/', {exclude: ['/.deployed-versions/', '.github/']})"
@@ -675,7 +684,10 @@ blocks:
             - export DOCKER_PROD_IMAGE_NAME=$DOCKER_PROD_REGISTRY${DOCKER_REPOS// / $DOCKER_PROD_REGISTRY}
             - ci-tools ci-update-version
             - ci-tools ci-push-tag
-            - echo "Skipping Maven Deploy"
+            - |-
+              if [[ ! $IS_RELEASE && ! $IS_PREVIEW ]]; then
+                mvn -Dmaven.wagon.http.retryHandler.count=3 --batch-mode -P jenkins,docker -DaltDeploymentRepository=confluent-codeartifact-internal::default::https://confluent-519856050701.d.codeartifact.us-west-2.amazonaws.com/maven/maven-snapshots/ -DrepositoryId=confluent-codeartifact-internal deploy -DskipTests -Ddocker.skip-build=true -Ddocker.skip-test=true 
+              fi
             # Create manifest
             - >-
               for image in $DOCKER_PROD_IMAGE_NAME;
