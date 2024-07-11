@@ -17,10 +17,11 @@ semaphore:
     'confluentinc/cp-kafka-connect-base',
     'confluentinc/cp-enterprise-kafka',
     'confluentinc/cp-kafka',
+    'confluentinc/confluent-local',
     'confluentinc/cp-server',
     'confluentinc/cp-zookeeper'
   ]
-  maven_phase: 'package'
+  maven_phase: 'verify'
   maven_skip_deploy: true
   build_arm: true
   os_types: ['ubi8']
