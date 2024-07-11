@@ -27,6 +27,7 @@ global_job_config:
       - sem-version java 8 || sem-version java 1.8
       - . vault-setup
       - . cache-maven restore
+      - . assume-iam-role arn:aws:iam::519856050701:role/semaphore-oidc
       - pip install tox==3.28.0
       - export GIT_COMMIT=$(git rev-parse --verify HEAD --short)
       - export BUILD_NUMBER=$(echo $SEMAPHORE_WORKFLOW_ID | cut -f1 -d"-")
