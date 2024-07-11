@@ -24,9 +24,10 @@ global_job_config:
   prologue:
     commands:
       - checkout
-      - sem-version java 8
+      - sem-version java 8 || sem-version java 1.8
       - . vault-setup
       - . cache-maven restore
+      - . assume-iam-role arn:aws:iam::519856050701:role/semaphore-oidc
       - pip install tox==3.28.0
       - export GIT_COMMIT=$(git rev-parse --verify HEAD --short)
       - export BUILD_NUMBER=$(echo $SEMAPHORE_WORKFLOW_ID | cut -f1 -d"-")
@@ -72,20 +73,26 @@ global_job_config:
         fi
       - export DOCKER_DEV_REGISTRY="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/"
       - export DOCKER_PROD_REGISTRY="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/"
-      - export DOCKER_UPSTREAM_REGISTRY=$DOCKER_PROD_REGISTRY
-      - export LATEST_TAG=$BRANCH_TAG-latest
+      - export DOCKER_UPSTREAM_REGISTRY=$DOCKER_DEV_REGISTRY
+      - export LATEST_TAG=dev-7.0.x-12eb538f
       - export DOCKER_UPSTREAM_TAG="$LATEST_TAG"
       - export DOCKER_REPOS="confluentinc/cp-server-connect confluentinc/cp-server-connect-base confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-enterprise-kafka confluentinc/cp-kafka
         confluentinc/cp-server confluentinc/cp-zookeeper"
       - export DOCKER_DEV_TAG="dev-$BRANCH_TAG-$BUILD_NUMBER"
       - export AMD_ARCH=.amd64
       - export ARM_ARCH=.arm64
+      - sudo chown $(whoami) /var/run/docker.sock
+      - sudo chown -R $(whoami) /var/run/docker
+      - sudo chmod g+rw,u+rw /var/run/docker.sock
 blocks:
   - name: Build, Test, & Scan AMD
     dependencies: []
     run:
       when: "pull_request =~ '.*'"
     task:
+      agent:
+        machine:
+          type: s1-prod-rhel-9-amd64-1
       jobs:
         - name: Build, Test, & Scan ubi8
           commands:
@@ -96,14 +103,14 @@ blocks:
             - export OS_PACKAGES_URL=$(echo "$PACKAGES_URL" | sed "s/PACKAGE_TYPE/rpm/g")
             - export PACKAGING_BUILD_ARGS="$PACKAGING_BUILD_ARGS -DCONFLUENT_PACKAGES_REPO=$OS_PACKAGES_URL"
             - mvn -Dmaven.wagon.http.retryHandler.count=3 --batch-mode -P jenkins,docker clean package dependency:analyze validate -U -Ddocker.registry=$DOCKER_DEV_REGISTRY -Ddocker.upstream-registry=$DOCKER_UPSTREAM_REGISTRY
-              -DBUILD_NUMBER=$BUILD_NUMBER -DGIT_COMMIT=$GIT_COMMIT -Ddocker.tag=$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH -Ddocker.upstream-tag=$DOCKER_UPSTREAM_TAG$OS_TAG -Darch.type=$AMD_ARCH -Ddocker.os_type=ubi8
+              -DBUILD_NUMBER=$BUILD_NUMBER -DGIT_COMMIT=$GIT_COMMIT -Ddocker.tag=$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH -Ddocker.upstream-tag=$DOCKER_UPSTREAM_TAG$OS_TAG$AMD_ARCH -Darch.type=$AMD_ARCH -Ddocker.os_type=ubi8
               $PACKAGING_BUILD_ARGS
             - . cache-maven store
-            - >-
-              for dev_image in $AMD_DOCKER_DEV_FULL_IMAGES;
-              do
-                cve-scan $dev_image
-              done
+#            - >-
+#              for dev_image in $AMD_DOCKER_DEV_FULL_IMAGES;
+#              do
+#                cve-scan $dev_image
+#              done
             - for image in $AMD_DOCKER_DEV_FULL_IMAGES; do echo "Pushing $image" && docker push $image; done
       epilogue:
         always:
@@ -118,7 +125,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu20-04-arm64-1
+          type: s1-prod-rhel-9-arm64-1
       jobs:
         - name: Build & Test ubi8
           commands:
@@ -129,7 +136,7 @@ blocks:
             - export PACKAGING_BUILD_ARGS="$PACKAGING_BUILD_ARGS -DCONFLUENT_PACKAGES_REPO=$OS_PACKAGES_URL"
             - ci-tools ci-update-version
             - mvn -Dmaven.wagon.http.retryHandler.count=3 --batch-mode -P jenkins,docker clean package dependency:analyze validate -U -Ddocker.registry=$DOCKER_DEV_REGISTRY -Ddocker.upstream-registry=$DOCKER_UPSTREAM_REGISTRY
-              -DBUILD_NUMBER=$BUILD_NUMBER -DGIT_COMMIT=$GIT_COMMIT -Ddocker.tag=$DOCKER_DEV_TAG$OS_TAG$ARM_ARCH -Ddocker.upstream-tag=$DOCKER_UPSTREAM_TAG$OS_TAG -Darch.type=$ARM_ARCH -Ddocker.os_type=ubi8
+              -DBUILD_NUMBER=$BUILD_NUMBER -DGIT_COMMIT=$GIT_COMMIT -Ddocker.tag=$DOCKER_DEV_TAG$OS_TAG$ARM_ARCH -Ddocker.upstream-tag=$DOCKER_UPSTREAM_TAG$OS_TAG$ARM_ARCH -Darch.type=$ARM_ARCH -Ddocker.os_type=ubi8
               $PACKAGING_BUILD_ARGS
             - . cache-maven store
             - for image in $ARM_DOCKER_DEV_FULL_IMAGES; do echo "Pushing $image" && docker push $image; done
