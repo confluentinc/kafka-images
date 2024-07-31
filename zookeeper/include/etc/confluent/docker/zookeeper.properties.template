@@ -16,6 +16,7 @@ dataLogDir=/var/lib/zookeeper/log
   'ZOOKEEPER_MAX_SESSION_TIMEOUT' : 'maxSessionTimeout',
   'ZOOKEEPER_FSYNC_WARNING_THRESHOLDMS' : 'fsync.warningthresholdms',
   'ZOOKEEPER_AUTOPURGE_SNAP_RETAIN_COUNT' : 'autopurge.snapRetainCount',
+  'ZOOKEEPER_SNAPSHOT_TRUST_EMPTY' : 'snapshot.trust.empty',
   'ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL': 'autopurge.purgeInterval',
   'ZOOKEEPER_SYNC_ENABLED': 'syncEnabled',
   'ZOOKEEPER_ELECTION_ALG' : 'electionAlg',
