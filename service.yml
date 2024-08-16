@@ -73,4 +73,4 @@ semaphore:
 code_artifact:
   enable: true
   package_paths:
-    - maven/maven-snapshots/io/confluent/kafka-images/kafka-images-parent
+    - maven-snapshots/maven/io.confluent.kafka-images/kafka-images-parent
