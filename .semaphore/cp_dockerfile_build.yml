@@ -131,7 +131,7 @@ blocks:
   - name: Deploy AMD confluentinc/cp-server-connect
     dependencies: ["Build, Test, & Scan AMD"]
     run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?-rc[0-9]+$'"
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-server-connect ubi8
@@ -158,7 +158,7 @@ blocks:
   - name: Deploy AMD confluentinc/cp-server-connect-base
     dependencies: ["Build, Test, & Scan AMD"]
     run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?-rc[0-9]+$'"
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-server-connect-base ubi8
@@ -185,7 +185,7 @@ blocks:
   - name: Deploy AMD confluentinc/cp-kafka-connect
     dependencies: ["Build, Test, & Scan AMD"]
     run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?-rc[0-9]+$'"
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-kafka-connect ubi8
@@ -212,7 +212,7 @@ blocks:
   - name: Deploy AMD confluentinc/cp-kafka-connect-base
     dependencies: ["Build, Test, & Scan AMD"]
     run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?-rc[0-9]+$'"
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-kafka-connect-base ubi8
@@ -239,7 +239,7 @@ blocks:
   - name: Deploy AMD confluentinc/cp-enterprise-kafka
     dependencies: ["Build, Test, & Scan AMD"]
     run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?-rc[0-9]+$'"
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-enterprise-kafka ubi8
@@ -266,7 +266,7 @@ blocks:
   - name: Deploy AMD confluentinc/cp-kafka
     dependencies: ["Build, Test, & Scan AMD"]
     run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?-rc[0-9]+$'"
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-kafka ubi8
@@ -293,7 +293,7 @@ blocks:
   - name: Deploy AMD confluentinc/cp-server
     dependencies: ["Build, Test, & Scan AMD"]
     run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?-rc[0-9]+$'"
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-server ubi8
@@ -320,7 +320,7 @@ blocks:
   - name: Deploy AMD confluentinc/cp-zookeeper
     dependencies: ["Build, Test, & Scan AMD"]
     run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?-rc[0-9]+$'"
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-zookeeper ubi8
@@ -376,7 +376,7 @@ blocks:
   - name: Deploy ARM confluentinc/cp-server-connect
     dependencies: ["Build & Test ARM"]
     run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?-rc[0-9]+$'"
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       agent:
         machine:
@@ -406,7 +406,7 @@ blocks:
   - name: Deploy ARM confluentinc/cp-server-connect-base
     dependencies: ["Build & Test ARM"]
     run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?-rc[0-9]+$'"
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       agent:
         machine:
@@ -436,7 +436,7 @@ blocks:
   - name: Deploy ARM confluentinc/cp-kafka-connect
     dependencies: ["Build & Test ARM"]
     run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?-rc[0-9]+$'"
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       agent:
         machine:
@@ -466,7 +466,7 @@ blocks:
   - name: Deploy ARM confluentinc/cp-kafka-connect-base
     dependencies: ["Build & Test ARM"]
     run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?-rc[0-9]+$'"
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       agent:
         machine:
@@ -496,7 +496,7 @@ blocks:
   - name: Deploy ARM confluentinc/cp-enterprise-kafka
     dependencies: ["Build & Test ARM"]
     run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?-rc[0-9]+$'"
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       agent:
         machine:
@@ -526,7 +526,7 @@ blocks:
   - name: Deploy ARM confluentinc/cp-kafka
     dependencies: ["Build & Test ARM"]
     run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?-rc[0-9]+$'"
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       agent:
         machine:
@@ -556,7 +556,7 @@ blocks:
   - name: Deploy ARM confluentinc/cp-server
     dependencies: ["Build & Test ARM"]
     run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?-rc[0-9]+$'"
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       agent:
         machine:
@@ -586,7 +586,7 @@ blocks:
   - name: Deploy ARM confluentinc/cp-zookeeper
     dependencies: ["Build & Test ARM"]
     run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?-rc[0-9]+$'"
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       agent:
         machine:
@@ -619,7 +619,7 @@ blocks:
       "Deploy ARM confluentinc/cp-server-connect-base", "Deploy ARM confluentinc/cp-kafka-connect", "Deploy ARM confluentinc/cp-kafka-connect-base", "Deploy ARM confluentinc/cp-enterprise-kafka", "Deploy
           ARM confluentinc/cp-kafka", "Deploy ARM confluentinc/cp-server", "Deploy ARM confluentinc/cp-zookeeper"]
     run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?-rc[0-9]+$'"
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       jobs:
         - name: Create Manifest and Maven Deploy
