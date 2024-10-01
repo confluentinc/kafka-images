@@ -72,7 +72,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$AMD_ARCH
                   docker push $DOCKER_REPO:latest$AMD_ARCH
@@ -100,7 +100,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$AMD_ARCH
                   docker push $DOCKER_REPO:latest$AMD_ARCH
@@ -128,7 +128,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$AMD_ARCH
                   docker push $DOCKER_REPO:latest$AMD_ARCH
@@ -156,7 +156,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$AMD_ARCH
                   docker push $DOCKER_REPO:latest$AMD_ARCH
@@ -184,7 +184,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$AMD_ARCH
                   docker push $DOCKER_REPO:latest$AMD_ARCH
@@ -212,7 +212,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$AMD_ARCH
                   docker push $DOCKER_REPO:latest$AMD_ARCH
@@ -268,7 +268,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$AMD_ARCH
                   docker push $DOCKER_REPO:latest$AMD_ARCH
@@ -296,7 +296,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$AMD_ARCH
                   docker push $DOCKER_REPO:latest$AMD_ARCH
@@ -328,7 +328,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$ARM_ARCH
                   docker push $DOCKER_REPO:latest$ARM_ARCH
@@ -356,7 +356,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$ARM_ARCH
                   docker push $DOCKER_REPO:latest$ARM_ARCH
@@ -384,7 +384,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$ARM_ARCH
                   docker push $DOCKER_REPO:latest$ARM_ARCH
@@ -412,7 +412,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$ARM_ARCH
                   docker push $DOCKER_REPO:latest$ARM_ARCH
@@ -440,7 +440,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$ARM_ARCH
                   docker push $DOCKER_REPO:latest$ARM_ARCH
@@ -468,7 +468,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$ARM_ARCH
                   docker push $DOCKER_REPO:latest$ARM_ARCH
@@ -524,7 +524,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$ARM_ARCH
                   docker push $DOCKER_REPO:latest$ARM_ARCH
@@ -552,7 +552,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest$ARM_ARCH
                   docker push $DOCKER_REPO:latest$ARM_ARCH
@@ -579,7 +579,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH $DOCKER_REPO:latest$ARM_ARCH
                   docker manifest push $DOCKER_REPO:latest
@@ -602,7 +602,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH $DOCKER_REPO:latest$ARM_ARCH
                   docker manifest push $DOCKER_REPO:latest
@@ -625,7 +625,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH $DOCKER_REPO:latest$ARM_ARCH
                   docker manifest push $DOCKER_REPO:latest
@@ -648,7 +648,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH $DOCKER_REPO:latest$ARM_ARCH
                   docker manifest push $DOCKER_REPO:latest
@@ -671,7 +671,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH $DOCKER_REPO:latest$ARM_ARCH
                   docker manifest push $DOCKER_REPO:latest
@@ -694,7 +694,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH $DOCKER_REPO:latest$ARM_ARCH
                   docker manifest push $DOCKER_REPO:latest
@@ -740,7 +740,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH $DOCKER_REPO:latest$ARM_ARCH
                   docker manifest push $DOCKER_REPO:latest
@@ -763,7 +763,7 @@ blocks:
                   export APPLIED="true"
               fi
             - >-
-              if [[ $UPDATE_LATEST_TAG ]]; then
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
                   if [[ $APPLIED ]]; then
                   docker manifest create $DOCKER_REPO:latest $DOCKER_REPO:latest$AMD_ARCH $DOCKER_REPO:latest$ARM_ARCH
                   docker manifest push $DOCKER_REPO:latest
