@@ -44,6 +44,17 @@ echo "===> Launching kafka-rest ... "
 kafka-rest-start /etc/kafka-rest/kafka-rest.properties & # your second application
 P2=$! # capture PID of the process
 
+# Function to handle cleanup
+cleanup() {
+  echo "Terminating processes..."
+  kill $P1 $P2
+  wait $P1 $P2 2>/dev/null
+  exit 1
+}
+
+# Trap SIGINT (Ctrl+C) and call cleanup
+trap cleanup SIGINT
+
 # Wait for either of these 2 process to exit
 wait -n $P1 $P2
 # Exit with status of process that exited first
