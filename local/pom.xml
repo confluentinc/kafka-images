@@ -19,7 +19,7 @@
    <parent>
       <groupId>io.confluent.kafka-images</groupId>
       <artifactId>kafka-images-parent</artifactId>
-      <version>7.6.4-0</version>
+      <version>7.6.4-28</version>
    </parent>
    <groupId>io.confluent.kafka-images</groupId>
    <artifactId>confluent-local</artifactId>
