@@ -24,7 +24,7 @@ services:
 
 
   broker1:
-    image: confluentinc/cp-server:7.6.x-latest
+    image: confluentinc/cp-server:7.6.4
     hostname: broker1
     container_name: broker1
     depends_on:
