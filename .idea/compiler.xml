@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="cp-kafka-connect" />
+        <module name="cp-enterprise-kafka" />
+        <module name="confluent-local" />
+        <module name="cp-server" />
+        <module name="cp-server-connect-base" />
+        <module name="cp-server-connect" />
+        <module name="cp-kafka-connect-base" />
+        <module name="cp-zookeeper" />
+        <module name="cp-kafka" />
+      </profile>
+    </annotationProcessing>
+  </component>
+</project>

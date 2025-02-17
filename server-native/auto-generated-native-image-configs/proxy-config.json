@@ -1,0 +1,11 @@
+[
+  {
+    "interfaces":["javax.ws.rs.core.HttpHeaders","org.glassfish.hk2.api.ProxyCtl"]
+  },
+  {
+    "interfaces":["javax.ws.rs.core.UriInfo","org.glassfish.hk2.api.ProxyCtl"]
+  },
+  {
+    "interfaces":["sun.misc.SignalHandler"]
+  }
+]
