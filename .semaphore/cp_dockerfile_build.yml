@@ -79,7 +79,6 @@ global_job_config:
       - export LATEST_TAG=$BRANCH_TAG-latest
       - export DOCKER_UPSTREAM_TAG="$LATEST_TAG"
       - export DOCKER_REPOS="confluentinc/cp-enterprise-kafka confluentinc/cp-kafka confluentinc/cp-server"
-        confluentinc/confluent-local confluentinc/cp-server confluentinc/cp-zookeeper"
       - export DOCKER_DEV_TAG="dev-$BRANCH_TAG-$BUILD_NUMBER"
       - export AMD_ARCH=.amd64
       - export ARM_ARCH=.arm64
