@@ -30,7 +30,7 @@ global_job_config:
       - pip install tox==3.28.0
       - export GIT_COMMIT=$(git rev-parse --verify HEAD --short)
       - export BUILD_NUMBER=$(echo $SEMAPHORE_WORKFLOW_ID | cut -f1 -d"-")
-      - export BRANCH_TAG="master"
+      - export BRANCH_TAG=$(echo $SEMAPHORE_GIT_BRANCH | tr / -)
       # For PR Builds using Packaging
       - pip install confluent-release-tools
       - if [ $BRANCH_TAG == "master" ]; then export BUILD_KEY=$(pinto get-master-version); else export BUILD_KEY=$BRANCH_TAG; fi
@@ -42,7 +42,7 @@ global_job_config:
       - export CONFLUENT_VERSION=$(pinto get-version --build $BUILD_KEY --key confluent.version)
       - export DEFAULT_OS_TYPE="ubi"
       - export URL_CONFLUENT_VERSION=$(echo $CONFLUENT_VERSION | awk -F . '{print $1"."$2}')
-      - export PACKAGES_URL="https://s3-us-west-2.amazonaws.com/dev-confluent-packages-654654529379-us-west-2/custom-build/CB-1004/PACKAGE_TYPE/8.0"
+      - export PACKAGES_URL="https://s3-us-west-2.amazonaws.com/dev-confluent-packages-654654529379-us-west-2/$BRANCH_TAG/$LATEST_PACKAGING_BUILD_NUMBER/PACKAGE_TYPE/$URL_CONFLUENT_VERSION"
       - export PACKAGING_BUILD_NUMBER=$LATEST_PACKAGING_BUILD_NUMBER
       - >-
         if [[ $IS_BETA || $IS_HOTFIX || $IS_POST ]]; then
