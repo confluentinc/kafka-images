@@ -22,15 +22,7 @@
     <parent>
         <groupId>io.confluent</groupId>
         <artifactId>common-docker</artifactId>
-<<<<<<< HEAD
-<<<<<<< HEAD
         <version>[8.0.0-0, 8.0.1-0)</version>
-=======
-        <version>7.1.16</version>
->>>>>>> df7bafc6d (Set Confluent to 7.1.16, Kafka to 7.1.16.)
-=======
-        <version>7.2.14</version>
->>>>>>> 45e45693a (Set Confluent to 7.2.14, Kafka to 7.2.14.)
     </parent>
 
     <groupId>io.confluent.kafka-images</groupId>
@@ -38,15 +30,7 @@
     <packaging>pom</packaging>
     <name>Kafka and CE Kafka Docker Images</name>
     <description>Build files for Confluent's Kafka Docker images</description>
-<<<<<<< HEAD
-<<<<<<< HEAD
     <version>8.0.0-0</version>
-=======
-    <version>7.1.16</version>
->>>>>>> df7bafc6d (Set Confluent to 7.1.16, Kafka to 7.1.16.)
-=======
-    <version>7.2.14</version>
->>>>>>> 45e45693a (Set Confluent to 7.2.14, Kafka to 7.2.14.)
 
     <modules>
         <module>server</module>
@@ -60,15 +44,7 @@
 
     <properties>
         <component.name>kafka</component.name>
-<<<<<<< HEAD
-<<<<<<< HEAD
         <io.confluent.kafka-images.version>8.0.0-0</io.confluent.kafka-images.version>
-=======
-        <io.confluent.kafka-images.version>7.1.16</io.confluent.kafka-images.version>
->>>>>>> df7bafc6d (Set Confluent to 7.1.16, Kafka to 7.1.16.)
-=======
-        <io.confluent.kafka-images.version>7.2.14</io.confluent.kafka-images.version>
->>>>>>> 45e45693a (Set Confluent to 7.2.14, Kafka to 7.2.14.)
     </properties>
 
     <dependencies>
