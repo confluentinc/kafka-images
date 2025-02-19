@@ -33,15 +33,15 @@
     <version>8.0.0-0</version>
 
     <modules>
-        <module>zookeeper</module>
+<!--        <module>zookeeper</module>-->
         <module>server</module>
-        <module>kafka</module>
-        <module>local</module>
+<!--        <module>kafka</module>-->
+<!--        <module>local</module>-->
         <module>ce-kafka</module>
-        <module>kafka-connect-base</module>
-        <module>kafka-connect</module>
-        <module>server-connect-base</module>
-        <module>server-connect</module>
+<!--        <module>kafka-connect-base</module>-->
+<!--        <module>kafka-connect</module>-->
+<!--        <module>server-connect-base</module>-->
+<!--        <module>server-connect</module>-->
     </modules>
 
     <properties>
