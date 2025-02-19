@@ -35,9 +35,9 @@
     <modules>
 <!--        <module>zookeeper</module>-->
         <module>server</module>
-        <module>kafka</module>
+<!--        <module>kafka</module>-->
 <!--        <module>local</module>-->
-        <module>ce-kafka</module>
+<!--        <module>ce-kafka</module>-->
 <!--        <module>kafka-connect-base</module>-->
 <!--        <module>kafka-connect</module>-->
 <!--        <module>server-connect-base</module>-->
