@@ -30,6 +30,7 @@ dataLogDir=/var/lib/zookeeper/log
   'ZOOKEEPER_CLIENT_CNXN_SOCKET' : 'clientCnxnSocket',
   'ZOOKEEPER_SECURE_CLIENT_PORT' : 'secureClientPort',
   'ZOOKEEPER_SERVER_CNXN_SOCKET' : 'serverCnxnSocket',
+  'ZOOKEEPER_TCP_KEEP_ALIVE' : 'tcpKeepAlive',
   'ZOOKEEPER_X509_AUTHENTICATION_PROVIDER_SUPER_USER' : 'X509AuthenticationProvider.superUser',
   'ZOOKEEPER_SSL_AUTH_PROVIDER' : 'ssl.authProvider',
   'ZOOKEEPER_SSL_CLIENT_AUTH' : 'ssl.clientAuth',
