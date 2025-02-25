@@ -18,8 +18,7 @@ semaphore:
     'confluentinc/cp-enterprise-kafka',
     'confluentinc/cp-kafka',
     'confluentinc/confluent-local',
-    'confluentinc/cp-server',
-    'confluentinc/cp-zookeeper'
+    'confluentinc/cp-server'
   ]
   maven_phase: 'verify'
   maven_skip_deploy: true
@@ -75,7 +74,6 @@ code_artifact:
   enable: true
   package_paths:
     - maven-snapshots/maven/io.confluent.kafka-images/kafka-images-parent
-    - maven-snapshots/maven/io.confluent.kafka-images/cp-zookeeper
     - maven-snapshots/maven/io.confluent.kafka-images/cp-server-connect-base
     - maven-snapshots/maven/io.confluent.kafka-images/cp-server-connect
     - maven-snapshots/maven/io.confluent.kafka-images/cp-server
