@@ -33,7 +33,6 @@
     <version>8.0.0-0</version>
 
     <modules>
-        <module>zookeeper</module>
         <module>server</module>
         <module>kafka</module>
         <module>local</module>
