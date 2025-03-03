@@ -15,7 +15,6 @@ semaphore:
     'confluentinc/cp-server-connect-base',
     'confluentinc/cp-kafka-connect',
     'confluentinc/cp-kafka-connect-base',
-    'confluentinc/cp-enterprise-kafka',
     'confluentinc/cp-kafka',
     'confluentinc/confluent-local',
     'confluentinc/cp-server',
@@ -83,4 +82,3 @@ code_artifact:
     - maven-snapshots/maven/io.confluent.kafka-images/cp-kafka-connect-base
     - maven-snapshots/maven/io.confluent.kafka-images/cp-kafka-connect
     - maven-snapshots/maven/io.confluent.kafka-images/cp-kafka
-    - maven-snapshots/maven/io.confluent.kafka-images/cp-enterprise-kafka
