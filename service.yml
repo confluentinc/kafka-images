@@ -18,8 +18,7 @@ semaphore:
     'confluentinc/cp-enterprise-kafka',
     'confluentinc/cp-kafka',
     'confluentinc/confluent-local',
-    'confluentinc/cp-server',
-    'confluentinc/cp-zookeeper'
+    'confluentinc/cp-server'
   ]
   maven_phase: 'verify'
   maven_skip_deploy: true
