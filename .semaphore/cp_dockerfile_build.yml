@@ -556,7 +556,7 @@ blocks:
     dependencies: ["Deploy AMD confluentinc/cp-server-connect", "Deploy AMD confluentinc/cp-server-connect-base", "Deploy AMD confluentinc/cp-kafka-connect", "Deploy AMD confluentinc/cp-kafka-connect-base",
       "Deploy AMD confluentinc/cp-kafka", "Deploy AMD confluentinc/confluent-local", "Deploy AMD confluentinc/cp-server",
       "Deploy ARM confluentinc/cp-server-connect", "Deploy ARM confluentinc/cp-server-connect-base", "Deploy ARM confluentinc/cp-kafka-connect", "Deploy ARM confluentinc/cp-kafka-connect-base",
-      "Deploy ARM confluentinc/cp-enterprise-kafka", "Deploy ARM confluentinc/cp-kafka", "Deploy ARM confluentinc/confluent-local", "Deploy ARM confluentinc/cp-server"]
+      "Deploy ARM confluentinc/cp-kafka", "Deploy ARM confluentinc/confluent-local", "Deploy ARM confluentinc/cp-server"]
     run:
       when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:

@@ -81,3 +81,4 @@ code_artifact:
     - maven-snapshots/maven/io.confluent.kafka-images/cp-kafka-connect-base
     - maven-snapshots/maven/io.confluent.kafka-images/cp-kafka-connect
     - maven-snapshots/maven/io.confluent.kafka-images/cp-kafka
+    - maven-snapshots/maven/io.confluent.kafka-images/cp-enterprise-kafka
