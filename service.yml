@@ -70,6 +70,10 @@ semaphore:
           options:
             - 'deb'
             - 'ubi'
+        - name: SKIP_DOCKER_IMAGES
+          required: false
+          default_value: ''
+          description: 'Space separated list of docker images to skip promoting eg. confluentinc/cp-server confluentinc/cp-server-connect'
 code_artifact:
   enable: true
   package_paths:
