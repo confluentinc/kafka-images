@@ -23,11 +23,7 @@
     <parent>
         <groupId>io.confluent.kafka-images</groupId>
         <artifactId>kafka-images-parent</artifactId>
-<<<<<<< HEAD
         <version>8.0.0-0</version>
-=======
-        <version>7.1.16</version>
->>>>>>> df7bafc6d (Set Confluent to 7.1.16, Kafka to 7.1.16.)
     </parent>
 
     <groupId>io.confluent.kafka-images</groupId>
