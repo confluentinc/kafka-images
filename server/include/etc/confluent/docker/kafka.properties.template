@@ -7,14 +7,8 @@
                          'KAFKA_GC_LOG_OPTS',
                          'KAFKA_LOG4J_ROOT_LOGLEVEL',
                          'KAFKA_LOG4J_LOGGERS',
-                         'KAFKA_TOOLS_LOG4J_LOGLEVEL',
-                         'KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET']
+                         'KAFKA_TOOLS_LOG4J_LOGLEVEL']
 -%}
-
-{# properties that don't fit the standard format #}
-{% set other_props = {
-  'KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET' : 'zookeeper.clientCnxnSocket'
- } -%}
 
 {% set kafka_props = env_to_props('KAFKA_', '', exclude=excluded_props) -%}
 {% for name, value in kafka_props.items() -%}

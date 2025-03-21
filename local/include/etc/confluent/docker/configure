@@ -18,35 +18,28 @@
 
 # --- for broker
 
-# If KAFKA_PROCESS_ROLES is defined it means we are running in KRaft mode
+# Ensure KAFKA_PROCESS_ROLES and CLUSTER_ID 
+ub ensure KAFKA_PROCESS_ROLES
+ub ensure CLUSTER_ID
 
 # unset KAFKA_ADVERTISED_LISTENERS from ENV in KRaft mode when running as controller only
-if [[ -n "${KAFKA_PROCESS_ROLES-}" ]]
+if [[ $KAFKA_PROCESS_ROLES == "controller" ]]
 then
-  echo "Running in KRaft mode..."
-  ub ensure CLUSTER_ID
-  if [[ $KAFKA_PROCESS_ROLES == "controller" ]]
+  if [[ -n "${KAFKA_ADVERTISED_LISTENERS-}" ]]
   then
-    if [[ -n "${KAFKA_ADVERTISED_LISTENERS-}" ]]
-    then
-      echo "KAFKA_ADVERTISED_LISTENERS is not supported on a KRaft controller."
-      exit 1
-    else
-      unset KAFKA_ADVERTISED_LISTENERS
-    fi
+    echo "KAFKA_ADVERTISED_LISTENERS is not supported on a KRaft controller."
+    exit 1
   else
-    ub ensure KAFKA_ADVERTISED_LISTENERS
-  fi 
+    unset KAFKA_ADVERTISED_LISTENERS
+  fi
 else
-  echo "Running in Zookeeper mode..."
-  ub ensure KAFKA_ZOOKEEPER_CONNECT
   ub ensure KAFKA_ADVERTISED_LISTENERS
-fi
+fi 
 
 # By default, LISTENERS is derived from ADVERTISED_LISTENERS by replacing
 # hosts with 0.0.0.0. This is good default as it ensures that the broker
 # process listens on all ports.
-if [[ -z "${KAFKA_LISTENERS-}" ]] && ( [[ -z "${KAFKA_PROCESS_ROLES-}" ]] || [[ $KAFKA_PROCESS_ROLES != "controller" ]] )
+if [[ -z "${KAFKA_LISTENERS-}" ]] && [[ $KAFKA_PROCESS_ROLES != "controller" ]]
 then
   export KAFKA_LISTENERS
   KAFKA_LISTENERS=$(echo "$KAFKA_ADVERTISED_LISTENERS" | sed -e 's|://[^:]*:|://0.0.0.0:|g')

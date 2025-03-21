@@ -7,9 +7,7 @@ log4j.appender.stdout.layout.ConversionPattern ={{ env["CONNECT_LOG4J_APPENDER_S
 
 
 {% set default_loggers = {
-	'org.reflections': 'ERROR',
-	'org.apache.zookeeper': 'ERROR',
-	'org.I0Itec.zkclient': 'ERROR'
+	'org.reflections': 'ERROR'
 } -%}
 
 {% if env['CONNECT_LOG4J_LOGGERS'] %}
