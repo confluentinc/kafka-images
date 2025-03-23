@@ -7,7 +7,7 @@ version: v1.0
 name: build-test-release
 agent:
   machine:
-    type: s1-prod-ubuntu20-04-amd64-1
+    type: s1-prod-ubuntu24-04-amd64-1
 
 fail_fast:
   cancel:
@@ -78,8 +78,8 @@ global_job_config:
       - export DOCKER_UPSTREAM_REGISTRY=$DOCKER_PROD_REGISTRY
       - export LATEST_TAG=$BRANCH_TAG-latest
       - export DOCKER_UPSTREAM_TAG="$LATEST_TAG"
-      - export DOCKER_REPOS="confluentinc/cp-server-connect confluentinc/cp-server-connect-base confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-kafka
-        confluentinc/confluent-local confluentinc/cp-server"
+      - export DOCKER_REPOS="confluentinc/cp-server-connect confluentinc/cp-server-connect-base confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-kafka confluentinc/confluent-local
+        confluentinc/cp-server"
       - export DOCKER_DEV_TAG="dev-$BRANCH_TAG-$BUILD_NUMBER"
       - export AMD_ARCH=.amd64
       - export ARM_ARCH=.arm64
@@ -321,7 +321,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu20-04-arm64-1
+          type: s1-prod-ubuntu24-04-arm64-1
       jobs:
         - name: Build & Test ubi8
           commands:
@@ -349,7 +349,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu20-04-arm64-1
+          type: s1-prod-ubuntu24-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-server-connect ubi8
           commands:
@@ -379,7 +379,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu20-04-arm64-1
+          type: s1-prod-ubuntu24-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-server-connect-base ubi8
           commands:
@@ -409,7 +409,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu20-04-arm64-1
+          type: s1-prod-ubuntu24-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-kafka-connect ubi8
           commands:
@@ -439,7 +439,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu20-04-arm64-1
+          type: s1-prod-ubuntu24-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-kafka-connect-base ubi8
           commands:
@@ -469,7 +469,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu20-04-arm64-1
+          type: s1-prod-ubuntu24-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-kafka ubi8
           commands:
@@ -499,7 +499,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu20-04-arm64-1
+          type: s1-prod-ubuntu24-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/confluent-local ubi8
           commands:
@@ -529,7 +529,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu20-04-arm64-1
+          type: s1-prod-ubuntu24-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-server ubi8
           commands:
@@ -554,9 +554,8 @@ blocks:
             - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
   - name: Create Manifest and Maven Deploy
     dependencies: ["Deploy AMD confluentinc/cp-server-connect", "Deploy AMD confluentinc/cp-server-connect-base", "Deploy AMD confluentinc/cp-kafka-connect", "Deploy AMD confluentinc/cp-kafka-connect-base",
-      "Deploy AMD confluentinc/cp-kafka", "Deploy AMD confluentinc/confluent-local", "Deploy AMD confluentinc/cp-server",
-      "Deploy ARM confluentinc/cp-server-connect", "Deploy ARM confluentinc/cp-server-connect-base", "Deploy ARM confluentinc/cp-kafka-connect", "Deploy ARM confluentinc/cp-kafka-connect-base",
-      "Deploy ARM confluentinc/cp-kafka", "Deploy ARM confluentinc/confluent-local", "Deploy ARM confluentinc/cp-server"]
+      "Deploy AMD confluentinc/cp-kafka", "Deploy AMD confluentinc/confluent-local", "Deploy AMD confluentinc/cp-server", "Deploy ARM confluentinc/cp-server-connect", "Deploy ARM confluentinc/cp-server-connect-base",
+      "Deploy ARM confluentinc/cp-kafka-connect", "Deploy ARM confluentinc/cp-kafka-connect-base", "Deploy ARM confluentinc/cp-kafka", "Deploy ARM confluentinc/confluent-local", "Deploy ARM confluentinc/cp-server"]
     run:
       when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
@@ -596,7 +595,7 @@ after_pipeline:
   task:
     agent:
       machine:
-        type: s1-prod-ubuntu20-04-arm64-0
+        type: s1-prod-ubuntu24-04-arm64-0
     jobs:
       - name: Metrics
         commands:
