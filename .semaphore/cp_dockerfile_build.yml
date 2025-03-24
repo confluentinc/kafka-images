@@ -88,7 +88,7 @@ global_job_config:
       # Filter out skipped repositories from DOCKER_REPOS
       - DOCKER_REPOS=$(comm -23 <(echo "$DOCKER_REPOS" | tr ' ' '\n' | sort) <(echo "$SKIP_DOCKER_REPOS" | tr ' ' '\n' | sort) | tr '\n' ' ' | xargs)
       - export DOCKER_REPOS
-      - echo "Filtered DOCKER_REPOS: $DOCKER_REPOS"
+      - echo "Filtered DOCKER_REPOS- $DOCKER_REPOS"
       
       # Check if current DOCKER_IMAGE is in SKIP_DOCKER_REPOS
       - |
