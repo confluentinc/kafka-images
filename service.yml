@@ -22,7 +22,7 @@ semaphore:
   maven_phase: 'verify'
   maven_skip_deploy: true
   build_arm: true
-  os_types: ['ubi8']
+  os_types: ['ubi9']
   nano_version: true
   use_packages: true
   cp_images: true
