@@ -14,9 +14,9 @@
 # limitations under the License.
 
 ARG DOCKER_UPSTREAM_REGISTRY
-ARG DOCKER_UPSTREAM_TAG=ubi8-latest
+ARG DOCKER_UPSTREAM_TAG=ubi9-latest
 
-FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-new:${DOCKER_UPSTREAM_TAG}
+FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-lite:${DOCKER_UPSTREAM_TAG}
 
 ARG PROJECT_VERSION
 ARG ARTIFACT_ID
@@ -27,8 +27,7 @@ LABEL vendor="Confluent"
 LABEL version=$GIT_COMMIT
 LABEL release=$PROJECT_VERSION
 LABEL name=$ARTIFACT_ID
-LABEL summary="Confluent platform server image."
-LABEL description="Confluent platform server image."
+LABEL summary="Kafka with Rest Proxy"
 LABEL io.confluent.docker=true
 LABEL io.confluent.docker.git.id=$GIT_COMMIT
 ARG BUILD_NUMBER=-1
@@ -47,44 +46,32 @@ ENV KAFKA_ADVERTISED_LISTENERS=${KAFKA_ADVERTISED_LISTENERS}
 ARG CLUSTER_ID
 ENV CLUSTER_ID=${CLUSTER_ID}
 
-ENV COMPONENT=kafka
-
-# primary
-EXPOSE 9092
+# exposed ports
+EXPOSE 9092 8082
 
 USER root
 
-RUN echo "===> Installing ${COMPONENT}..." \
+RUN echo "===> Installing kafka and kafka rest..." \
     && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
     && rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
-    && printf "[Confluent.dist] \n\
-name=Confluent repository (dist) \n\
-baseurl=${CONFLUENT_PACKAGES_REPO}/\$releasever \n\
-gpgcheck=1 \n\
-gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
-enabled=1 \n\
-\n\
-[Confluent] \n\
+    && printf "[Confluent] \n\
 name=Confluent repository \n\
 baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
 gpgcheck=1 \n\
 gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
-enabled=1 " > /etc/yum.repos.d/confluent.repo \
-    && echo "===> installing ${COMPONENT}..." \
-    && yum install -y confluent-server-${CONFLUENT_VERSION} \
-    && echo "===> installing confluent-rebalancer ..." \
-    && yum install -y confluent-rebalancer-${CONFLUENT_VERSION} \
-    && echo "===> installing confluent-security ..." \
-    && yum install -y confluent-security-${CONFLUENT_VERSION} \
+enabled=1 " > /etc/yum.repos.d/confluent.repo
+    && yum install -y confluent-kafka-${CONFLUENT_VERSION} \
+    && yum install -y confluent-kafka-rest-${CONFLUENT_VERSION} \
     && echo "===> clean up ..."  \
     && yum clean all \
     && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo \
-    && echo "===> Setting up ${COMPONENT} dirs" \
-    && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
-    && chown -R appuser:root /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/zookeeper /etc/${COMPONENT}/secrets \
-    && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets /var/log/kafka
+    && echo "===> Setting up dirs" \
+    && mkdir -p /var/lib/kafka/data /etc/kafka/secrets \
+    && chown appuser:root -R /etc/kafka-rest /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/zookeeper /etc/kafka/secrets /var/lib/kafka /etc/kafka \
+    && chmod -R ug+w /etc/kafka-rest /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/zookeeper /var/lib/kafka /etc/kafka/secrets /etc/kafka
 
-VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
+
+VOLUME ["/var/lib/kafka/data", "/etc/kafka/secrets"]
 
 COPY --chown=appuser:appuser include/etc/confluent/docker /etc/confluent/docker
 
