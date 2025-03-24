@@ -79,8 +79,26 @@ global_job_config:
       - export DOCKER_UPSTREAM_REGISTRY=$DOCKER_PROD_REGISTRY
       - export LATEST_TAG=$BRANCH_TAG-latest
       - export DOCKER_UPSTREAM_TAG="$LATEST_TAG"
-      - export DOCKER_REPOS="confluentinc/cp-server-connect confluentinc/cp-server-connect-base confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-enterprise-kafka confluentinc/cp-kafka
-        confluentinc/cp-server confluentinc/cp-zookeeper"
+      # Define all available Docker repositories
+      - export DOCKER_REPOS="confluentinc/cp-server-connect confluentinc/cp-server-connect-base confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-enterprise-kafka confluentinc/cp-kafka confluentinc/cp-server confluentinc/cp-zookeeper"
+      
+      # Define repositories to skip
+      - export SKIP_DOCKER_REPOS="confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-enterprise-kafka confluentinc/cp-kafka"
+      
+      # Filter out skipped repositories from DOCKER_REPOS
+      - DOCKER_REPOS=$(comm -23 <(echo "$DOCKER_REPOS" | tr ' ' '\n' | sort) <(echo "$SKIP_DOCKER_REPOS" | tr ' ' '\n' | sort) | tr '\n' ' ' | xargs)
+      - export DOCKER_REPOS
+      - echo "Filtered DOCKER_REPOS: $DOCKER_REPOS"
+      
+      # Check if current DOCKER_IMAGE is in SKIP_DOCKER_REPOS
+      - |
+        for skip_repo in $SKIP_DOCKER_REPOS; do
+          if [ "$skip_repo" = "$DOCKER_IMAGE" ]; then
+            echo "Skipping build for $DOCKER_IMAGE as it is in SKIP_DOCKER_REPOS list"
+            export SEMAPHORE_JOB_RESULT=passed
+            return 130
+          fi
+        done
       - export DOCKER_DEV_TAG="dev-$BRANCH_TAG-$BUILD_NUMBER"
       - export AMD_ARCH=.amd64
       - export ARM_ARCH=.arm64
@@ -132,6 +150,9 @@ blocks:
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-server-connect ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-server-connect
           commands:
             - export OS_TAG="-ubi8"
             - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-server-connect
@@ -159,6 +180,9 @@ blocks:
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-server-connect-base ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-server-connect-base
           commands:
             - export OS_TAG="-ubi8"
             - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-server-connect-base
@@ -186,6 +210,9 @@ blocks:
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-kafka-connect ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-kafka-connect
           commands:
             - export OS_TAG="-ubi8"
             - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-kafka-connect
@@ -213,6 +240,9 @@ blocks:
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-kafka-connect-base ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-kafka-connect-base
           commands:
             - export OS_TAG="-ubi8"
             - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-kafka-connect-base
@@ -240,6 +270,9 @@ blocks:
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-enterprise-kafka ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-enterprise-kafka
           commands:
             - export OS_TAG="-ubi8"
             - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-enterprise-kafka
@@ -267,6 +300,9 @@ blocks:
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-kafka ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-kafka
           commands:
             - export OS_TAG="-ubi8"
             - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-kafka
@@ -294,6 +330,9 @@ blocks:
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-server ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-server
           commands:
             - export OS_TAG="-ubi8"
             - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-server
@@ -321,6 +360,9 @@ blocks:
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-zookeeper ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-zookeeper
           commands:
             - export OS_TAG="-ubi8"
             - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-zookeeper
@@ -361,7 +403,7 @@ blocks:
             - ci-tools ci-update-version
             - mvn -Dmaven.wagon.http.retryHandler.count=3 --batch-mode -P jenkins,docker clean package dependency:analyze validate -U -Ddocker.registry=$DOCKER_DEV_REGISTRY -Ddocker.upstream-registry=$DOCKER_UPSTREAM_REGISTRY
               -DBUILD_NUMBER=$BUILD_NUMBER -DGIT_COMMIT=$GIT_COMMIT -Ddocker.tag=$DOCKER_DEV_TAG$OS_TAG$ARM_ARCH -Ddocker.upstream-tag=$DOCKER_UPSTREAM_TAG$OS_TAG -Darch.type=$ARM_ARCH -Ddocker.os_type=ubi8
-              $PACKAGING_BUILD_ARGS -Ddependency.check.skip=true
+              $PACKAGING_BUILD_ARGS -Ddependency.check.skip=true -pl !kafka,!ce-kafka,!kafka-connect-base,!kafka-connect
             - . cache-maven store
             - for image in $ARM_DOCKER_DEV_FULL_IMAGES; do echo "Pushing $image" && docker push $image; done
       epilogue:
@@ -380,6 +422,9 @@ blocks:
           type: s1-prod-ubuntu20-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-server-connect ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-server-connect
           commands:
             - export OS_TAG="-ubi8"
             - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-server-connect
@@ -410,6 +455,9 @@ blocks:
           type: s1-prod-ubuntu20-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-server-connect-base ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-server-connect-base
           commands:
             - export OS_TAG="-ubi8"
             - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-server-connect-base
@@ -440,6 +488,9 @@ blocks:
           type: s1-prod-ubuntu20-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-kafka-connect ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-kafka-connect
           commands:
             - export OS_TAG="-ubi8"
             - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-kafka-connect
@@ -461,6 +512,9 @@ blocks:
             - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
             - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
   - name: Deploy ARM confluentinc/cp-kafka-connect-base
+    env_vars:
+      - name: DOCKER_IMAGE
+        value: confluentinc/cp-kafka-connect-base
     dependencies: ["Build & Test ARM"]
     run:
       when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
@@ -500,6 +554,9 @@ blocks:
           type: s1-prod-ubuntu20-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-enterprise-kafka ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-enterprise-kafka
           commands:
             - export OS_TAG="-ubi8"
             - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-enterprise-kafka
@@ -530,6 +587,9 @@ blocks:
           type: s1-prod-ubuntu20-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-kafka ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-kafka
           commands:
             - export OS_TAG="-ubi8"
             - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-kafka
@@ -560,6 +620,9 @@ blocks:
           type: s1-prod-ubuntu20-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-server ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-server
           commands:
             - export OS_TAG="-ubi8"
             - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-server
@@ -590,6 +653,9 @@ blocks:
           type: s1-prod-ubuntu20-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-zookeeper ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-zookeeper
           commands:
             - export OS_TAG="-ubi8"
             - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-zookeeper
