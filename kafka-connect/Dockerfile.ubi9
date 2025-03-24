@@ -14,10 +14,10 @@
 # limitations under the License.
 
 ARG DOCKER_REGISTRY
-ARG DOCKER_UPSTREAM_TAG=ubi8-latest
+ARG DOCKER_UPSTREAM_TAG=ubi9-latest
 ARG DOCKER_TAG
 
-FROM ${DOCKER_REGISTRY}confluentinc/cp-server-connect-base:${DOCKER_TAG}
+FROM ${DOCKER_REGISTRY}confluentinc/cp-kafka-connect-base:${DOCKER_TAG}
 
 ARG PROJECT_VERSION
 ARG ARTIFACT_ID
@@ -28,8 +28,7 @@ LABEL vendor="Confluent"
 LABEL version=$GIT_COMMIT
 LABEL release=$PROJECT_VERSION
 LABEL name=$ARTIFACT_ID
-LABEL summary="Confluent platform server connect image."
-LABEL description="Confluent platform server connect image."
+LABEL summary="Confluent platform Kafka Connect."
 LABEL io.confluent.docker=true
 LABEL io.confluent.docker.git.id=$GIT_COMMIT
 ARG BUILD_NUMBER=-1
@@ -43,5 +42,10 @@ ARG CONFLUENT_PLATFORM_LABEL
 ENV COMPONENT=kafka-connect
 
 USER root
+
+RUN echo "===> Installing ${COMPONENT}..." \
+    && echo "===> Cleaning up ..." \
+    && yum clean all \
+    && rm -rf /tmp/*
 
 USER appuser
