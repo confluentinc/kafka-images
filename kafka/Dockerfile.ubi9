@@ -56,19 +56,12 @@ USER root
 RUN echo "===> Installing ${COMPONENT}..." \
     && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
     && rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
-    && printf "[Confluent.dist] \n\
-name=Confluent repository (dist) \n\
-baseurl=${CONFLUENT_PACKAGES_REPO}/\$releasever \n\
-gpgcheck=1 \n\
-gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
-enabled=1 \n\
-\n\
-[Confluent] \n\
+    && printf "[Confluent] \n\
 name=Confluent repository \n\
 baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
 gpgcheck=1 \n\
 gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
-enabled=1 " > /etc/yum.repos.d/confluent.repo \
+enabled=1 " > /etc/yum.repos.d/confluent.repo
     && yum install -y confluent-kafka-${CONFLUENT_VERSION} \
     && echo "===> clean up ..."  \
     && yum clean all \
