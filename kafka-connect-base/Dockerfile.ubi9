@@ -14,21 +14,22 @@
 # limitations under the License.
 
 ARG DOCKER_REGISTRY
-ARG DOCKER_UPSTREAM_TAG=ubi8-latest
+ARG DOCKER_UPSTREAM_TAG=ubi9-latest
 ARG DOCKER_TAG
 
-FROM ${DOCKER_REGISTRY}confluentinc/cp-server:${DOCKER_TAG}
+FROM ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG}
 
 ARG PROJECT_VERSION
 ARG ARTIFACT_ID
 ARG GIT_COMMIT
+ARG CONFLUENT_PACKAGES_REPO
 
 LABEL maintainer="partner-support@confluent.io"
 LABEL vendor="Confluent"
 LABEL version=$GIT_COMMIT
 LABEL release=$PROJECT_VERSION
 LABEL name=$ARTIFACT_ID
-LABEL summary="Confluent platform server connect base image."
+LABEL summary="The Kafka Connect Base image contains Kafka Connect and all of its dependencies. When started, it will run the Connect framework in distributed mode."
 LABEL io.confluent.docker=true
 LABEL io.confluent.docker.git.id=$GIT_COMMIT
 ARG BUILD_NUMBER=-1
@@ -49,14 +50,7 @@ USER root
 RUN echo "===> Installing ${COMPONENT}..." \
     && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
     && rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
-    && printf "[Confluent.dist] \n\
-name=Confluent repository (dist) \n\
-baseurl=${CONFLUENT_PACKAGES_REPO}/7 \n\
-gpgcheck=1 \n\
-gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
-enabled=1 \n\
-\n\
-[Confluent] \n\
+    && printf "[Confluent] \n\
 name=Confluent repository \n\
 baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
 gpgcheck=1 \n\
@@ -64,17 +58,17 @@ gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
 enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && echo "===> Installing Schema Registry (for Avro jars) ..." \
     && yum install -y confluent-schema-registry-${CONFLUENT_VERSION} \
-    && echo "===> Installing Controlcenter for monitoring interceptors ..."\
+    && echo "===> Installing Controlcenter for monitoring interceptors ..." \
     && yum install -y confluent-control-center-${CONFLUENT_VERSION} \
-    && echo "===> Installing Confluent Hub client ..." \
+    && echo "===> Installing Confluent Hub client ..."\
     && yum install -y confluent-hub-client-${CONFLUENT_VERSION} \
-    && echo "===> Cleaning up ..."  \
+    && echo "===> Cleaning up ..." \
     && yum clean all \
     && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo \
     && echo "===> Setting up ${COMPONENT} dirs ..." \
-    && mkdir -p /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /usr/logs /usr/share/confluent-hub-components \
-    && chown appuser:root -R /etc/kafka /etc/${COMPONENT} /etc/schema-registry /usr/logs /usr/share/confluent-hub-components \
-    && chmod -R ug+w /etc/kafka /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /etc/schema-registry
+    && mkdir -p /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /usr/share/confluent-hub-components \
+    && chown appuser:root -R /etc/kafka /etc/${COMPONENT} /usr/logs /etc/schema-registry /usr/share/confluent-hub-components \
+    && chmod -R ug+w /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /etc/schema-registry /usr/share/confluent-hub-components
 
 ENV CONNECT_PLUGIN_PATH=/usr/share/java/,/usr/share/confluent-hub-components/
 
@@ -85,3 +79,11 @@ COPY --chown=appuser:appuser include/etc/confluent/docker /etc/confluent/docker
 USER appuser
 
 CMD ["/etc/confluent/docker/run"]
+
+# Polling period  : 5 seconds
+# Timeout period  :10 seconds (if the polling does not return within this time, treat as a failed poll)
+# Start-up period : 2 minutes (during which failures are not counted as failures)
+# Retry period    : 8 minutes (after which container is deemed unhealthy)
+# All settings can be overriden at run-time in Docker/Docker Compose. 
+HEALTHCHECK --start-period=120s --interval=5s --timeout=10s --retries=96 \
+    CMD /etc/confluent/docker/healthcheck.sh
