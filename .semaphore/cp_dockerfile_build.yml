@@ -145,8 +145,6 @@ blocks:
             - artifact push workflow target --destination target-AMD
   - name: Deploy AMD confluentinc/cp-server-connect
     dependencies: ["Build, Test, & Scan AMD"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-server-connect ubi8
@@ -154,29 +152,9 @@ blocks:
             - name: DOCKER_IMAGE
               value: confluentinc/cp-server-connect
           commands:
-            - export OS_TAG="-ubi8"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-server-connect
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$AMD_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-server-connect:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
+            - echo "Temp change - Building $DOCKER_IMAGE AMD"
   - name: Deploy AMD confluentinc/cp-server-connect-base
     dependencies: ["Build, Test, & Scan AMD"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-server-connect-base ubi8
@@ -184,29 +162,9 @@ blocks:
             - name: DOCKER_IMAGE
               value: confluentinc/cp-server-connect-base
           commands:
-            - export OS_TAG="-ubi8"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-server-connect-base
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$AMD_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-server-connect-base:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
+            - echo "Temp change - Building $DOCKER_IMAGE AMD"
   - name: Deploy AMD confluentinc/cp-kafka-connect
     dependencies: ["Build, Test, & Scan AMD"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-kafka-connect ubi8
@@ -214,29 +172,9 @@ blocks:
             - name: DOCKER_IMAGE
               value: confluentinc/cp-kafka-connect
           commands:
-            - export OS_TAG="-ubi8"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-kafka-connect
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$AMD_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-kafka-connect:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
+            - echo "Temp change - Building $DOCKER_IMAGE AMD"
   - name: Deploy AMD confluentinc/cp-kafka-connect-base
     dependencies: ["Build, Test, & Scan AMD"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-kafka-connect-base ubi8
@@ -244,29 +182,9 @@ blocks:
             - name: DOCKER_IMAGE
               value: confluentinc/cp-kafka-connect-base
           commands:
-            - export OS_TAG="-ubi8"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-kafka-connect-base
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$AMD_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-kafka-connect-base:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
+            - echo "Temp change - Building $DOCKER_IMAGE AMD"
   - name: Deploy AMD confluentinc/cp-enterprise-kafka
     dependencies: ["Build, Test, & Scan AMD"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-enterprise-kafka ubi8
@@ -274,29 +192,9 @@ blocks:
             - name: DOCKER_IMAGE
               value: confluentinc/cp-enterprise-kafka
           commands:
-            - export OS_TAG="-ubi8"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-enterprise-kafka
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$AMD_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-enterprise-kafka:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
+            - echo "Temp change - Building $DOCKER_IMAGE AMD"
   - name: Deploy AMD confluentinc/cp-kafka
     dependencies: ["Build, Test, & Scan AMD"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-kafka ubi8
@@ -304,29 +202,9 @@ blocks:
             - name: DOCKER_IMAGE
               value: confluentinc/cp-kafka
           commands:
-            - export OS_TAG="-ubi8"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-kafka
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$AMD_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-kafka:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
+            - echo "Temp change - Building $DOCKER_IMAGE AMD"
   - name: Deploy AMD confluentinc/cp-server
     dependencies: ["Build, Test, & Scan AMD"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-server ubi8
@@ -334,29 +212,9 @@ blocks:
             - name: DOCKER_IMAGE
               value: confluentinc/cp-server
           commands:
-            - export OS_TAG="-ubi8"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-server
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$AMD_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-server:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
+            - echo "Temp change - Building $DOCKER_IMAGE AMD"
   - name: Deploy AMD confluentinc/cp-zookeeper
     dependencies: ["Build, Test, & Scan AMD"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       jobs:
         - name: Deploy AMD confluentinc/cp-zookeeper ubi8
@@ -364,25 +222,7 @@ blocks:
             - name: DOCKER_IMAGE
               value: confluentinc/cp-zookeeper
           commands:
-            - export OS_TAG="-ubi8"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-zookeeper
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$AMD_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-zookeeper:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
+            - echo "Temp change - Building $DOCKER_IMAGE AMD"
   - name: Build & Test ARM
     dependencies: ["Validation"]
     run:
@@ -414,8 +254,6 @@ blocks:
             - artifact push workflow target --destination target-ARM
   - name: Deploy ARM confluentinc/cp-server-connect
     dependencies: ["Build & Test ARM"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       agent:
         machine:
@@ -426,29 +264,9 @@ blocks:
             - name: DOCKER_IMAGE
               value: confluentinc/cp-server-connect
           commands:
-            - export OS_TAG="-ubi8"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-server-connect
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$ARM_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-server-connect:$DOCKER_DEV_TAG$OS_TAG$ARM_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
+            - echo "Temp change - Building $DOCKER_IMAGE ARM"
   - name: Deploy ARM confluentinc/cp-server-connect-base
     dependencies: ["Build & Test ARM"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       agent:
         machine:
@@ -459,29 +277,9 @@ blocks:
             - name: DOCKER_IMAGE
               value: confluentinc/cp-server-connect-base
           commands:
-            - export OS_TAG="-ubi8"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-server-connect-base
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$ARM_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-server-connect-base:$DOCKER_DEV_TAG$OS_TAG$ARM_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
+            - echo "Temp change - Building $DOCKER_IMAGE ARM"
   - name: Deploy ARM confluentinc/cp-kafka-connect
     dependencies: ["Build & Test ARM"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       agent:
         machine:
@@ -492,29 +290,9 @@ blocks:
             - name: DOCKER_IMAGE
               value: confluentinc/cp-kafka-connect
           commands:
-            - export OS_TAG="-ubi8"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-kafka-connect
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$ARM_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-kafka-connect:$DOCKER_DEV_TAG$OS_TAG$ARM_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
+            - echo "Temp change - Building $DOCKER_IMAGE ARM"
   - name: Deploy ARM confluentinc/cp-kafka-connect-base
     dependencies: ["Build & Test ARM"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       agent:
         machine:
@@ -525,29 +303,9 @@ blocks:
             - name: DOCKER_IMAGE
               value: confluentinc/cp-kafka-connect-base
           commands:
-            - export OS_TAG="-ubi8"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-kafka-connect-base
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$ARM_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-kafka-connect-base:$DOCKER_DEV_TAG$OS_TAG$ARM_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
+            - echo "Temp change - Building $DOCKER_IMAGE ARM"
   - name: Deploy ARM confluentinc/cp-enterprise-kafka
     dependencies: ["Build & Test ARM"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       agent:
         machine:
@@ -558,29 +316,9 @@ blocks:
             - name: DOCKER_IMAGE
               value: confluentinc/cp-enterprise-kafka
           commands:
-            - export OS_TAG="-ubi8"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-enterprise-kafka
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$ARM_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-enterprise-kafka:$DOCKER_DEV_TAG$OS_TAG$ARM_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
+            - echo "Temp change - Building $DOCKER_IMAGE ARM"
   - name: Deploy ARM confluentinc/cp-kafka
     dependencies: ["Build & Test ARM"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       agent:
         machine:
@@ -591,29 +329,9 @@ blocks:
             - name: DOCKER_IMAGE
               value: confluentinc/cp-kafka
           commands:
-            - export OS_TAG="-ubi8"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-kafka
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$ARM_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-kafka:$DOCKER_DEV_TAG$OS_TAG$ARM_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
+            - echo "Temp change - Building $DOCKER_IMAGE ARM"
   - name: Deploy ARM confluentinc/cp-server
     dependencies: ["Build & Test ARM"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       agent:
         machine:
@@ -624,29 +342,9 @@ blocks:
             - name: DOCKER_IMAGE
               value: confluentinc/cp-server
           commands:
-            - export OS_TAG="-ubi8"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-server
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$ARM_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-server:$DOCKER_DEV_TAG$OS_TAG$ARM_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
+            - echo "Temp change - Building $DOCKER_IMAGE ARM"
   - name: Deploy ARM confluentinc/cp-zookeeper
     dependencies: ["Build & Test ARM"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       agent:
         machine:
@@ -657,64 +355,26 @@ blocks:
             - name: DOCKER_IMAGE
               value: confluentinc/cp-zookeeper
           commands:
-            - export OS_TAG="-ubi8"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-zookeeper
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$ARM_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-zookeeper:$DOCKER_DEV_TAG$OS_TAG$ARM_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
+            - echo "Temp change - Building $DOCKER_IMAGE ARM"
   - name: Create Manifest and Maven Deploy
     dependencies: ["Deploy AMD confluentinc/cp-server-connect", "Deploy AMD confluentinc/cp-server-connect-base", "Deploy AMD confluentinc/cp-kafka-connect", "Deploy AMD confluentinc/cp-kafka-connect-base",
       "Deploy AMD confluentinc/cp-enterprise-kafka", "Deploy AMD confluentinc/cp-kafka", "Deploy AMD confluentinc/cp-server", "Deploy AMD confluentinc/cp-zookeeper", "Deploy ARM confluentinc/cp-server-connect",
       "Deploy ARM confluentinc/cp-server-connect-base", "Deploy ARM confluentinc/cp-kafka-connect", "Deploy ARM confluentinc/cp-kafka-connect-base", "Deploy ARM confluentinc/cp-enterprise-kafka", "Deploy
           ARM confluentinc/cp-kafka", "Deploy ARM confluentinc/cp-server", "Deploy ARM confluentinc/cp-zookeeper"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
       jobs:
         - name: Create Manifest and Maven Deploy
           commands:
             - export DOCKER_PROD_IMAGE_NAME=$DOCKER_PROD_REGISTRY${DOCKER_REPOS// / $DOCKER_PROD_REGISTRY}
-            - ci-tools ci-update-version
-            - ci-tools ci-push-tag
             - |-
               if [[ ! $IS_RELEASE && ! $IS_PREVIEW ]]; then
-                mvn -Dmaven.wagon.http.retryHandler.count=3 --batch-mode -P jenkins,docker -DaltDeploymentRepository=confluent-codeartifact-internal::default::https://confluent-519856050701.d.codeartifact.us-west-2.amazonaws.com/maven/maven-snapshots/ -DrepositoryId=confluent-codeartifact-internal deploy -DskipTests -Ddocker.skip-build=true -Ddocker.skip-test=true 
+                mvn -X -DdryRun=true -Dmaven.wagon.http.retryHandler.count=3 --batch-mode -P jenkins,docker -DaltDeploymentRepository=confluent-codeartifact-internal::default::https://confluent-519856050701.d.codeartifact.us-west-2.amazonaws.com/maven/maven-snapshots/ -DrepositoryId=confluent-codeartifact-internal deploy -DskipTests -Ddocker.skip-build=true -Ddocker.skip-test=true -pl !kafka,!ce-kafka,!kafka-connect-base,!kafka-connect
               fi
             # Create manifest
             - >-
               for image in $DOCKER_PROD_IMAGE_NAME;
               do
-                export OS_TAG="-ubi8"
-                export GIT_TAG=$GIT_COMMIT$OS_TAG
-                docker manifest create $image:$GIT_TAG $image:$GIT_TAG$AMD_ARCH $image:$GIT_TAG$ARM_ARCH
-                docker manifest push $image:$GIT_TAG
-                docker pull $image:$GIT_TAG
-                sign-images $image:$GIT_TAG
-                export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG
-                docker manifest create $image:$BRANCH_BUILD_TAG $image:$BRANCH_BUILD_TAG$AMD_ARCH $image:$BRANCH_BUILD_TAG$ARM_ARCH
-                docker manifest push $image:$BRANCH_BUILD_TAG
-                docker pull $image:$BRANCH_BUILD_TAG
-                sign-images $image:$BRANCH_BUILD_TAG
-                export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG
-                docker manifest create $image:$PACKAGE_TAG $image:$PACKAGE_TAG$AMD_ARCH $image:$PACKAGE_TAG$ARM_ARCH
-                docker manifest push $image:$PACKAGE_TAG
-                export LATEST_MANIFEST_TAG=$LATEST_TAG$OS_TAG
-                docker manifest create $image:$LATEST_MANIFEST_TAG $image:$LATEST_MANIFEST_TAG$AMD_ARCH $image:$LATEST_MANIFEST_TAG$ARM_ARCH
-                docker manifest push $image:$LATEST_MANIFEST_TAG
+                echo "Temp change - Creating manifest for $image"
               done
 after_pipeline:
   task:
