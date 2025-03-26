@@ -67,8 +67,8 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo \
     && echo "===> Setting up dirs" \
     && mkdir -p /var/lib/kafka/data /etc/kafka/secrets \
-    && chown appuser:root -R /etc/kafka-rest /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/zookeeper /etc/kafka/secrets /var/lib/kafka /etc/kafka \
-    && chmod -R ug+w /etc/kafka-rest /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/zookeeper /var/lib/kafka /etc/kafka/secrets /etc/kafka
+    && chown appuser:root -R /etc/kafka-rest /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /etc/kafka/secrets /var/lib/kafka /etc/kafka \
+    && chmod -R ug+w /etc/kafka-rest /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/kafka /etc/kafka/secrets /etc/kafka
 
 
 VOLUME ["/var/lib/kafka/data", "/etc/kafka/secrets"]
