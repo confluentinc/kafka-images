@@ -60,10 +60,10 @@ baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
 gpgcheck=1 \n\
 gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
 enabled=1 " > /etc/yum.repos.d/confluent.repo \
-    && yum install -y confluent-kafka-${CONFLUENT_VERSION} \
-    && yum install -y confluent-kafka-rest-${CONFLUENT_VERSION} \
+    && microdnf install -y confluent-kafka-${CONFLUENT_VERSION} \
+    && microdnf install -y confluent-kafka-rest-${CONFLUENT_VERSION} \
     && echo "===> clean up ..."  \
-    && yum clean all \
+    && microdnf clean all \
     && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo \
     && echo "===> Setting up dirs" \
     && mkdir -p /var/lib/kafka/data /etc/kafka/secrets \
