@@ -59,7 +59,6 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && echo "===> Installing Schema Registry (for Avro jars) ..." \
     && microdnf install -y confluent-schema-registry-${CONFLUENT_VERSION} \
     && echo "===> Installing Controlcenter for monitoring interceptors ..." \
-    && microdnf install -y confluent-control-center-${CONFLUENT_VERSION} \
     && echo "===> Installing Confluent Hub client ..."\
     && microdnf install -y confluent-hub-client-${CONFLUENT_VERSION} \
     && echo "===> Cleaning up ..." \
