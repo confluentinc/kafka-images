@@ -18,7 +18,7 @@
 
 export KAFKA_DATA_DIRS=${KAFKA_DATA_DIRS:-"/var/lib/kafka/data"}
 echo "===> Check if $KAFKA_DATA_DIRS is writable ..."
-dub path "$KAFKA_DATA_DIRS" writable
+ub path "$KAFKA_DATA_DIRS" writable
 
 if [[ -n "${KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE-}" ]] && [[ $KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE == "true" ]]
 then
@@ -28,7 +28,7 @@ then
     echo "===> Running in KRaft mode, skipping Zookeeper health check..."
 else
     echo "===> Check if Zookeeper is healthy ..."
-    cub zk-ready "$KAFKA_ZOOKEEPER_CONNECT" "${KAFKA_CUB_ZK_TIMEOUT:-40}"
+    ub zk-ready "$KAFKA_ZOOKEEPER_CONNECT" "${KAFKA_CUB_ZK_TIMEOUT:-40}"
 fi
 
 # KRaft required step: Format the storage directory with provided cluster ID unless it already exists.
