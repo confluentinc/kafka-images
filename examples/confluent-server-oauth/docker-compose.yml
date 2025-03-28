@@ -1,5 +1,4 @@
 ---
-version: '2'
 services:
   keycloak:
     image: quay.io/keycloak/keycloak:23.0.5
