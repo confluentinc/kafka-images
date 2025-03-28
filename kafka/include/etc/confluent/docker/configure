@@ -27,8 +27,6 @@ then
   then
     echo "KAFKA_ADVERTISED_LISTENERS is not supported on a KRaft controller."
     exit 1
-  else
-    unset KAFKA_ADVERTISED_LISTENERS
   fi
 else
   dub ensure KAFKA_ADVERTISED_LISTENERS
