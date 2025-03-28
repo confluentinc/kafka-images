@@ -20,6 +20,18 @@ semaphore:
     'confluentinc/cp-server',
     'confluentinc/cp-zookeeper'
   ]
+  community_docker_repos: [
+    'confluentinc/cp-kafka-connect',
+    'confluentinc/cp-kafka-connect-base',
+    'confluentinc/cp-enterprise-kafka',
+    'confluentinc/cp-kafka'
+  ]
+  community_maven_modules: [
+    'kafka-connect',
+    'kafka-connect-base',
+    'ce-kafka',
+    'kafka'
+  ]
   maven_phase: 'package'
   maven_skip_deploy: true
   build_arm: true
@@ -52,6 +64,13 @@ semaphore:
         - name: CONFLUENT_DEB_VERSION
           required: true
           default_value: '1'
+        - name: SKIP_COMMUNITY
+          required: false
+          default_value: 'False'
+          description: 'Skip building community docker images'
+          options:
+            - 'True'
+            - 'False'  
     - name: cp-dockerfile-promote
       branch: master
       pipeline_file: .semaphore/cp_dockerfile_promote.yml
@@ -70,6 +89,13 @@ semaphore:
           options:
             - 'deb'
             - 'ubi'
+        - name: SKIP_COMMUNITY
+          required: false
+          default_value: 'False'
+          description: 'Skip publishing community docker images'
+          options:
+            - 'True'
+            - 'False'    
 code_artifact:
   enable: true
   package_paths:
