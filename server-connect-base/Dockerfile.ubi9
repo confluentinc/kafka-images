@@ -57,8 +57,6 @@ gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
 enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && echo "===> Installing Schema Registry (for Avro jars) ..." \
     && yum install -y confluent-schema-registry-${CONFLUENT_VERSION} \
-    && echo "===> Installing Controlcenter for monitoring interceptors ..."\
-    && yum install -y confluent-control-center-${CONFLUENT_VERSION} \
     && echo "===> Installing Confluent Hub client ..." \
     && yum install -y confluent-hub-client-${CONFLUENT_VERSION} \
     && echo "===> Cleaning up ..."  \
