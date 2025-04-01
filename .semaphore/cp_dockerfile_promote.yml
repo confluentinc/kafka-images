@@ -7,7 +7,7 @@ version: v1.0
 name: build-test-release
 agent:
   machine:
-    type: s1-prod-ubuntu20-04-amd64-1
+    type: s1-prod-ubuntu24-04-amd64-1
 
 fail_fast:
   cancel:
@@ -46,6 +46,17 @@ global_job_config:
       - docker login --username $DOCKERHUB_USER --password $DOCKERHUB_APIKEY
       - export AMD_ARCH=.amd64
       - export ARM_ARCH=.arm64
+      - export COMMUNITY_DOCKER_REPOS="confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-enterprise-kafka confluentinc/cp-kafka"
+      - |
+        if [[ $SKIP_COMMUNITY == "True" ]]; then
+          for skip_repo in $COMMUNITY_DOCKER_REPOS; do
+            if [ "$skip_repo" = "$DOCKER_IMAGE" ]; then
+              echo "Skipping promotion for $DOCKER_IMAGE as it is in COMMUNITY_DOCKER_REPOS list"
+              export SEMAPHORE_JOB_RESULT=passed
+              return 130
+            fi
+          done
+        fi
 
 blocks:
   - name: Promote AMD
@@ -53,6 +64,9 @@ blocks:
     task:
       jobs:
         - name: Promote confluentinc/cp-server-connect ubi8 AMD
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-server-connect
           commands:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-server-connect"
@@ -81,6 +95,9 @@ blocks:
                   docker push $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
               fi
         - name: Promote confluentinc/cp-server-connect-base ubi8 AMD
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-server-connect-base
           commands:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-server-connect-base"
@@ -109,6 +126,9 @@ blocks:
                   docker push $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
               fi
         - name: Promote confluentinc/cp-kafka-connect ubi8 AMD
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-kafka-connect
           commands:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-kafka-connect"
@@ -137,6 +157,9 @@ blocks:
                   docker push $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
               fi
         - name: Promote confluentinc/cp-kafka-connect-base ubi8 AMD
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-kafka-connect-base
           commands:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-kafka-connect-base"
@@ -165,6 +188,9 @@ blocks:
                   docker push $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
               fi
         - name: Promote confluentinc/cp-enterprise-kafka ubi8 AMD
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-enterprise-kafka
           commands:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-enterprise-kafka"
@@ -193,6 +219,9 @@ blocks:
                   docker push $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
               fi
         - name: Promote confluentinc/cp-kafka ubi8 AMD
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-kafka
           commands:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-kafka"
@@ -221,6 +250,9 @@ blocks:
                   docker push $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
               fi
         - name: Promote confluentinc/cp-server ubi8 AMD
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-server
           commands:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-server"
@@ -249,6 +281,9 @@ blocks:
                   docker push $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
               fi
         - name: Promote confluentinc/cp-zookeeper ubi8 AMD
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-zookeeper
           commands:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-zookeeper"
@@ -281,6 +316,9 @@ blocks:
     task:
       jobs:
         - name: Promote confluentinc/cp-server-connect ubi8 ARM
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-server-connect
           commands:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-server-connect"
@@ -309,6 +347,9 @@ blocks:
                   docker push $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
               fi
         - name: Promote confluentinc/cp-server-connect-base ubi8 ARM
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-server-connect-base
           commands:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-server-connect-base"
@@ -337,6 +378,9 @@ blocks:
                   docker push $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
               fi
         - name: Promote confluentinc/cp-kafka-connect ubi8 ARM
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-kafka-connect
           commands:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-kafka-connect"
@@ -365,6 +409,9 @@ blocks:
                   docker push $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
               fi
         - name: Promote confluentinc/cp-kafka-connect-base ubi8 ARM
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-kafka-connect-base
           commands:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-kafka-connect-base"
@@ -393,6 +440,9 @@ blocks:
                   docker push $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
               fi
         - name: Promote confluentinc/cp-enterprise-kafka ubi8 ARM
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-enterprise-kafka
           commands:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-enterprise-kafka"
@@ -421,6 +471,9 @@ blocks:
                   docker push $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
               fi
         - name: Promote confluentinc/cp-kafka ubi8 ARM
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-kafka
           commands:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-kafka"
@@ -449,6 +502,9 @@ blocks:
                   docker push $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
               fi
         - name: Promote confluentinc/cp-server ubi8 ARM
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-server
           commands:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-server"
@@ -477,6 +533,9 @@ blocks:
                   docker push $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
               fi
         - name: Promote confluentinc/cp-zookeeper ubi8 ARM
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-zookeeper
           commands:
             - export OS_TYPE="ubi8"
             - export DOCKER_REPO="confluentinc/cp-zookeeper"
@@ -509,6 +568,9 @@ blocks:
     task:
       jobs:
         - name: Create Manifest confluentinc/cp-server-connect ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-server-connect
           commands:
             - export OS_TYPE="ubi8"
             - if [[ ! "$OS_TYPE" ]]; then export OS_TAG=""; elif [[ "$OS_TYPE" =~ $PROMOTE_OS_TYPE* ]]; then export OS_TAG="-$OS_TYPE"; fi
@@ -532,6 +594,9 @@ blocks:
                   docker manifest push $DOCKER_REPO:latest-$OS_TYPE
               fi
         - name: Create Manifest confluentinc/cp-server-connect-base ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-server-connect-base
           commands:
             - export OS_TYPE="ubi8"
             - if [[ ! "$OS_TYPE" ]]; then export OS_TAG=""; elif [[ "$OS_TYPE" =~ $PROMOTE_OS_TYPE* ]]; then export OS_TAG="-$OS_TYPE"; fi
@@ -555,6 +620,9 @@ blocks:
                   docker manifest push $DOCKER_REPO:latest-$OS_TYPE
               fi
         - name: Create Manifest confluentinc/cp-kafka-connect ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-kafka-connect
           commands:
             - export OS_TYPE="ubi8"
             - if [[ ! "$OS_TYPE" ]]; then export OS_TAG=""; elif [[ "$OS_TYPE" =~ $PROMOTE_OS_TYPE* ]]; then export OS_TAG="-$OS_TYPE"; fi
@@ -578,6 +646,9 @@ blocks:
                   docker manifest push $DOCKER_REPO:latest-$OS_TYPE
               fi
         - name: Create Manifest confluentinc/cp-kafka-connect-base ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-kafka-connect-base
           commands:
             - export OS_TYPE="ubi8"
             - if [[ ! "$OS_TYPE" ]]; then export OS_TAG=""; elif [[ "$OS_TYPE" =~ $PROMOTE_OS_TYPE* ]]; then export OS_TAG="-$OS_TYPE"; fi
@@ -601,6 +672,9 @@ blocks:
                   docker manifest push $DOCKER_REPO:latest-$OS_TYPE
               fi
         - name: Create Manifest confluentinc/cp-enterprise-kafka ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-enterprise-kafka
           commands:
             - export OS_TYPE="ubi8"
             - if [[ ! "$OS_TYPE" ]]; then export OS_TAG=""; elif [[ "$OS_TYPE" =~ $PROMOTE_OS_TYPE* ]]; then export OS_TAG="-$OS_TYPE"; fi
@@ -624,6 +698,9 @@ blocks:
                   docker manifest push $DOCKER_REPO:latest-$OS_TYPE
               fi
         - name: Create Manifest confluentinc/cp-kafka ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-kafka
           commands:
             - export OS_TYPE="ubi8"
             - if [[ ! "$OS_TYPE" ]]; then export OS_TAG=""; elif [[ "$OS_TYPE" =~ $PROMOTE_OS_TYPE* ]]; then export OS_TAG="-$OS_TYPE"; fi
@@ -647,6 +724,9 @@ blocks:
                   docker manifest push $DOCKER_REPO:latest-$OS_TYPE
               fi
         - name: Create Manifest confluentinc/cp-server ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-server
           commands:
             - export OS_TYPE="ubi8"
             - if [[ ! "$OS_TYPE" ]]; then export OS_TAG=""; elif [[ "$OS_TYPE" =~ $PROMOTE_OS_TYPE* ]]; then export OS_TAG="-$OS_TYPE"; fi
@@ -670,6 +750,9 @@ blocks:
                   docker manifest push $DOCKER_REPO:latest-$OS_TYPE
               fi
         - name: Create Manifest confluentinc/cp-zookeeper ubi8
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-zookeeper
           commands:
             - export OS_TYPE="ubi8"
             - if [[ ! "$OS_TYPE" ]]; then export OS_TAG=""; elif [[ "$OS_TYPE" =~ $PROMOTE_OS_TYPE* ]]; then export OS_TAG="-$OS_TYPE"; fi
