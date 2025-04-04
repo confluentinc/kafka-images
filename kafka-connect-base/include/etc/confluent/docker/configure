@@ -49,9 +49,19 @@ then
   dub ensure CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL
 fi
 
-dub path /etc/"${COMPONENT}"/ writable
+# Set default value for CONNECT_PROPERTIES_DIR if not provided
+export CONNECT_PROPERTIES_DIR=${CONNECT_PROPERTIES_DIR:-/etc/${COMPONENT}/}
 
-dub template "/etc/confluent/docker/${COMPONENT}.properties.template" "/etc/${COMPONENT}/${COMPONENT}.properties"
+# Ensure the properties directory exists and is writable
+dub path "${CONNECT_PROPERTIES_DIR}" writable
 
-# The connect-distributed script expects the log4j config at /etc/kafka/connect-log4j.properties.
-dub template "/etc/confluent/docker/log4j.properties.template" "/etc/kafka/connect-log4j.properties"
+dub template "/etc/confluent/docker/${COMPONENT}.properties.template" "${CONNECT_PROPERTIES_DIR}/${COMPONENT}.properties"
+
+# Set KAFKA_LOG4J_OPTS if CONNECT_PROPERTIES_DIR is set
+if [ -n "$CONNECT_PROPERTIES_DIR" ]; then
+  export KAFKA_LOG4J_OPTS="-Dlog4j2.configurationFile=${CONNECT_PROPERTIES_DIR}/connect-log4j.properties"
+  dub template "/etc/confluent/docker/log4j.properties.template" "${CONNECT_PROPERTIES_DIR}/connect-log4j.properties"
+else
+  # The connect-distributed script expects the log4j config at /etc/kafka/connect-log4j.properties.
+  dub template "/etc/confluent/docker/log4j.properties.template" "/etc/kafka/connect-log4j.properties"
+fi

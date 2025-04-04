@@ -14,6 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Set default value for CONNECT_PROPERTIES_DIR if not provided
+export CONNECT_PROPERTIES_DIR=${CONNECT_PROPERTIES_DIR:-/etc/${COMPONENT}/}
+
 
 # Override this section from the script to include the com.sun.management.jmxremote.rmi.port property.
 if [ -z "$KAFKA_JMX_OPTS" ]; then
@@ -41,4 +44,4 @@ echo "===> Launching ${COMPONENT} ... "
 if [ -z "$CLASSPATH" ]; then
     export CLASSPATH="/etc/kafka-connect/jars/*"
 fi
-exec connect-distributed /etc/"${COMPONENT}"/"${COMPONENT}".properties
+exec connect-distributed "${CONNECT_PROPERTIES_DIR}/${COMPONENT}.properties"
