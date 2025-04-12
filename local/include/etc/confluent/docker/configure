@@ -157,10 +157,10 @@ fi
 
 # --- for broker
 ub render-properties /etc/confluent/docker/kafka-propertiesSpec.json > /etc/kafka/kafka.properties
-ub render-template /etc/confluent/docker/kafka-log4j.properties.template > /etc/kafka/log4j.properties
-ub render-template /etc/confluent/docker/kafka-tools-log4j.properties.template > /etc/kafka/tools-log4j.properties
+ub render-template /etc/confluent/docker/kafka-log4j2.yaml.template > /etc/kafka/log4j2.yaml
+ub render-template /etc/confluent/docker/kafka-tools-log4j2.yaml.template > /etc/kafka/tools-log4j2.yaml
 
 # --- for rest proxy
 ub render-properties /etc/confluent/docker/kafka-rest-propertiesSpec.json > /etc/kafka-rest/kafka-rest.properties
 ub render-properties /etc/confluent/docker/admin-propertiesSpec.json > /etc/kafka-rest/admin.properties
-ub render-template /etc/confluent/docker/kafka-rest-log4j.properties.template > /etc/kafka-rest/log4j.properties
+ub render-template /etc/confluent/docker/kafka-rest-log4j2.yaml.template > /etc/kafka-rest/log4j2.yaml
