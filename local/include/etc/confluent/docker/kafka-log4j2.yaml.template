@@ -10,16 +10,16 @@ Configuration:
 
   Loggers:
     Root:
-      level: "{{ getEnv 'KAFKA_LOG4J_ROOT_LOGLEVEL' 'INFO' }}"
+      level: {{ getEnv "KAFKA_LOG4J_ROOT_LOGLEVEL" "INFO" }}
       AppenderRef:
         - ref: STDOUT
 
     Logger:
-      {{ $loggerDefaults := "kafka=INFO,kafka.network.RequestChannel$=WARN,kafka.producer.async.DefaultEventHandler=DEBUG,kafka.request.logger=WARN,kafka.controller=TRACE,kafka.log.LogCleaner=INFO,state.change.logger=TRACE,kafka.authorizer.logger=WARN"}}
-      {{ $loggers := getEnv "KAFKA_LOG4J_LOGGERS" "" -}}
-      {{ range $k, $v := splitToMapDefaults ","  $loggerDefaults $loggers }}
+{{ $loggerDefaults := "kafka=INFO,kafka.network.RequestChannel$=WARN,kafka.producer.async.DefaultEventHandler=DEBUG,kafka.request.logger=WARN,kafka.controller=TRACE,kafka.log.LogCleaner=INFO,state.change.logger=TRACE,kafka.authorizer.logger=WARN"}}
+{{ $loggers := getEnv "KAFKA_LOG4J_LOGGERS" "" -}}
+{{ range $k, $v := splitToMapDefaults ","  $loggerDefaults $loggers}}
       - name: "{{ $k }}"
         level: "{{ $v }}"
         AppenderRef:
           ref: STDOUT
-      {{ end }}
+{{ end }}
