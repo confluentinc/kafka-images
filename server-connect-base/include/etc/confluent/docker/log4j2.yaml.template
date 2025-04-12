@@ -1,0 +1,35 @@
+Configuration:
+  name: "Log4j2"
+
+  Appenders:
+    Console:
+      name: STDOUT
+      target: SYSTEM_OUT
+      PatternLayout:
+        Pattern: "{{ env['CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN'] | default('[%d] %p %m (%c)%n') }}"
+
+  Loggers:
+    Root:
+      level: "{{ env['CONNECT_LOG4J_ROOT_LOGLEVEL'] | default('INFO') }}"
+      AppenderRef:
+        - ref: STDOUT
+
+    {% set default_loggers = {
+      'org.reflections': 'ERROR'
+    } -%}
+
+    {% if env['CONNECT_LOG4J_LOGGERS'] %}
+    # loggers from CONNECT_LOG4J_LOGGERS env variable
+    {% set loggers = parse_log4j_loggers(env['CONNECT_LOG4J_LOGGERS']) %}
+    {% else %}
+    # default log levels
+    {% set loggers = default_loggers %}
+    {% endif %}
+
+    Logger:
+      {% for logger, loglevel in loggers.items() %}
+      - name: "{{ logger }}"
+        level: "{{ loglevel }}"
+        AppenderRef:
+          - ref: STDOUT
+      {% endfor %}
