@@ -15,24 +15,22 @@ Configuration:
         - ref: STDOUT
 
     Logger:
-      {% set loggers = {
-        'kafka': 'INFO',
-        'kafka.network.RequestChannel$': 'WARN',
-        'kafka.producer.async.DefaultEventHandler': 'DEBUG',
-        'kafka.request.logger': 'WARN',
-        'kafka.controller': 'TRACE',
-        'kafka.log.LogCleaner': 'INFO',
-        'state.change.logger': 'TRACE',
-        'kafka.authorizer.logger': 'WARN'
-        } -%}
-
-      {% if env['KAFKA_LOG4J_LOGGERS'] %}
-      {% set loggers = parse_log4j_loggers(env['KAFKA_LOG4J_LOGGERS'], loggers) %}
-      {% endif %}
-
-      {% for logger, loglevel in loggers.items() %}
+{% set loggers = {
+  'kafka': 'INFO',
+  'kafka.network.RequestChannel$': 'WARN',
+  'kafka.producer.async.DefaultEventHandler': 'DEBUG',
+  'kafka.request.logger': 'WARN',
+  'kafka.controller': 'TRACE',
+  'kafka.log.LogCleaner': 'INFO',
+  'state.change.logger': 'TRACE',
+  'kafka.authorizer.logger': 'WARN'
+  } -%}
+{% if env['KAFKA_LOG4J_LOGGERS'] %}
+{% set loggers = parse_log4j_loggers(env['KAFKA_LOG4J_LOGGERS'], loggers) %}
+{% endif %}
+{% for logger,loglevel in loggers.items() %}
       - name: "{{ logger }}"
         level: "{{ loglevel }}"
         AppenderRef:
           ref: STDOUT
-      {% endfor %}
+{% endfor %}
