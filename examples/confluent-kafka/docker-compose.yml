@@ -1,7 +1,7 @@
 ---
 services:
   controller-1:
-    image: confluentinc/cp-server:latest
+    image: confluentinc/cp-kafka:latest
     network_mode: host
     environment:
       KAFKA_NODE_ID: 1
@@ -16,7 +16,7 @@ services:
       - "moby:127.0.0.1"
 
   kafka-1:
-    image: confluentinc/cp-server:latest
+    image: confluentinc/cp-kafka:latest
     network_mode: host
     environment:
       KAFKA_NODE_ID: 2
@@ -35,7 +35,7 @@ services:
       - "moby:127.0.0.1"
 
   kafka-2:
-    image: confluentinc/cp-server:latest
+    image: confluentinc/cp-kafka:latest
     network_mode: host
     environment:
       KAFKA_NODE_ID: 3
@@ -54,7 +54,7 @@ services:
       - "moby:127.0.0.1"
 
   kafka-3:
-    image: confluentinc/cp-server:latest
+    image: confluentinc/cp-kafka:latest
     network_mode: host
     environment:
       KAFKA_NODE_ID: 4

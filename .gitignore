@@ -1,0 +1,6 @@
+# If changing this file, also update .gitignore in the rpm, deb, and archive branches
+target/
+.idea
+*.iml
+*~
+*.DS_Store
