@@ -10,15 +10,15 @@ Configuration:
 
   Loggers:
     Root:
-      level: "{{ getEnv 'KAFKA_REST_LOG4J_ROOT_LOGLEVEL' 'INFO' }}"
+      level: {{ getEnv "KAFKA_REST_LOG4J_ROOT_LOGLEVEL" "INFO" }}
       AppenderRef:
         - ref: STDOUT
 
     Logger:
-      {{ $loggers := getEnv "KAFKA_REST_LOG4J_LOGGERS" "" -}}
-      {{ range $k, $v := splitToMapDefaults "," "" $loggers }}
+  {{ $loggers := getEnv "KAFKA_REST_LOG4J_LOGGERS" "" -}}
+  {{ range $k, $v := splitToMapDefaults ","  "" $loggers}}
       - name: "{{ $k }}"
         level: "{{ $v }}"
         AppenderRef:
           ref: STDOUT
-      {{ end }}
+  {{ end }}
