@@ -1,10 +1,20 @@
+Configuration:
+  name: "Log4j2"
 
-log4j.rootLogger={{ env["KAFKA_LOG4J_ROOT_LOGLEVEL"] | default('INFO') }}, stdout
+  Appenders:
+    Console:
+      name: STDOUT
+      target: SYSTEM_OUT
+      PatternLayout:
+        Pattern: "[%d] %p %m (%c)%n"
 
-log4j.appender.stdout=org.apache.log4j.ConsoleAppender
-log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
-log4j.appender.stdout.layout.ConversionPattern=[%d] %p %m (%c)%n
+  Loggers:
+    Root:
+      level: "{{ env['KAFKA_LOG4J_ROOT_LOGLEVEL'] | default('INFO') }}"
+      AppenderRef:
+        - ref: STDOUT
 
+    Logger:
 {% set loggers = {
   'kafka': 'INFO',
   'kafka.network.RequestChannel$': 'WARN',
@@ -15,12 +25,12 @@ log4j.appender.stdout.layout.ConversionPattern=[%d] %p %m (%c)%n
   'state.change.logger': 'TRACE',
   'kafka.authorizer.logger': 'WARN'
   } -%}
-
-
 {% if env['KAFKA_LOG4J_LOGGERS'] %}
 {% set loggers = parse_log4j_loggers(env['KAFKA_LOG4J_LOGGERS'], loggers) %}
 {% endif %}
-
 {% for logger,loglevel in loggers.items() %}
-log4j.logger.{{logger}}={{loglevel}}
+      - name: "{{ logger }}"
+        level: "{{ loglevel }}"
+        AppenderRef:
+          ref: STDOUT
 {% endfor %}
