@@ -46,7 +46,7 @@ PRODUCER = """bash -c "\
 
 CONSUMER = """bash -c "\
         export KAFKA_TOOLS_LOG4J_LOGLEVEL=DEBUG \
-        && ub template "/etc/confluent/docker/tools-log4j.properties.template" "/etc/kafka/tools-log4j.properties" \
+        && ub template "/etc/confluent/docker/tools-log4j2.yaml.template" "/etc/kafka/tools-log4j2.yaml" \
         && kafka-console-consumer --bootstrap-server {brokers} --topic foo --from-beginning --consumer.config /etc/kafka/secrets/{config} --max-messages {messages}"
         """
 
@@ -61,7 +61,7 @@ KAFKACAT_SSL_CONSUMER = """kafkacat -X security.protocol=ssl \
 
 PLAIN_CLIENTS = """bash -c "\
     export KAFKA_TOOLS_LOG4J_LOGLEVEL=DEBUG \
-    && ub template /etc/confluent/docker/tools-log4j.properties.template /etc/kafka/tools-log4j.properties \
+    && ub template /etc/confluent/docker/tools-log4j2.yaml.template /etc/kafka/tools-log4j2.yaml \
     && kafka-topics --create --topic {topic} --partitions 1 --replication-factor 3 --if-not-exists --zookeeper $KAFKA_ZOOKEEPER_CONNECT \
     && seq {messages} | kafka-console-producer --broker-list {brokers} --topic {topic} \
     && echo PRODUCED {messages} messages. \
@@ -150,34 +150,77 @@ class ConfigTest(unittest.TestCase):
     def test_default_logging_config(self):
         self.is_kafka_healthy_for_service("default-config", 9092, 1)
 
-        log4j_props = self.cluster.run_command_on_service("default-config", "cat /etc/kafka/log4j.properties")
-        expected_log4j_props = """log4j.rootLogger=INFO, stdout
+        logger_props = self.cluster.run_command_on_service("default-config", "cat /etc/kafka/log4j2.yaml")
+        expected_logger_props = """Configuration:
+            name: "Log4j2"
 
-            log4j.appender.stdout=org.apache.log4j.ConsoleAppender
-            log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
-            log4j.appender.stdout.layout.ConversionPattern=[%d] %p %m (%c)%n
+            Appenders:
+                Console:
+                  name: STDOUT
+                  target: SYSTEM_OUT
+                  PatternLayout:
+                    Pattern: "[%d] %p %m (%c)%n"
 
+            Loggers:
+                Root:
+                  level: INFO
+                  AppenderRef:
+                    - ref: STDOUT
 
-            log4j.logger.kafka.authorizer.logger=WARN
-            log4j.logger.kafka.log.LogCleaner=INFO
-            log4j.logger.kafka.producer.async.DefaultEventHandler=DEBUG
-            log4j.logger.kafka.controller=TRACE
-            log4j.logger.kafka.network.RequestChannel$=WARN
-            log4j.logger.kafka.request.logger=WARN
-            log4j.logger.state.change.logger=TRACE
-            log4j.logger.kafka=INFO
+                Logger:
+                  - name: kafka.authorizer.logger
+                    level: WARN
+                    AppenderRef:
+                      ref: STDOUT
+                  - name: kafka.log.LogCleaner
+                    level: INFO
+                    AppenderRef:
+                      ref: STDOUT
+                  - name: kafka.producer.async.DefaultEventHandler
+                    level: DEBUG
+                    AppenderRef:
+                      ref: STDOUT
+                  - name: kafka.controller
+                    level: TRACE
+                    AppenderRef:
+                      ref: STDOUT
+                  - name: kafka.network.RequestChannel$
+                    level: WARN
+                    AppenderRef:
+                      ref: STDOUT
+                  - name: kafka.request.logger
+                    level: WARN
+                    AppenderRef:
+                      ref: STDOUT
+                  - name: state.change.logger
+                    level: TRACE
+                    AppenderRef:
+                      ref: STDOUT
+                  - name: kafka
+                    level: INFO
+                    AppenderRef:
+                      ref: STDOUT
             """
-        self.assertEquals(log4j_props.translate(None, string.whitespace), expected_log4j_props.translate(None, string.whitespace))
+        self.assertEquals(logger_props.translate(None, string.whitespace), expected_logger_props.translate(None, string.whitespace))
 
-        tools_log4j_props = self.cluster.run_command_on_service("default-config", "cat /etc/kafka/tools-log4j.properties")
-        expected_tools_log4j_props = """log4j.rootLogger=WARN, stderr
+        tools_logger_props = self.cluster.run_command_on_service("default-config", "cat /etc/kafka/tools-log4j2.yaml")
+        expected_tools_logger_props = """Configuration:
+            name: "Log4j2"
 
-            log4j.appender.stderr=org.apache.log4j.ConsoleAppender
-            log4j.appender.stderr.layout=org.apache.log4j.PatternLayout
-            log4j.appender.stderr.layout.ConversionPattern=[%d] %p %m (%c)%n
-            log4j.appender.stderr.Target=System.err
+            Appenders:
+              Console:
+                name: STDERR
+                target: SYSTEM_ERR
+                PatternLayout:
+                  Pattern: "[%d] %p %m (%c)%n"
+
+            Loggers:
+              Root:
+                level: WARN
+                AppenderRef:
+                  - ref: STDERR
             """
-        self.assertEquals(tools_log4j_props.translate(None, string.whitespace), expected_tools_log4j_props.translate(None, string.whitespace))
+        self.assertEquals(tools_logger_props.translate(None, string.whitespace), expected_tools_logger_props.translate(None, string.whitespace))
 
     def test_full_config(self):
         self.is_kafka_healthy_for_service("full-config", 9092, 1)
@@ -194,35 +237,81 @@ class ConfigTest(unittest.TestCase):
     def test_full_logging_config(self):
         self.is_kafka_healthy_for_service("full-config", 9092, 1)
 
-        log4j_props = self.cluster.run_command_on_service("full-config", "cat /etc/kafka/log4j.properties")
-        expected_log4j_props = """log4j.rootLogger=WARN, stdout
+        logger_props = self.cluster.run_command_on_service("full-config", "cat /etc/kafka/log4j2.yaml")
+        expected_logger_props = """Configuration:
+            name: "Log4j2"
 
-            log4j.appender.stdout=org.apache.log4j.ConsoleAppender
-            log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
-            log4j.appender.stdout.layout.ConversionPattern=[%d] %p %m (%c)%n
+            Appenders:
+                Console:
+                  name: STDOUT
+                  target: SYSTEM_OUT
+                  PatternLayout:
+                    Pattern: "[%d] %p %m (%c)%n"
 
+            Loggers:
+                Root:
+                  level: WARN
+                  AppenderRef:
+                    - ref: STDOUT
 
-            log4j.logger.kafka.authorizer.logger=WARN
-            log4j.logger.kafka.log.LogCleaner=INFO
-            log4j.logger.kafka.producer.async.DefaultEventHandler=DEBUG
-            log4j.logger.kafka.controller=WARN
-            log4j.logger.kafka.network.RequestChannel$=WARN
-            log4j.logger.kafka.request.logger=WARN
-            log4j.logger.state.change.logger=TRACE
-            log4j.logger.kafka.foo.bar=DEBUG
-            log4j.logger.kafka=INFO
+                Logger:
+                  - name: kafka.authorizer.logger
+                    level: WARN
+                    AppenderRef:
+                      ref: STDOUT
+                  - name: kafka.log.LogCleaner
+                    level: INFO
+                    AppenderRef:
+                      ref: STDOUT
+                  - name: kafka.producer.async.DefaultEventHandler
+                    level: DEBUG
+                    AppenderRef:
+                      ref: STDOUT
+                  - name: kafka.controller
+                    level: WARN
+                    AppenderRef:
+                      ref: STDOUT
+                  - name: kafka.network.RequestChannel$
+                    level: WARN
+                    AppenderRef:
+                      ref: STDOUT
+                  - name: kafka.request.logger
+                    level: WARN
+                    AppenderRef:
+                      ref: STDOUT
+                  - name: state.change.logger
+                    level: TRACE
+                    AppenderRef:
+                      ref: STDOUT
+                  - name: kafka.foo.bar
+                    level: DEBUG
+                    AppenderRef:
+                      ref: STDOUT
+                  - name: kafka
+                    level: INFO
+                    AppenderRef:
+                      ref: STDOUT
             """
-        self.assertEquals(log4j_props.translate(None, string.whitespace), expected_log4j_props.translate(None, string.whitespace))
+        self.assertEquals(logger_props.translate(None, string.whitespace), expected_logger_props.translate(None, string.whitespace))
 
-        tools_log4j_props = self.cluster.run_command_on_service("full-config", "cat /etc/kafka/tools-log4j.properties")
-        expected_tools_log4j_props = """log4j.rootLogger=ERROR, stderr
+        tools_logger_props = self.cluster.run_command_on_service("full-config", "cat /etc/kafka/tools-log4j2.yaml")
+        expected_tools_logger_props = """Configuration:
+            name: "Log4j2"
 
-            log4j.appender.stderr=org.apache.log4j.ConsoleAppender
-            log4j.appender.stderr.layout=org.apache.log4j.PatternLayout
-            log4j.appender.stderr.layout.ConversionPattern=[%d] %p %m (%c)%n
-            log4j.appender.stderr.Target=System.err
+            Appenders:
+              Console:
+                name: STDERR
+                target: SYSTEM_ERR
+                PatternLayout:
+                  Pattern: "[%d] %p %m (%c)%n"
+
+            Loggers:
+              Root:
+                level: ERROR
+                AppenderRef:
+                  - ref: STDERR
             """
-        self.assertEquals(tools_log4j_props.translate(None, string.whitespace), expected_tools_log4j_props.translate(None, string.whitespace))
+        self.assertEquals(tools_logger_props.translate(None, string.whitespace), expected_tools_logger_props.translate(None, string.whitespace))
 
     def test_volumes(self):
         self.is_kafka_healthy_for_service("external-volumes", 9092, 1)

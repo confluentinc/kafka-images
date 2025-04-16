@@ -68,7 +68,7 @@ This will:
     sasl.mechanism=OAUTHBEARER
     security.protocol=SASL_PLAINTEXT
     group.id=console-consumer-group
-    sasl.login.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerLoginCallbackHandler
+    sasl.login.callback.handler.class=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginCallbackHandler
     sasl.oauthbearer.token.endpoint.url=http://localhost:8080/realms/cp/protocol/openid-connect/token
     sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
       clientId="client_app1" \

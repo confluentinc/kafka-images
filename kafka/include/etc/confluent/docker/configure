@@ -16,35 +16,26 @@
 
 . /etc/confluent/docker/bash-config
 
-# If KAFKA_PROCESS_ROLES is defined it means we are running in KRaft mode
+# Ensure that KAFKA_PROCESS_ROLES and CLUSTER_ID are defined
+ub ensure KAFKA_PROCESS_ROLES
+ub ensure CLUSTER_ID
 
-# unset KAFKA_ADVERTISED_LISTENERS from ENV in KRaft mode when running as controller only
-if [[ -n "${KAFKA_PROCESS_ROLES-}" ]]
+# unset KAFKA_ADVERTISED_LISTENERS from ENV when running as controller only
+if [[ $KAFKA_PROCESS_ROLES == "controller" ]]
 then
-  echo "Running in KRaft mode..."
-  ub ensure CLUSTER_ID
-  if [[ $KAFKA_PROCESS_ROLES == "controller" ]]
+  if [[ -n "${KAFKA_ADVERTISED_LISTENERS-}" ]]
   then
-    if [[ -n "${KAFKA_ADVERTISED_LISTENERS-}" ]]
-    then
-      echo "KAFKA_ADVERTISED_LISTENERS is not supported on a KRaft controller."
-      exit 1
-    else
-      unset KAFKA_ADVERTISED_LISTENERS
-    fi
-  else
-    ub ensure KAFKA_ADVERTISED_LISTENERS
-  fi 
+    echo "KAFKA_ADVERTISED_LISTENERS is not supported on a KRaft controller."
+    exit 1
+  fi
 else
-  echo "Running in Zookeeper mode..."
-  ub ensure KAFKA_ZOOKEEPER_CONNECT
   ub ensure KAFKA_ADVERTISED_LISTENERS
 fi
 
 # By default, LISTENERS is derived from ADVERTISED_LISTENERS by replacing
 # hosts with 0.0.0.0. This is good default as it ensures that the broker
 # process listens on all ports.
-if [[ -z "${KAFKA_LISTENERS-}" ]] && ( [[ -z "${KAFKA_PROCESS_ROLES-}" ]] || [[ $KAFKA_PROCESS_ROLES != "controller" ]] )
+if [[ -z "${KAFKA_LISTENERS-}" ]] && [[ $KAFKA_PROCESS_ROLES != "controller" ]]
 then
   export KAFKA_LISTENERS
   KAFKA_LISTENERS=$(ub listeners "$KAFKA_ADVERTISED_LISTENERS")
@@ -141,5 +132,5 @@ then
 fi
 
 ub template "/etc/confluent/docker/${COMPONENT}.properties.template" "/etc/${COMPONENT}/${COMPONENT}.properties"
-ub template "/etc/confluent/docker/log4j.properties.template" "/etc/${COMPONENT}/log4j.properties"
-ub template "/etc/confluent/docker/tools-log4j.properties.template" "/etc/${COMPONENT}/tools-log4j.properties"
+ub template "/etc/confluent/docker/log4j2.yaml.template" "/etc/${COMPONENT}/log4j2.yaml"
+ub template "/etc/confluent/docker/tools-log4j2.yaml.template" "/etc/${COMPONENT}/tools-log4j2.yaml"

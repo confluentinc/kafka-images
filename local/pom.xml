@@ -19,7 +19,7 @@
    <parent>
       <groupId>io.confluent.kafka-images</groupId>
       <artifactId>kafka-images-parent</artifactId>
-      <version>8.0.0-0</version>
+      <version>8.1.0-0</version>
    </parent>
    <groupId>io.confluent.kafka-images</groupId>
    <artifactId>confluent-local</artifactId>
@@ -92,10 +92,14 @@
          <scope>test</scope>
       </dependency>
       <dependency>
-         <groupId>org.slf4j</groupId>
-         <artifactId>slf4j-log4j12</artifactId>
-         <version>${slf4j.version}</version>
+         <groupId>org.apache.logging.log4j</groupId>
+         <artifactId>log4j-slf4j-impl</artifactId>
          <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>com.fasterxml.jackson.dataformat</groupId>
+         <artifactId>jackson-dataformat-yaml</artifactId>
+         <scope>runtime</scope>
       </dependency>
    </dependencies>
    <build>
