@@ -7,12 +7,12 @@ import json
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 FIXTURES_DIR = os.path.join(CURRENT_DIR, "fixtures", "debian", "kafka")
-HEALTH_CHECK = """bash -c 'cp /etc/kafka/kafka.properties /tmp/cub.properties \
-                  && echo security.protocol={security_protocol} >> /tmp/cub.properties \
-                  && cub kafka-ready {brokers} 40 -b {host}:{port} -c /tmp/cub.properties -s {security_protocol}\
+HEALTH_CHECK = """bash -c 'cp /etc/kafka/kafka.properties /tmp/ub.properties \
+                  && echo security.protocol={security_protocol} >> /tmp/ub.properties \
+                  && ub kafka-ready {brokers} 40 -b {host}:{port} -c /tmp/ub.properties -s {security_protocol}\
                   && echo PASS || echo FAIL'
                 """
-ZK_READY = "bash -c 'cub zk-ready {servers} 40 && echo PASS || echo FAIL'"
+ZK_READY = "bash -c 'ub zk-ready {servers} 40 && echo PASS || echo FAIL'"
 KAFKA_CHECK = "bash -c 'kafkacat -L -b {host}:{port} -J' "
 KAFKA_SASL_SSL_CHECK = """bash -c "kafkacat -X 'security.protocol=sasl_ssl' \
       -X 'ssl.ca.location=/etc/kafka/secrets/snakeoil-ca-1.crt' \
@@ -46,7 +46,7 @@ PRODUCER = """bash -c "\
 
 CONSUMER = """bash -c "\
         export KAFKA_TOOLS_LOG4J_LOGLEVEL=DEBUG \
-        && dub template "/etc/confluent/docker/tools-log4j2.yaml.template" "/etc/kafka/tools-log4j2.yaml" \
+        && ub template "/etc/confluent/docker/tools-log4j2.yaml.template" "/etc/kafka/tools-log4j2.yaml" \
         && kafka-console-consumer --bootstrap-server {brokers} --topic foo --from-beginning --consumer.config /etc/kafka/secrets/{config} --max-messages {messages}"
         """
 
@@ -61,7 +61,7 @@ KAFKACAT_SSL_CONSUMER = """kafkacat -X security.protocol=ssl \
 
 PLAIN_CLIENTS = """bash -c "\
     export KAFKA_TOOLS_LOG4J_LOGLEVEL=DEBUG \
-    && dub template /etc/confluent/docker/tools-log4j2.yaml.template /etc/kafka/tools-log4j2.yaml \
+    && ub template /etc/confluent/docker/tools-log4j2.yaml.template /etc/kafka/tools-log4j2.yaml \
     && kafka-topics --create --topic {topic} --partitions 1 --replication-factor 3 --if-not-exists --zookeeper $KAFKA_ZOOKEEPER_CONNECT \
     && seq {messages} | kafka-console-producer --broker-list {brokers} --topic {topic} \
     && echo PRODUCED {messages} messages. \
