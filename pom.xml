@@ -22,7 +22,7 @@
     <parent>
         <groupId>io.confluent</groupId>
         <artifactId>common-docker</artifactId>
-        <version>[7.1.17-0, 7.1.18-0)</version>
+        <version>[7.2.0-0,7.3.0-0)</version>
     </parent>
 
     <groupId>io.confluent.kafka-images</groupId>
