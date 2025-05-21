@@ -26,6 +26,8 @@ ARG CONFLUENT_VERSION
 ARG CONFLUENT_PACKAGES_REPO
 ARG CONFLUENT_PLATFORM_LABEL
 
+USER root
+
 # Install Kafka in intermediate stage
 RUN echo "===> Installing ${COMPONENT}..." \
     && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
@@ -70,8 +72,6 @@ ENV COMPONENT=kafka
 
 # primary
 EXPOSE 9092
-
-USER root
 
 # Copy only necessary files from intermediate stage
 COPY --from=intermediate / /
