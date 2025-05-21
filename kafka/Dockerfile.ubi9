@@ -31,7 +31,7 @@ USER root
 # Install Kafka in intermediate stage
 RUN echo "===> Installing ${COMPONENT}..." \
     && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
-    && sudo rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
+    && rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
     && printf "[Confluent] \n\
     name=Confluent repository \n\
     baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
