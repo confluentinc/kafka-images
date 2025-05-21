@@ -15,12 +15,39 @@
 
 ARG DOCKER_UPSTREAM_REGISTRY
 ARG DOCKER_UPSTREAM_TAG=ubi9-latest
+ARG UBI_MINIMAL_VERSION
 
+FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-java:${DOCKER_UPSTREAM_TAG} as intermediate
+
+ARG PROJECT_VERSION
+ARG ARTIFACT_ID
+ARG GIT_COMMIT
+ARG CONFLUENT_VERSION
+ARG CONFLUENT_PACKAGES_REPO
+ARG CONFLUENT_PLATFORM_LABEL
+
+# Install Kafka in intermediate stage
+RUN echo "===> Installing ${COMPONENT}..." \
+    && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
+    && sudo rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
+    && printf "[Confluent] \n\
+    name=Confluent repository \n\
+    baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
+    gpgcheck=1 \n\
+    gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
+    enabled=1 " > /etc/yum.repos.d/confluent.repo \
+    && microdnf install -y confluent-kafka-${CONFLUENT_VERSION} \
+    && echo "===> clean up ..."  \
+    && microdnf clean all \
+    && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo
+
+# Final stage
 FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-new:${DOCKER_UPSTREAM_TAG}
 
 ARG PROJECT_VERSION
 ARG ARTIFACT_ID
 ARG GIT_COMMIT
+ARG BUILD_NUMBER=-1
 
 LABEL maintainer="partner-support@confluent.io"
 LABEL vendor="Confluent"
@@ -30,13 +57,8 @@ LABEL name=$ARTIFACT_ID
 LABEL summary="Confluent platform Kafka."
 LABEL io.confluent.docker=true
 LABEL io.confluent.docker.git.id=$GIT_COMMIT
-ARG BUILD_NUMBER=-1
 LABEL io.confluent.docker.build.number=$BUILD_NUMBER
 LABEL io.confluent.docker.git.repo="confluentinc/kafka-images"
-
-ARG CONFLUENT_VERSION
-ARG CONFLUENT_PACKAGES_REPO
-ARG CONFLUENT_PLATFORM_LABEL
 
 # allow arg override of required env params
 ARG KAFKA_ADVERTISED_LISTENERS
@@ -51,23 +73,14 @@ EXPOSE 9092
 
 USER root
 
-RUN echo "===> Installing ${COMPONENT}..." \
-    && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
-    && rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
-    && printf "[Confluent] \n\
-name=Confluent repository \n\
-baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
-gpgcheck=1 \n\
-gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
-enabled=1 " > /etc/yum.repos.d/confluent.repo \
-    && yum install -y confluent-kafka-${CONFLUENT_VERSION} \
-    && echo "===> clean up ..."  \
-    && yum clean all \
-    && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo \
-    && echo "===> Setting up ${COMPONENT} dirs" \
+# Copy only necessary files from intermediate stage
+COPY --from=intermediate / /
+
+RUN echo "===> Setting up ${COMPONENT} dirs" \
     && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
     && chown appuser:root -R /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /etc/${COMPONENT}/secrets /var/lib/${COMPONENT} /etc/${COMPONENT} \
-    && chmod -R ug+w /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}
+    && chmod -R ug+w /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT} \
+    && rm -rf /tmp/* /var/cache/yum/*
 
 VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
 
