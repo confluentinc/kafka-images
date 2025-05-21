@@ -1,36 +1,38 @@
 Configuration:
-  name: "Log4j2"
-
-  Appenders:
+  status: info
+  name: Kafka
+  properties:
+    property:
+      name: kafka.logs.dir
+      value: /var/log/kafka
+  appenders:
     Console:
-      name: STDOUT
-      target: SYSTEM_OUT
+      name: stdout
       PatternLayout:
-        Pattern: "[%d] %p %m (%c)%n"
-
+        pattern: "%d{ISO8601} %p %m%n"
   Loggers:
     Root:
-      level: "{{ env['KAFKA_LOG4J_ROOT_LOGLEVEL'] | default('INFO') }}"
+      level: {{ getEnv "KAFKA_LOG4J_ROOT_LOGLEVEL" | default "INFO" }}
       AppenderRef:
-        - ref: STDOUT
+        ref: stdout
 
     Logger:
-{% set loggers = {
-  'kafka': 'INFO',
-  'kafka.network.RequestChannel$': 'WARN',
-  'kafka.producer.async.DefaultEventHandler': 'DEBUG',
-  'kafka.request.logger': 'WARN',
-  'kafka.controller': 'TRACE',
-  'kafka.log.LogCleaner': 'INFO',
-  'state.change.logger': 'TRACE',
-  'kafka.authorizer.logger': 'WARN'
-  } -%}
-{% if env['KAFKA_LOG4J_LOGGERS'] %}
-{% set loggers = parse_log4j_loggers(env['KAFKA_LOG4J_LOGGERS'], loggers) %}
-{% endif %}
-{% for logger,loglevel in loggers.items() %}
-      - name: "{{ logger }}"
-        level: "{{ loglevel }}"
+{{- $loggers := dict 
+  "kafka" "INFO"
+  "kafka.network.RequestChannel$" "WARN"
+  "kafka.producer.async.DefaultEventHandler" "DEBUG"
+  "kafka.request.logger" "WARN"
+  "kafka.controller" "TRACE"
+  "kafka.log.LogCleaner" "INFO"
+  "state.change.logger" "TRACE"
+  "kafka.authorizer.logger" "WARN"
+-}}
+{{- if getEnv "KAFKA_LOG4J_LOGGERS" -}}
+{{- $loggers = parseLog4jLoggers (getEnv "KAFKA_LOG4J_LOGGERS") $loggers -}}
+{{- end -}}
+{{- range $logger, $loglevel := $loggers -}}
+      - name: "{{ $logger }}"
+        level: "{{ $loglevel }}"
         AppenderRef:
-          ref: STDOUT
-{% endfor %}
+          ref: stdout
+{{- end -}}
