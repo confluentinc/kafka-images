@@ -26,16 +26,18 @@ ARG CONFLUENT_VERSION
 ARG CONFLUENT_PACKAGES_REPO
 ARG CONFLUENT_PLATFORM_LABEL
 
+USER root
+
 # Install Kafka in intermediate stage
 RUN echo "===> Installing kafka..." \
     && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
     && rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
     && printf "[Confluent] \n\
-    name=Confluent repository \n\
-    baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
-    gpgcheck=1 \n\
-    gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
-    enabled=1 " > /etc/yum.repos.d/confluent.repo \
+name=Confluent repository \n\
+baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
+gpgcheck=1 \n\
+gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
+enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && yum install -y confluent-kafka-${CONFLUENT_VERSION} \
     && echo "===> clean up ..."  \
     && yum clean all \
