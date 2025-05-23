@@ -43,6 +43,9 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && microdnf clean all \
     && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo
 
+RUN cd /usr/share/java \
+    && package_dedupe $(pwd)
+
 # Final stage
 FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-new:${DOCKER_UPSTREAM_TAG}
 
