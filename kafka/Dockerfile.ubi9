@@ -47,7 +47,7 @@ RUN cd /usr/share/java \
     && package_dedupe $(pwd)
 
 # Final stage
-FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-new:${DOCKER_UPSTREAM_TAG}
+FROM registry.access.redhat.com/ubi9-minimal:${UBI_MINIMAL_VERSION}
 
 ARG PROJECT_VERSION
 ARG ARTIFACT_ID
