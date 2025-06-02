@@ -7,15 +7,18 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="cp-kafka-connect" />
-        <module name="cp-enterprise-kafka" />
         <module name="confluent-local" />
         <module name="cp-server" />
         <module name="cp-server-connect-base" />
         <module name="cp-server-connect" />
         <module name="cp-kafka-connect-base" />
-        <module name="cp-zookeeper" />
         <module name="cp-kafka" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="confluent-local" target="1.5" />
+      <module name="cp-enterprise-kafka" target="1.5" />
+      <module name="cp-zookeeper" target="1.5" />
+    </bytecodeTargetLevel>
   </component>
 </project>

@@ -1,0 +1,131 @@
+ARG DOCKER_UPSTREAM_REGISTRY=519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/
+ARG DOCKER_UPSTREAM_TAG=8.0.x-6262-ubi9
+ARG CONFLUENT_PACKAGES_REPO=https://nightly-packages.confluent.io/8.0.x/6302/rpm/8.0
+ARG CONFLUENT_VERSION=8.0.0
+
+FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-new:${DOCKER_UPSTREAM_TAG} AS confluent-base
+
+ARG PROJECT_VERSION
+ARG ARTIFACT_ID
+ARG GIT_COMMIT
+
+LABEL maintainer="partner-support@confluent.io"
+LABEL vendor="Confluent"
+LABEL version=$GIT_COMMIT
+LABEL release=$PROJECT_VERSION
+LABEL name=$ARTIFACT_ID
+LABEL summary="Confluent platform server image."
+LABEL description="Confluent platform server image."
+LABEL io.confluent.docker=true
+LABEL io.confluent.docker.git.id=$GIT_COMMIT
+ARG BUILD_NUMBER=-1
+LABEL io.confluent.docker.build.number=$BUILD_NUMBER
+LABEL io.confluent.docker.git.repo="confluentinc/kafka-images"
+
+ARG CONFLUENT_VERSION
+ARG CONFLUENT_PACKAGES_REPO
+ARG CONFLUENT_PLATFORM_LABEL
+ARG KAFKA_ADVERTISED_LISTENERS
+ENV KAFKA_ADVERTISED_LISTENERS=${KAFKA_ADVERTISED_LISTENERS}
+ARG CLUSTER_ID
+ENV CLUSTER_ID=${CLUSTER_ID}
+
+ENV COMPONENT=kafka
+EXPOSE 9092
+USER root
+
+RUN echo "===> Installing ${COMPONENT}..." \
+    && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
+    && rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
+    && printf "[Confluent] \n\
+name=Confluent repository \n\
+baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
+gpgcheck=1 \n\
+gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
+enabled=1 " > /etc/yum.repos.d/confluent.repo \
+    && echo "===> installing ${COMPONENT}..." \
+    && yum install -y confluent-server-${CONFLUENT_VERSION} \
+    && echo "===> installing confluent-rebalancer ..." \
+    && yum install -y confluent-rebalancer-${CONFLUENT_VERSION} \
+    && echo "===> installing confluent-security ..." \
+    && yum install -y confluent-security-${CONFLUENT_VERSION} \
+    && echo "===> clean up ..."  \
+    && yum clean all \
+    && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo \
+    && echo "===> Setting up ${COMPONENT} dirs" \
+    && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
+    && chown -R appuser:root /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /etc/${COMPONENT}/secrets \
+    && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets /var/log/kafka
+
+VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
+
+
+# Stage 2: GraalVM for native-image
+FROM ghcr.io/graalvm/graalvm-community:21 AS build-native-image
+
+WORKDIR /app
+ARG COMPONENT=kafka
+ENV COMPONENT=kafka
+USER root
+
+# Set environment variables for GraalVM
+ENV GRAALVM_HOME=/opt/graalvm
+ENV PATH="$GRAALVM_HOME/bin:$PATH"
+
+# Copy Kafka source code from the previous stage
+COPY --from=confluent-base /usr/share/java /usr/share/java
+
+# Copy reflection configs to create GraalVM native binary
+COPY native-image-configs-800 /app/native-image-configs-800
+
+COPY override-dir /app/override-dir
+
+# Build native image for the Kafka application
+RUN mkdir /app/kafka; \
+    native-image --no-fallback -H:-CheckToolchain --enable-http \
+                                                    --enable-https \
+                                                    --add-exports org.graalvm.nativeimage.builder/com.oracle.svm.core.configure=ALL-UNNAMED \
+                                                    --add-exports org.graalvm.nativeimage/org.graalvm.nativeimage.impl=ALL-UNNAMED \
+                                                    --allow-incomplete-classpath \
+                                                    --report-unsupported-elements-at-runtime \
+                                                    --install-exit-handlers \
+                                                    --trace-class-initialization=com.fasterxml.jackson.dataformat.yaml.util.StringQuotingChecker \
+                                                    --initialize-at-run-time=ch.qos.logback.classic.Level,ch.qos.logback.classic.Logger,ch.qos.logback.classic.PatternLayout,ch.qos.logback.core.CoreConstants,ch.qos.logback.core.pattern.parser.Parser,ch.qos.logback.core.spi.AppenderAttachableImpl,ch.qos.logback.core.status.InfoStatus,ch.qos.logback.core.status.StatusBase,ch.qos.logback.core.util.Loader,ch.qos.logback.core.util.StatusPrinter,ch.qos.logback.core.util.StatusPrinter2,org.apache.log4j.Logger,org.slf4j.MDC,org.slf4j.LoggerFactory,org.slf4j.impl.StaticLoggerBinder,com.azure.core.util.logging.LogLevel,com.azure.core.implementation.logging.DefaultLogger,com.azure.core.test.TestBase,com.azure.core.util.Configuration,com.azure.core.util.logging.ClientLogger,com.azure.core.implementation.util.EnvironmentConfiguration,com.azure.core.implementation.util.EnvironmentConfiguration$EnvironmentVariablesConfigurationSource,com.azure.core.util.CoreUtils,com.azure.core.util.NoopConfiguration,com.azure.core.util.logging.LoggingEventBuilder,com.fasterxml.jackson.core.Base64Variants,com.fasterxml.jackson.core.JsonFactory,com.fasterxml.jackson.core.io.CharTypes,com.fasterxml.jackson.core.io.JsonStringEncoder,com.fasterxml.jackson.core.io.SerializedString,com.fasterxml.jackson.databind.MappingJsonFactory \
+                                                    --enable-monitoring=jmxserver,jmxclient,heapdump,jvmstat \
+                                                    -H:ConfigurationFileDirectories=/app/override-dir \
+                                                    -H:+ReportExceptionStackTraces \
+                                                    -H:+PrintClassInitialization \
+                                                    -H:+EnableAllSecurityServices \
+                                                    -H:EnableURLProtocols=http,https \
+                                                    -H:AdditionalSecurityProviders=sun.security.jgss.SunProvider \
+                                                    -H:ReflectionConfigurationFiles=/app/native-image-configs-800/reflect-config.json \
+                                                    -H:JNIConfigurationFiles=/app/native-image-configs-800/jni-config.json \
+                                                    -H:ResourceConfigurationFiles=/app/native-image-configs-800/resource-config.json \
+                                                    -H:SerializationConfigurationFiles=/app/native-image-configs-800/serialization-config.json \
+                                                    -H:PredefinedClassesConfigurationFiles=/app/native-image-configs-800/predefined-classes-config.json \
+                                                    -H:DynamicProxyConfigurationFiles=/app/native-image-configs-800/proxy-config.json \
+                                                    --verbose \
+                                                    -march=compatibility \
+                                                    -cp "/usr/bin/../share/java/kafka/*:/usr/bin/../share/java/confluent-metadata-service/*:/usr/bin/../share/java/rest-utils/*:/usr/bin/../share/java/confluent-common/*:/usr/bin/../share/java/ce-kafka-http-server/*:/usr/bin/../share/java/ce-kafka-rest-servlet/*:/usr/bin/../share/java/ce-kafka-rest-extensions/*:/usr/bin/../share/java/kafka-rest-lib/*:/usr/bin/../share/java/confluent-security/kafka-rest/*:/usr/bin/../share/java/confluent-security/schema-validator/*:/usr/bin/../share/java/confluent-telemetry/*" kafka.Kafka -o /app/kafka/kafka.Kafka
+
+# Stage 3: Final runtime image with native binary
+FROM ubuntu:latest
+
+
+# Copy the native executable from the GraalVM build stage
+COPY --from=build-native-image /app /app
+
+COPY --from=confluent-base /usr/local/bin /usr/local/bin
+COPY --from=confluent-base /usr/bin /usr/bin
+COPY include/etc/confluent/docker /etc/confluent/docker
+COPY include/etc/confluent/docker/kafka.properties /etc/kafka/kafka.properties
+COPY include/etc/confluent/docker/log4j2.yaml /etc/kafka/log4j2.yaml
+COPY include/etc/confluent/docker/tools-log4j2.yaml /etc/kafka/tools-log4j2.yaml
+COPY include/etc/confluent/docker/meta.properties /var/lib/kafka/data/meta.properties
+
+# Set permissions and the entrypoint
+# USER appuser
+USER root
+RUN mkdir -p /var/lib/kafka/data /etc/kafka/secrets
+
+CMD ["/etc/confluent/docker/run"]

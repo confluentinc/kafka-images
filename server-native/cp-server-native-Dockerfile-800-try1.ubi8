@@ -1,0 +1,130 @@
+ARG DOCKER_UPSTREAM_REGISTRY=519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/
+ARG DOCKER_UPSTREAM_TAG=8.0.x-6262-ubi9
+ARG CONFLUENT_PACKAGES_REPO=https://nightly-packages.confluent.io/8.0.x/6302/rpm/8.0
+ARG CONFLUENT_VERSION=8.0.0
+
+FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-new:${DOCKER_UPSTREAM_TAG} AS confluent-base
+
+ARG PROJECT_VERSION
+ARG ARTIFACT_ID
+ARG GIT_COMMIT
+
+LABEL maintainer="partner-support@confluent.io"
+LABEL vendor="Confluent"
+LABEL version=$GIT_COMMIT
+LABEL release=$PROJECT_VERSION
+LABEL name=$ARTIFACT_ID
+LABEL summary="Confluent platform server image."
+LABEL description="Confluent platform server image."
+LABEL io.confluent.docker=true
+LABEL io.confluent.docker.git.id=$GIT_COMMIT
+ARG BUILD_NUMBER=-1
+LABEL io.confluent.docker.build.number=$BUILD_NUMBER
+LABEL io.confluent.docker.git.repo="confluentinc/kafka-images"
+
+ARG CONFLUENT_VERSION
+ARG CONFLUENT_PACKAGES_REPO
+ARG CONFLUENT_PLATFORM_LABEL
+ARG KAFKA_ADVERTISED_LISTENERS
+ENV KAFKA_ADVERTISED_LISTENERS=${KAFKA_ADVERTISED_LISTENERS}
+ARG CLUSTER_ID
+ENV CLUSTER_ID=${CLUSTER_ID}
+
+ENV COMPONENT=kafka
+EXPOSE 9092
+USER root
+
+RUN echo "===> Installing ${COMPONENT}..." \
+    && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
+    && rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
+    && printf "[Confluent] \n\
+name=Confluent repository \n\
+baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
+gpgcheck=1 \n\
+gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
+enabled=1 " > /etc/yum.repos.d/confluent.repo \
+    && echo "===> installing ${COMPONENT}..." \
+    && yum install -y confluent-server-${CONFLUENT_VERSION} \
+    && echo "===> installing confluent-rebalancer ..." \
+    && yum install -y confluent-rebalancer-${CONFLUENT_VERSION} \
+    && echo "===> installing confluent-security ..." \
+    && yum install -y confluent-security-${CONFLUENT_VERSION} \
+    && echo "===> clean up ..."  \
+    && yum clean all \
+    && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo \
+    && echo "===> Setting up ${COMPONENT} dirs" \
+    && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
+    && chown -R appuser:root /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /etc/${COMPONENT}/secrets \
+    && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets /var/log/kafka
+
+VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
+
+
+# Stage 2: GraalVM for native-image
+FROM ghcr.io/graalvm/graalvm-community:21 AS build-native-image
+
+WORKDIR /app
+ARG COMPONENT=kafka
+ENV COMPONENT=kafka
+USER root
+
+# Set environment variables for GraalVM
+ENV GRAALVM_HOME=/opt/graalvm
+ENV PATH="$GRAALVM_HOME/bin:$PATH"
+
+# Copy Kafka source code from the previous stage
+COPY --from=confluent-base /usr/share/java /usr/share/java
+
+# Copy reflection configs to create GraalVM native binary
+COPY native-image-configs-800 /app/native-image-configs-800
+
+# Build native image for the Kafka application
+RUN mkdir /app/kafka; \
+    native-image --no-fallback -H:-CheckToolchain --enable-http \
+                                                    --enable-https \
+                                                    --add-exports org.graalvm.nativeimage.builder/com.oracle.svm.core.configure=ALL-UNNAMED \
+                                                    --add-exports org.graalvm.nativeimage/org.graalvm.nativeimage.impl=ALL-UNNAMED \
+                                                    --allow-incomplete-classpath \
+                                                    --report-unsupported-elements-at-runtime \
+                                                    --install-exit-handlers \
+                                                    --enable-monitoring=jmxserver,jmxclient,heapdump,jvmstat \
+                                                    --initialize-at-run-time=scala.math.Ordering$,scala.math.Ordering$Int$ \
+                                                    --initialize-at-build-time=org.apache.logging.log4j.status.StatusLogger$Config,org.apache.logging.log4j.core.pattern.ThrowablePatternConverter,org.yaml.snakeyaml.DumperOptions$ScalarStyle,com.fasterxml.jackson.databind.cfg.MapperConfigBase,org.apache.logging.log4j.spi.Provider,org.apache.logging.log4j.core.pattern.LevelPatternConverter,org.apache.logging.log4j.core.config.plugins.visitors.PluginElementVisitor,org.apache.logging.log4j.core.appender.AbstractAppender,com.fasterxml.jackson.databind.ext.Java7Support,org.yaml.snakeyaml.util.UriEncoder,org.apache.logging.log4j.core.config.plugins.visitors.PluginConfigurationVisitor,org.apache.logging.log4j.core.appender.OutputStreamManager,com.github.luben.zstd.util.Native,org.apache.logging.log4j.core.config.ConfigurationFactory,com.fasterxml.jackson.databind.type.TypeBindings,org.apache.logging.log4j.spi.StandardLevel,com.fasterxml.jackson.annotation.JsonInclude$Value,com.fasterxml.jackson.databind.deser.std.BaseNodeDeserializer,org.apache.logging.log4j.core.util.DefaultShutdownCallbackRegistry,com.fasterxml.jackson.databind.introspect.VisibilityChecker$Std,com.fasterxml.jackson.dataformat.yaml.util.StringQuotingChecker,org.apache.logging.log4j.core.config.properties.PropertiesConfigurationFactory,com.fasterxml.jackson.databind.introspect.AnnotatedClass,org.apache.logging.log4j.core.pattern.MessagePatternConverter,org.apache.logging.log4j.spi.AbstractLogger,org.apache.logging.log4j.core.config.Property,org.apache.logging.log4j.core.lookup.RuntimeStrSubstitutor,com.fasterxml.jackson.databind.util.ClassUtil,org.apache.logging.log4j.core.config.plugins.util.PluginRegistry,org.apache.logging.log4j.core.lookup.StrMatcher$NoMatcher,org.apache.logging.log4j.status.StatusLogger$InstanceHolder,com.fasterxml.jackson.databind.cfg.CoercionConfigs,org.apache.logging.log4j.core.config.NullConfiguration,org.apache.logging.log4j.util.StackLocatorUtil,com.fasterxml.jackson.core.util.BufferRecyclers,org.apache.logging.log4j.Level,com.fasterxml.jackson.databind.ext.Java7SupportImpl,org.yaml.snakeyaml.DumperOptions$FlowStyle,com.fasterxml.jackson.core.base.ParserMinimalBase,org.apache.logging.log4j.core.pattern.LevelPatternConverter$SimpleLevelPatternConverter,org.apache.logging.log4j.spi.DefaultThreadContextStack,com.fasterxml.jackson,com.fasterxml.jackson.databind.ser.std.NumberSerializers$ShortSerializer,org.apache.logging.log4j.core.pattern.LiteralPatternConverter,org.apache.logging.log4j.core.pattern.NamePatternConverter,org.apache.logging.log4j.core.util.WatchManager,org.apache.logging.log4j.core.config.plugins.util.PluginBuilder,org.apache.logging.log4j.core.util.OptionConverter,org.apache.log4j.xml.XmlConfigurationFactory,org.apache.logging.log4j.core.config.plugins.convert.TypeConverters,org.apache.logging.log4j.core.lookup.StrMatcher$CharSetMatcher,com.fasterxml.jackson.databind.type.TypeBase,org.apache.logging.log4j.core.util.ClockFactory,org.apache.logging.log4j.core.lookup.ResourceBundleLookup,org.apache.logging.slf4j.Log4jLogger,com.fasterxml.jackson.core.io.ContentReference,org.apache.logging.log4j.core.filter.AbstractFilterable,com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector,org.apache.logging.log4j.core.util.Loader,com.fasterxml.jackson.core.PrettyPrinter,com.fasterxml.jackson.databind.introspect.AnnotatedClassResolver,org.apache.logging.log4j.util.PropertiesUtil,com.fasterxml.jackson.databind.deser.std.JsonNodeDeserializer,org.apache.logging.log4j.util.OsgiServiceLocator,com.fasterxml.jackson.core.base.ParserBase,org.apache.logging.log4j.util.PropertySource$Util,org.yaml.snakeyaml.resolver.Resolver,org.apache.logging.log4j.core.layout.AbstractLayout,com.fasterxml.jackson.databind.ObjectMapper,com.fasterxml.jackson.databind.cfg.ContextAttributes$Impl,org.apache.logging.log4j.core.config.AbstractConfiguration,org.apache.logging.log4j.core.util.ShutdownCallbackRegistry,org.apache.logging.log4j.core.util.Source,org.apache.logging.log4j.core.lookup.StrMatcher$TrimMatcher,org.apache.logging.log4j.core.pattern.SimpleLiteralPatternConverter$StringValue,org.apache.logging.log4j.util.Strings,org.apache.logging.log4j.core.impl.Log4jProvider,com.fasterxml.jackson.annotation.JsonFormat$Value,org.apache.logging.log4j.core.pattern.AbstractPatternConverter,com.fasterxml.jackson.core.JsonParser,org.apache.logging.log4j.core.config.json.JsonConfiguration,org.apache.logging.log4j.core.pattern.SimpleLiteralPatternConverter$Space,org.apache.logging.log4j.core.config.yaml.YamlConfigurationFactory,com.fasterxml.jackson.databind.deser.BeanDeserializerFactory,org.apache.logging.log4j.core.pattern.PatternParser$1,org.apache.logging.log4j.core.pattern.SimpleLiteralPatternConverter,com.fasterxml.jackson.databind.cfg.MapperConfig,com.fasterxml.jackson.databind.ser.std.NumberSerializers$IntLikeSerializer,org.apache.logging.log4j.core.pattern.LoggerPatternConverter,org.apache.logging.log4j.core.lookup.ConfigurationStrSubstitutor,com.fasterxml.jackson.databind.ser.std.UUIDSerializer,org.apache.logging.log4j.core.lookup.StrMatcher,com.fasterxml.jackson.databind.deser.std.StdDeserializer,org.apache.logging.log4j.core.config.plugins.util.PluginManager,org.yaml.snakeyaml.external.com.google.gdata.util.common.base.PercentEscaper,com.fasterxml.jackson.databind.type.SimpleType,org.apache.logging.log4j.core.util.BasicAuthorizationProvider,org.apache.logging.log4j.core.pattern.LineLocationPatternConverter,org.apache.logging.log4j.core.pattern.ExtendedThrowablePatternConverter,org.apache.logging.log4j.core.LoggerContext,org.apache.logging.log4j.core.net.JndiManager,org.apache.logging.log4j.core.util.datetime.FixedDateFormat$FixedFormat,org.apache.logging.log4j.core.lookup.JmxRuntimeInputArgumentsLookup,com.fasterxml.jackson.databind.ser.BasicSerializerFactory,org.apache.logging.log4j.core.appender.AbstractOutputStreamAppender,com.fasterxml.jackson.dataformat.yaml.UTF8Reader,org.apache.logging.log4j.core.config.plugins.visitors.AbstractPluginVisitor,org.apache.logging.log4j.core.appender.AbstractManager,org.apache.logging.log4j.core.config.status.StatusConfiguration,org.apache.logging.log4j.core.config.ConfigurationFactory$Factory,org.apache.logging.log4j.core.config.plugins.visitors.PluginVisitors,org.apache.logging.log4j.core.config.ConfigurationScheduler,org.yaml.snakeyaml.nodes.Tag,com.fasterxml.jackson.dataformat.yaml.util.StringQuotingChecker$Default,com.fasterxml.jackson.databind.type.TypeFactory,org.apache.logging.log4j.core.config.json.JsonConfigurationFactory,org.apache.logging.log4j.core.selector.ClassLoaderContextSelector,org.apache.logging.log4j.core.config.ConfigurationSource,org.apache.logging.log4j.util.LoaderUtil,org.apache.logging.log4j.core.lookup.DateLookup,org.apache.logging.log4j.core.config.DefaultConfiguration,org.yaml.snakeyaml.parser.ParserImpl,org.apache.logging.log4j.core.pattern.MessagePatternConverter$SimpleMessagePatternConverter,com.fasterxml.jackson.databind.introspect.BasicClassIntrospector,com.fasterxml.jackson.annotation.JsonSetter$Value,com.fasterxml.jackson.databind.cfg.MutableCoercionConfig,org.apache.logging.log4j.core.pattern.DatePatternConverter,org.apache.logging.slf4j.Log4jLoggerFactory,org.apache.logging.log4j.util.SystemPropertiesPropertySource,com.fasterxml.jackson.databind.DeserializationConfig,org.apache.logging.log4j.core.config.yaml.YamlConfiguration,org.apache.logging.log4j.util.Constants,org.apache.logging.log4j.status.StatusLogger,org.apache.logging.log4j.core.config.plugins.validation.validators.RequiredValidator,org.yaml.snakeyaml.resolver.Resolver$1,org.apache.logging.slf4j.Log4jMarkerFactory,com.fasterxml.jackson.databind.cfg.DatatypeFeatures$DefaultHolder,org.apache.logging.log4j.core.appender.DefaultErrorHandler,org.apache.logging.log4j.core.impl.ThreadContextDataInjector,org.apache.logging.log4j.core.config.plugins.visitors.PluginAttributeVisitor,com.fasterxml.jackson.core.util.DefaultIndenter,org.apache.logging.log4j.core.impl.Log4jContextFactory,org.apache.logging.log4j.core.lookup.StrMatcher$StringMatcher,com.fasterxml.jackson.databind.SerializationConfig,com.fasterxml.jackson.databind.ser.std.NumberSerializers$FloatSerializer,com.fasterxml.jackson.databind.cfg.BaseSettings,org.apache.logging.log4j.core.util.Constants,org.apache.logging.log4j.core.AbstractLifeCycle,org.apache.logging.log4j.core.Logger,org.apache.logging.log4j.core.util.NetUtils,org.apache.logging.log4j.util.EnvironmentPropertySource,org.apache.logging.log4j.core.config.xml.XmlConfigurationFactory,org.apache.logging.log4j.core.config.AppenderControlArraySet,org.apache.logging.log4j.util.PropertyFilePropertySource,org.apache.logging.log4j.LogManager,org.apache.logging.log4j.core.appender.ConsoleAppender,org.apache.logging.log4j.core.impl.ThrowableFormatOptions,org.apache.logging.log4j.core.config.AppenderControl,org.yaml.snakeyaml.scanner.ScannerImpl,org.apache.logging.log4j.util.ProviderUtil,com.fasterxml.jackson.databind.util.StdDateFormat,org.apache.logging.log4j.core.pattern.LineSeparatorPatternConverter,org.apache.logging.log4j.core.lookup.Log4jLookup,org.apache.logging.log4j.core.util.ExecutorServices,org.yaml.snakeyaml.scanner.Constant,org.apache.logging.log4j.core.lookup.SystemPropertiesLookup,org.apache.logging.log4j.core.util.FileUtils,org.apache.logging.log4j.core.pattern.PatternParser,com.fasterxml.jackson.dataformat.yaml.YAMLParser,com.fasterxml.jackson.databind.ser.BeanSerializerFactory,org.apache.logging.log4j.ThreadContext,org.apache.logging.log4j.core.pattern.LogEventPatternConverter,org.apache.logging.log4j.core.config.LoggerConfig$RootLogger,org.apache.logging.log4j.core.lookup.Interpolator,org.apache.logging.log4j.core.lookup.StrSubstitutor,org.apache.logging.log4j.core.pattern.ThreadNamePatternConverter,org.apache.logging.log4j.core.layout.AbstractStringLayout,org.apache.logging.log4j.util.StackLocator,com.fasterxml.jackson.databind.JsonNode$1,org.apache.logging.log4j.core.config.LoggerConfig,org.yaml.snakeyaml.external.com.google.gdata.util.common.base.UnicodeEscaper,org.apache.logging.log4j.core.lookup.StrMatcher$CharMatcher,com.fasterxml.jackson.databind.util.internal.PrivateMaxEntriesMap,io.opentelemetry.instrumentation.log4j.contextdata.v2_17.OpenTelemetryContextDataProvider,org.apache.logging.log4j.core.config.AppenderRef,org.apache.log4j.config.PropertiesConfigurationFactory,org.apache.logging.log4j.core.config.plugins.convert.TypeConverterRegistry,org.apache.logging.log4j.core.config.plugins.visitors.PluginBuilderAttributeVisitor,com.fasterxml.jackson.core.JsonToken,com.fasterxml.jackson.dataformat.yaml.YAMLFactory,org.apache.logging.log4j.core.impl.Log4jLogEvent,com.fasterxml.jackson.databind.cfg.CoercionConfig \
+                                                    --trace-object-instantiation=scala.math.Ordering$Int$ \
+                                                    --trace-class-initialization=io.netty.buffer.UnpooledHeapByteBuf \
+                                                    -H:+ReportExceptionStackTraces \
+                                                    -H:+PrintClassInitialization \
+                                                    -H:+EnableAllSecurityServices \
+                                                    -H:EnableURLProtocols=http,https \
+                                                    -H:AdditionalSecurityProviders=sun.security.jgss.SunProvider \
+                                                    -H:ReflectionConfigurationFiles=/app/native-image-configs-800/reflect-config.json \
+                                                    -H:JNIConfigurationFiles=/app/native-image-configs-800/jni-config.json \
+                                                    -H:ResourceConfigurationFiles=/app/native-image-configs-800/resource-config.json \
+                                                    -H:SerializationConfigurationFiles=/app/native-image-configs-800/serialization-config.json \
+                                                    -H:PredefinedClassesConfigurationFiles=/app/native-image-configs-800/predefined-classes-config.json \
+                                                    -H:DynamicProxyConfigurationFiles=/app/native-image-configs-800/proxy-config.json \
+                                                    --verbose \
+                                                    -march=compatibility \
+                                                    -cp "/usr/bin/../share/java/kafka/*:/usr/bin/../share/java/confluent-metadata-service/*:/usr/bin/../share/java/rest-utils/*:/usr/bin/../share/java/confluent-common/*:/usr/bin/../share/java/ce-kafka-http-server/*:/usr/bin/../share/java/ce-kafka-rest-servlet/*:/usr/bin/../share/java/ce-kafka-rest-extensions/*:/usr/bin/../share/java/kafka-rest-lib/*:/usr/bin/../share/java/confluent-security/kafka-rest/*:/usr/bin/../share/java/confluent-security/schema-validator/*:/usr/bin/../share/java/confluent-telemetry/*" kafka.Kafka -o /app/kafka/kafka.Kafka
+
+# Stage 3: Final runtime image with native binary
+FROM ubuntu:latest
+
+
+# Copy the native executable from the GraalVM build stage
+COPY --from=build-native-image /app /app
+
+COPY --from=confluent-base /usr/local/bin /usr/local/bin
+COPY --from=confluent-base /usr/bin /usr/bin
+COPY include/etc/confluent/docker /etc/confluent/docker
+COPY include/etc/confluent/docker/kafka.properties /etc/kafka/kafka.properties
+COPY include/etc/confluent/docker/log4j2.yaml /etc/kafka/log4j2.yaml
+COPY include/etc/confluent/docker/tools-log4j2.yaml /etc/kafka/tools-log4j2.yaml
+COPY include/etc/confluent/docker/meta.properties /var/lib/kafka/data/meta.properties
+
+# Set permissions and the entrypoint
+# USER appuser
+USER root
+RUN mkdir -p /var/lib/kafka/data /etc/kafka/secrets
+
+CMD ["/etc/confluent/docker/run"]
