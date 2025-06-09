@@ -52,12 +52,15 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && chown -R appuser:root /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /etc/${COMPONENT}/secrets \
     && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets /var/log/kafka
 
+# Create necessary directories
+RUN mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
+    && chown -R appuser:root /etc/kafka /var/lib/kafka /etc/${COMPONENT}/secrets \
+    && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets
+
 RUN cd /usr/share/java \
     && package_dedupe $(pwd)
 # Stage 2: Final stage with minimal base image
 FROM registry.access.redhat.com/ubi9-minimal:${UBI_MINIMAL_VERSION}
-
-USER root
 
 ARG PROJECT_VERSION
 ARG ARTIFACT_ID
@@ -87,13 +90,6 @@ ENV CLUSTER_ID=${CLUSTER_ID}
 
 # primary
 EXPOSE 9092
-
-USER root
-
-# Create necessary directories
-RUN mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
-    && chown -R appuser:root /etc/kafka /var/lib/kafka /etc/${COMPONENT}/secrets \
-    && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets
 
 VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
 
