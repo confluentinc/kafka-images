@@ -57,6 +57,8 @@ RUN cd /usr/share/java \
 # Stage 2: Final stage with minimal base image
 FROM registry.access.redhat.com/ubi9/ubi-minimal:${UBI_MINIMAL_VERSION}
 
+USER root
+
 ARG PROJECT_VERSION
 ARG ARTIFACT_ID
 ARG GIT_COMMIT
