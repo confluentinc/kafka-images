@@ -55,7 +55,7 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
 RUN cd /usr/share/java \
     && package_dedupe $(pwd)
 # Stage 2: Final stage with minimal base image
-FROM registry.access.redhat.com/ubi9/ubi-minimal:${UBI_MINIMAL_VERSION}
+FROM registry.access.redhat.com/ubi9-minimal:${UBI_MINIMAL_VERSION}
 
 USER root
 
@@ -89,17 +89,6 @@ ENV CLUSTER_ID=${CLUSTER_ID}
 EXPOSE 9092
 
 USER root
-
-RUN microdnf install -y --nodocs \
-    java-11-openjdk-headless \
-    shadow-utils \
-    && microdnf clean all \
-    && rm -rf /var/cache/yum \
-    && groupadd -r appuser -g 1000 \
-    && useradd -r -g appuser -u 1000 -m -s /sbin/nologin appuser
-
-# Copy necessary files from builder stage
-COPY --from=builder --chown=appuser:appuser / /
 
 # Create necessary directories
 RUN mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
