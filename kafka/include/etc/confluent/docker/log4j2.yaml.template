@@ -15,15 +15,7 @@ Configuration:
         - ref: STDOUT
 
     Logger:
-{{- $loggers := createStringSliceMap -}}
-{{- $loggers = setStringSliceMapValue $loggers "kafka" "INFO" -}}
-{{- $loggers = setStringSliceMapValue $loggers "kafka.network.RequestChannel$" "WARN" -}}
-{{- $loggers = setStringSliceMapValue $loggers "kafka.producer.async.DefaultEventHandler" "DEBUG" -}}
-{{- $loggers = setStringSliceMapValue $loggers "kafka.request.logger" "WARN" -}}
-{{- $loggers = setStringSliceMapValue $loggers "kafka.controller" "TRACE" -}}
-{{- $loggers = setStringSliceMapValue $loggers "kafka.log.LogCleaner" "INFO" -}}
-{{- $loggers = setStringSliceMapValue $loggers "state.change.logger" "TRACE" -}}
-{{- $loggers = setStringSliceMapValue $loggers "kafka.authorizer.logger" "WARN" -}}
+{{- $loggers := createStringSliceMap "kafka" "INFO" "kafka.network.RequestChannel$" "WARN" "kafka.producer.async.DefaultEventHandler" "DEBUG" "kafka.request.logger" "WARN" "kafka.controller" "TRACE" "kafka.log.LogCleaner" "INFO" "state.change.logger" "TRACE" "kafka.authorizer.logger" "WARN" -}}
 {{- if getEnv "KAFKA_LOG4J_LOGGERS" -}}
   {{- $loggers = parseLog4jLoggers (getEnv "KAFKA_LOG4J_LOGGERS") $loggers -}}
 {{- end -}}
