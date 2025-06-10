@@ -20,7 +20,6 @@ ARG UBI_MINIMAL_VERSION
 # Stage 1: Build stage
 FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-java:${DOCKER_UPSTREAM_TAG} AS builder
 
-
 ARG CONFLUENT_VERSION
 ARG CONFLUENT_PACKAGES_REPO
 ARG CONFLUENT_PLATFORM_LABEL
@@ -51,11 +50,6 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
     && chown -R appuser:root /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /etc/${COMPONENT}/secrets \
     && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets /var/log/kafka
-
-# Create necessary directories
-RUN mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
-    && chown -R appuser:root /etc/kafka /var/lib/kafka /etc/${COMPONENT}/secrets \
-    && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets
 
 RUN cd /usr/share/java \
     && package_dedupe $(pwd)
@@ -91,7 +85,23 @@ ENV CLUSTER_ID=${CLUSTER_ID}
 # primary
 EXPOSE 9092
 
+USER root
+
+# Create appuser and root group in final stage
+RUN groupadd -r appuser -g 1000 \
+    && useradd -r -g appuser -u 1000 -m -s /sbin/nologin appuser
+
+# Copy necessary files from builder stage
+COPY --from=builder --chown=appuser:appuser / /
+
+# Create necessary directories
+RUN mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
+    && chown -R appuser:root /etc/kafka /var/lib/kafka /etc/${COMPONENT}/secrets \
+    && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets
+
 VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
+
+COPY --chown=appuser:appuser include/etc/confluent/docker /etc/confluent/docker
 
 USER appuser
 
