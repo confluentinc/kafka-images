@@ -14,9 +14,9 @@
 # limitations under the License.
 
 ARG DOCKER_UPSTREAM_REGISTRY
-ARG DOCKER_UPSTREAM_TAG=dev-8.0.x-7eaa5b27-ubi9
+ARG DOCKER_UPSTREAM_TAG
 
-FROM 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-base-java:${DOCKER_UPSTREAM_TAG}
+FROM 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-base-java:dev-8.0.x-7eaa5b27-ubi9
 
 ARG PROJECT_VERSION
 ARG ARTIFACT_ID
