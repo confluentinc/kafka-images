@@ -15,12 +15,51 @@
 
 ARG DOCKER_UPSTREAM_REGISTRY
 ARG DOCKER_UPSTREAM_TAG=ubi9-latest
+ARG UBI_MINIMAL_VERSION
 
-FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-new:${DOCKER_UPSTREAM_TAG}
+# Stage 1: Build stage
+FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-java:${DOCKER_UPSTREAM_TAG} AS builder
+
+ARG CONFLUENT_VERSION
+ARG CONFLUENT_PACKAGES_REPO
+ARG CONFLUENT_PLATFORM_LABEL
+
+ENV COMPONENT=kafka
+
+USER root
+
+RUN echo "===> Installing ${COMPONENT}..." \
+    && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
+    && rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
+    && printf "[Confluent] \n\
+name=Confluent repository \n\
+baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
+gpgcheck=1 \n\
+gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
+enabled=1 " > /etc/yum.repos.d/confluent.repo \
+    && echo "===> installing ${COMPONENT}..." \
+    && microdnf install -y confluent-server-${CONFLUENT_VERSION} \
+    && echo "===> installing confluent-rebalancer ..." \
+    && microdnf install -y confluent-rebalancer-${CONFLUENT_VERSION} \
+    && echo "===> installing confluent-security ..." \
+    && microdnf install -y confluent-security-${CONFLUENT_VERSION} \
+    && echo "===> clean up ..."  \
+    && microdnf clean all \
+    && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo \
+    && echo "===> Setting up ${COMPONENT} dirs" \
+    && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
+    && chown -R appuser:root /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /etc/${COMPONENT}/secrets \
+    && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets /var/log/kafka
+
+RUN cd /usr/share/java \
+    && package_dedupe $(pwd)
+# Stage 2: Final stage with minimal base image
+FROM registry.access.redhat.com/ubi9-minimal:${UBI_MINIMAL_VERSION}
 
 ARG PROJECT_VERSION
 ARG ARTIFACT_ID
 ARG GIT_COMMIT
+ARG CONFLUENT_PLATFORM_LABEL
 
 LABEL maintainer="partner-support@confluent.io"
 LABEL vendor="Confluent"
@@ -35,9 +74,7 @@ ARG BUILD_NUMBER=-1
 LABEL io.confluent.docker.build.number=$BUILD_NUMBER
 LABEL io.confluent.docker.git.repo="confluentinc/kafka-images"
 
-ARG CONFLUENT_VERSION
-ARG CONFLUENT_PACKAGES_REPO
-ARG CONFLUENT_PLATFORM_LABEL
+ENV COMPONENT=kafka
 
 # allow arg override of required env params
 ARG KAFKA_ADVERTISED_LISTENERS
@@ -45,35 +82,22 @@ ENV KAFKA_ADVERTISED_LISTENERS=${KAFKA_ADVERTISED_LISTENERS}
 ARG CLUSTER_ID
 ENV CLUSTER_ID=${CLUSTER_ID}
 
-ENV COMPONENT=kafka
-
 # primary
 EXPOSE 9092
 
 USER root
 
-RUN echo "===> Installing ${COMPONENT}..." \
-    && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
-    && rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
-    && printf "[Confluent] \n\
-name=Confluent repository \n\
-baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
-gpgcheck=1 \n\
-gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
-enabled=1 " > /etc/yum.repos.d/confluent.repo \
-    && echo "===> installing ${COMPONENT}..." \
-    && yum install -y confluent-server-${CONFLUENT_VERSION} \
-    && echo "===> installing confluent-rebalancer ..." \
-    && yum install -y confluent-rebalancer-${CONFLUENT_VERSION} \
-    && echo "===> installing confluent-security ..." \
-    && yum install -y confluent-security-${CONFLUENT_VERSION} \
-    && echo "===> clean up ..."  \
-    && yum clean all \
-    && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo \
-    && echo "===> Setting up ${COMPONENT} dirs" \
-    && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
-    && chown -R appuser:root /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /etc/${COMPONENT}/secrets \
-    && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets /var/log/kafka
+# Create appuser and root group in final stage
+RUN groupadd -r appuser -g 1000 \
+    && useradd -r -g appuser -u 1000 -m -s /sbin/nologin appuser
+
+# Copy necessary files from builder stage
+COPY --from=builder --chown=appuser:appuser / /
+
+# Create necessary directories
+RUN mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
+    && chown -R appuser:root /etc/kafka /var/lib/kafka /etc/${COMPONENT}/secrets \
+    && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets
 
 VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
 
