@@ -15,13 +15,44 @@ Configuration:
         - ref: STDOUT
 
     Logger:
-{{- $loggers := createStringSliceMap "kafka" "INFO" "kafka.network.RequestChannel$" "WARN" "kafka.producer.async.DefaultEventHandler" "DEBUG" "kafka.request.logger" "WARN" "kafka.controller" "TRACE" "kafka.log.LogCleaner" "INFO" "state.change.logger" "TRACE" "kafka.authorizer.logger" "WARN" -}}
-{{- if getEnv "KAFKA_LOG4J_LOGGERS" -}}
-  {{- $loggers = parseLog4jLoggers (getEnv "KAFKA_LOG4J_LOGGERS") $loggers -}}
-{{- end -}}
-{{- range $logger, $loglevel := $loggers -}}
+      - name: "kafka"
+        level: "INFO"
+        AppenderRef:
+          ref: STDOUT
+      - name: "kafka.network.RequestChannel$"
+        level: "WARN"
+        AppenderRef:
+          ref: STDOUT
+      - name: "kafka.producer.async.DefaultEventHandler"
+        level: "DEBUG"
+        AppenderRef:
+          ref: STDOUT
+      - name: "kafka.request.logger"
+        level: "WARN"
+        AppenderRef:
+          ref: STDOUT
+      - name: "kafka.controller"
+        level: "TRACE"
+        AppenderRef:
+          ref: STDOUT
+      - name: "kafka.log.LogCleaner"
+        level: "INFO"
+        AppenderRef:
+          ref: STDOUT
+      - name: "state.change.logger"
+        level: "TRACE"
+        AppenderRef:
+          ref: STDOUT
+      - name: "kafka.authorizer.logger"
+        level: "WARN"
+        AppenderRef:
+          ref: STDOUT
+{{- if getEnv "KAFKA_LOG4J_LOGGERS" "" -}}
+{{- $customLoggers := parseLog4jLoggers (getEnv "KAFKA_LOG4J_LOGGERS" "") -}}
+{{- range $logger, $loglevel := $customLoggers -}}
       - name: "{{ $logger }}"
         level: "{{ $loglevel }}"
         AppenderRef:
           ref: STDOUT
+{{- end -}}
 {{- end -}}
