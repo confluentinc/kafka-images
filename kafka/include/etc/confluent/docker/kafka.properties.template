@@ -1,21 +1,11 @@
-{% set excluded_props = ['KAFKA_VERSION',
-                         'KAFKA_HEAP_OPTS'
-                         'KAFKA_LOG4J_OPTS',
-                         'KAFKA_OPTS',
-                         'KAFKA_JMX_OPTS',
-                         'KAFKA_JVM_PERFORMANCE_OPTS',
-                         'KAFKA_GC_LOG_OPTS',
-                         'KAFKA_LOG4J_ROOT_LOGLEVEL',
-                         'KAFKA_LOG4J_LOGGERS',
-                         'KAFKA_TOOLS_LOG4J_LOGLEVEL']
--%}
+{{- $excludedProps := stringSlice "KAFKA_VERSION" "KAFKA_HEAP_OPTS" "KAFKA_LOG4J_OPTS" "KAFKA_OPTS" "KAFKA_JMX_OPTS" "KAFKA_JVM_PERFORMANCE_OPTS" "KAFKA_GC_LOG_OPTS" "KAFKA_LOG4J_ROOT_LOGLEVEL" "KAFKA_LOG4J_LOGGERS" "KAFKA_TOOLS_LOG4J_LOGLEVEL" -}}
 
-{% set kafka_props = env_to_props('KAFKA_', '', exclude=excluded_props) -%}
-{% for name, value in kafka_props.items() -%}
-{{name}}={{value}}
-{% endfor -%}
+{{- $kafkaProps := envToProps "KAFKA_" "" $excludedProps nil nil -}}
+{{ range $name, $value := $kafkaProps }}
+{{$name}}={{$value}}
+{{ end }}
 
-{% set confluent_support_props = env_to_props('CONFLUENT_SUPPORT_', 'confluent.support.') -%}
-{% for name, value in confluent_support_props.items() -%}
-{{name}}={{value}}
-{% endfor -%}
+{{- $confluentSupportProps := envToProps "CONFLUENT_SUPPORT_" "confluent.support." nil nil nil -}}
+{{ range $name, $value := $confluentSupportProps }}
+{{$name}}={{$value}}
+{{ end }}
