@@ -1,16 +1,16 @@
-{{- $excludedProps := list "KAFKA_VERSION" "KAFKA_HEAP_OPTS" "KAFKA_LOG4J_OPTS" "KAFKA_OPTS" "KAFKA_JMX_OPTS" "KAFKA_JVM_PERFORMANCE_OPTS" "KAFKA_GC_LOG_OPTS" "KAFKA_LOG4J_ROOT_LOGLEVEL" "KAFKA_LOG4J_LOGGERS" "KAFKA_TOOLS_LOG4J_LOGLEVEL" -}}
+{{- $excludedProps := stringSlice "KAFKA_VERSION" "KAFKA_HEAP_OPTS" "KAFKA_LOG4J_OPTS" "KAFKA_OPTS" "KAFKA_JMX_OPTS" "KAFKA_JVM_PERFORMANCE_OPTS" "KAFKA_GC_LOG_OPTS" "KAFKA_LOG4J_ROOT_LOGLEVEL" "KAFKA_LOG4J_LOGGERS" "KAFKA_TOOLS_LOG4J_LOGLEVEL" -}}
 
-{{- $kafkaProps := envToProps "KAFKA_" "" $excludedProps -}}
-{{- range $name, $value := $kafkaProps -}}
+{{- $kafkaProps := envToProps "KAFKA_" "" $excludedProps nil nil -}}
+{{ range $name, $value := $kafkaProps }}
 {{$name}}={{$value}}
-{{- end -}}
+{{ end }}
 
-{{- $confluentSupportProps := envToProps "CONFLUENT_SUPPORT_" "confluent.support." -}}
-{{- range $name, $value := $confluentSupportProps -}}
+{{- $confluentSupportProps := envToProps "CONFLUENT_SUPPORT_" "confluent.support." nil nil nil -}}
+{{ range $name, $value := $confluentSupportProps }}
 {{$name}}={{$value}}
-{{- end -}}
+{{ end }}
 
-{{- $confluentMetricProps := envToProps "CONFLUENT_METRICS_" "confluent.metrics." -}}
-{{- range $name, $value := $confluentMetricProps -}}
+{{- $confluentMetricProps := envToProps "CONFLUENT_METRICS_" "confluent.metrics." nil nil nil -}}
+{{ range $name, $value := $confluentMetricProps }}
 {{$name}}={{$value}}
-{{- end -}}
+{{ end }}
