@@ -122,10 +122,6 @@
     "pattern":"java.base:\\Qjdk/internal/icu/impl/data/icudt72b/nfkc.nrm\\E"
   }, {
     "pattern":"jdk.jfr:\\Qjdk/jfr/internal/query/view.ini\\E"
-  }, {
-    "pattern": "log4j2.*"
-  }, {
-    "pattern": "META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat"
   }]},
   "bundles":[{
     "name":"jakarta.servlet.LocalStrings",

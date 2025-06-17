@@ -46,6 +46,7 @@ services:
     ports:
       - "9092:9092"
       - "9101:9101"
+      - "8090:8090"
     entrypoint:
       - sleep
       - "100000"

@@ -2578,7 +2578,10 @@
   "name":"org.apache.logging.log4j.core.appender.rolling.SizeBasedTriggeringPolicy"
 },
 {
-  "name":"org.apache.logging.log4j.core.appender.rolling.TimeBasedTriggeringPolicy"
+  "name":"org.apache.logging.log4j.core.appender.rolling.TimeBasedTriggeringPolicy",
+  "allDeclaredConstructors": true,
+  "allPublicConstructors": true,
+  "allDeclaredMethods": true
 },
 {
   "name":"org.apache.logging.log4j.core.appender.rolling.action.DeleteAction"

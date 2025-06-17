@@ -273,9 +273,6 @@
   "methods":[{"name":"getDefaultInstance","parameterTypes":[] }]
 },
 {
-  "name":"com.linkedin.cruisecontrol.monitor.sampling.aggregator.MetricSampleAggregator"
-},
-{
   "name":"com.linkedin.kafka.cruisecontrol.analyzer.goals.ConsumerOutboundCapacityGoal",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
@@ -359,9 +356,6 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"com.linkedin.kafka.cruisecontrol.detector.AnomalyDetector$DetectorTask"
-},
-{
   "name":"com.linkedin.kafka.cruisecontrol.executor.ExecutorNoopNotifier",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
@@ -370,13 +364,7 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"com.linkedin.kafka.cruisecontrol.monitor.LoadMonitor"
-},
-{
   "name":"com.linkedin.kafka.cruisecontrol.monitor.LoadMonitor$SensorUpdater"
-},
-{
-  "name":"com.linkedin.kafka.cruisecontrol.monitor.sampling.aggregator.KafkaPartitionMetricSampleAggregator"
 },
 {
   "name":"com.sun.crypto.provider.AESCipher$General",
@@ -2059,10 +2047,6 @@
   "fields":[{"name":"base"}, {"name":"cellsBusy"}]
 },
 {
-  "name":"java.util.concurrent.atomic.Striped64$Cell",
-  "fields":[{"name":"value"}]
-},
-{
   "name":"java.util.concurrent.jmx.CopyOnWriteArrayListMBean"
 },
 {
@@ -2594,7 +2578,10 @@
   "name":"org.apache.logging.log4j.core.appender.rolling.SizeBasedTriggeringPolicy"
 },
 {
-  "name":"org.apache.logging.log4j.core.appender.rolling.TimeBasedTriggeringPolicy"
+  "name":"org.apache.logging.log4j.core.appender.rolling.TimeBasedTriggeringPolicy",
+  "allDeclaredConstructors": true,
+  "allPublicConstructors": true,
+  "allDeclaredMethods": true
 },
 {
   "name":"org.apache.logging.log4j.core.appender.rolling.action.DeleteAction"
@@ -5011,5 +4998,23 @@
 {
   "name":"sun.security.x509.SubjectKeyIdentifierExtension",
   "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+},
+{
+  "name": "org.apache.kafka.storage.internals.checkpoint.CleanShutdownFileHandler$Content",
+  "allDeclaredConstructors": true,
+  "allDeclaredMethods": true
+},
+{
+  "name": "org.eclipse.jetty.ee10.servlet.DefaultServlet",
+  "allDeclaredConstructors": true,
+  "allDeclaredMethods": true
+},
+{
+  "name": "io.confluent.kafkarest.response.CrnFactoryImpl",
+  "allDeclaredConstructors": true
+},
+{
+  "name": "io.confluent.kafkarest.response.UrlFactoryImpl",
+  "allDeclaredConstructors": true
 }
 ]
