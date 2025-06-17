@@ -72,7 +72,7 @@ global_job_config:
       - export LATEST_TAG=$BRANCH_TAG-latest
       - export DOCKER_UPSTREAM_TAG="$LATEST_TAG"
       - export DOCKER_REPOS="confluentinc/cp-server-connect confluentinc/cp-server-connect-base confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-kafka confluentinc/confluent-local
-        confluentinc/cp-server"
+        confluentinc/cp-server confluentinc/cp-server-native"
       - export COMMUNITY_DOCKER_REPOS="confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-kafka confluentinc/confluent-local"
       - |
         if [[ $SKIP_COMMUNITY == "True" ]]; then
