@@ -17,42 +17,21 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>io.confluent</groupId>
-        <artifactId>common-docker</artifactId>
-        <version>[8.0.0-0, 8.0.1-0)</version>
+        <groupId>io.confluent.kafka-images</groupId>
+        <artifactId>kafka-images-parent</artifactId>
+        <version>8.0.0-0</version>
     </parent>
 
     <groupId>io.confluent.kafka-images</groupId>
-    <artifactId>kafka-images-parent</artifactId>
-    <packaging>pom</packaging>
-    <name>Kafka and CE Kafka Docker Images</name>
-    <description>Build files for Confluent's Kafka Docker images</description>
-    <version>8.0.0-0</version>
-
-    <modules>
-        <module>server</module>
-        <module>server-native</module>
-        <module>kafka</module>
-        <module>local</module>
-        <module>kafka-connect-base</module>
-        <module>kafka-connect</module>
-        <module>server-connect-base</module>
-        <module>server-connect</module>
-    </modules>
+    <artifactId>cp-server-native</artifactId>
+    <name>CP Server Native Docker Image</name>
 
     <properties>
-        <component.name>kafka</component.name>
-        <io.confluent.kafka-images.version>8.0.0-0</io.confluent.kafka-images.version>
+        <docker.skip-build>false</docker.skip-build>
+        <docker.skip-test>true</docker.skip-test>
     </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
 </project>
