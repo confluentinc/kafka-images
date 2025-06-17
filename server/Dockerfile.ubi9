@@ -18,7 +18,7 @@ ARG DOCKER_UPSTREAM_TAG=ubi9-latest
 ARG UBI_MINIMAL_VERSION
 
 # Stage 1: Build stage
-FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-java:${DOCKER_UPSTREAM_TAG} AS builder
+FROM 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-base-java:dev-8.0.x-7eaa5b27-ubi9.arm64 AS builder
 
 ARG CONFLUENT_VERSION
 ARG CONFLUENT_PACKAGES_REPO
