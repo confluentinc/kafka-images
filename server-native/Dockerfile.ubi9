@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG DOCKER_UPSTREAM_REGISTRY
-ARG DOCKER_UPSTREAM_TAG=ubi9-latest
+ARG DOCKER_UPSTREAM_REGISTRY=519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/
+ARG DOCKER_UPSTREAM_TAG=8.0.x-latest-ubi9
+ARG CONFLUENT_PACKAGES_REPO=https://nightly-packages.confluent.io/8.0.x/6480/rpm/8.0
+ARG CONFLUENT_VERSION=8.0.0
 
 FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-new:${DOCKER_UPSTREAM_TAG} AS confluent-base
 
@@ -93,7 +95,7 @@ ENV PATH="$GRAALVM_HOME/bin:$PATH"
 COPY --from=confluent-base /usr/share/java /usr/share/java
 
 # Copy reflection configs to create GraalVM native binary
-COPY native-image-configs /app/native-image-configs
+COPY native-image-configs-oauth /app/native-image-configs-oauth
 
 RUN microdnf install -y zip unzip && \
     echo "Scanning for JARs to clean..." && \
@@ -134,12 +136,12 @@ RUN mkdir /app/kafka; \
                                                     -H:+EnableAllSecurityServices \
                                                     -H:EnableURLProtocols=http,https \
                                                     -H:AdditionalSecurityProviders=sun.security.jgss.SunProvider \
-                                                    -H:ReflectionConfigurationFiles=/app/native-image-configs/reflect-config.json \
-                                                    -H:JNIConfigurationFiles=/app/native-image-configs/jni-config.json \
-                                                    -H:ResourceConfigurationFiles=/app/native-image-configs/resource-config.json \
-                                                    -H:SerializationConfigurationFiles=/app/native-image-configs/serialization-config.json \
-                                                    -H:PredefinedClassesConfigurationFiles=/app/native-image-configs/predefined-classes-config.json \
-                                                    -H:DynamicProxyConfigurationFiles=/app/native-image-configs/proxy-config.json \
+                                                    -H:ReflectionConfigurationFiles=/app/native-image-configs-oauth/reflect-config.json \
+                                                    -H:JNIConfigurationFiles=/app/native-image-configs-oauth/jni-config.json \
+                                                    -H:ResourceConfigurationFiles=/app/native-image-configs-oauth/resource-config.json \
+                                                    -H:SerializationConfigurationFiles=/app/native-image-configs-oauth/serialization-config.json \
+                                                    -H:PredefinedClassesConfigurationFiles=/app/native-image-configs-oauth/predefined-classes-config.json \
+                                                    -H:DynamicProxyConfigurationFiles=/app/native-image-configs-oauth/proxy-config.json \
                                                     --verbose \
                                                     -march=compatibility \
                                                     -cp "/usr/bin/../share/java/kafka/*:/usr/bin/../share/java/confluent-metadata-service/*:/usr/bin/../share/java/rest-utils/*:/usr/bin/../share/java/confluent-common/*:/usr/bin/../share/java/ce-kafka-http-server/*:/usr/bin/../share/java/ce-kafka-rest-servlet/*:/usr/bin/../share/java/ce-kafka-rest-extensions/*:/usr/bin/../share/java/kafka-rest-lib/*:/usr/bin/../share/java/confluent-security/kafka-rest/*:/usr/bin/../share/java/confluent-security/schema-validator/*:/usr/bin/../share/java/confluent-telemetry/*" kafka.Kafka -o /app/kafka/kafka.Kafka
