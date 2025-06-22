@@ -16,13 +16,6 @@
 ARG DOCKER_UPSTREAM_REGISTRY
 ARG DOCKER_UPSTREAM_TAG=ubi9-latest
 
-FROM docker.io/golang:1.23.6-bullseye AS build-ub
-RUN useradd --no-log-init --create-home --shell /bin/bash appuser
-
-WORKDIR /build/ub
-COPY --chown=appuser:appuser ub/ ./
-RUN go build -ldflags="-w -s" ./ub.go
-
 FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-new:${DOCKER_UPSTREAM_TAG} AS confluent-base
 
 ARG PROJECT_VERSION
@@ -154,12 +147,23 @@ RUN mkdir /app/kafka; \
 # Stage 3: Final runtime image with native binary
 FROM ubuntu:latest
 
+# Install Python 3 and pip for cub utility
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-venv \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install confluent-docker-utils which contains cub
+RUN pip3 install git+https://github.com/confluentinc/confluent-docker-utils@v0.0.157
+
 # Copy the native executable from the GraalVM build stage
 COPY --from=build-native-image /app /app
 
 COPY --from=confluent-base /usr/local/bin /usr/local/bin
 COPY --from=confluent-base /usr/bin /usr/bin
-COPY --from=build-ub /build/ub/ub /usr/bin/ub
+COPY --from=confluent-base /usr/share/java /usr/share/java
 COPY include/etc/confluent/docker /etc/confluent/docker
 COPY include/etc/confluent/docker/kafka.properties /etc/kafka/kafka.properties
 COPY include/etc/confluent/docker/server.properties /etc/kafka/server.properties
@@ -168,8 +172,6 @@ COPY include/etc/confluent/docker/tools-log4j2.yaml /etc/kafka/tools-log4j2.yaml
 COPY include/etc/confluent/docker/meta.properties /var/lib/kafka/data/meta.properties
 
 # Set permissions and the entrypoint
-# USER appuser
 USER root
 RUN mkdir -p /var/lib/kafka/data /etc/kafka/secrets
-RUN apt update && apt install vim -y
 CMD ["/etc/confluent/docker/run"]
