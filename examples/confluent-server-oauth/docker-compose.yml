@@ -21,9 +21,17 @@ services:
     volumes:
       - ./keycloak-realm-export.json:/opt/keycloak/data/import/realm-export.json
 
-
+  graalvm:
+    image: ghcr.io/graalvm/graalvm-community:21
+    hostname: graalvm
+    container_name: graalvm
+    volumes:
+      - ./graalvm-agent-800:/tmp/graalvm-agent-800
+    entrypoint:
+      - sleep
+      - "100000"
   broker1:
-    image: confluentinc/cp-server:8.0.x-latest
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
     hostname: broker1
     container_name: broker1
     depends_on:
@@ -100,6 +108,14 @@ services:
       KAFKA_CONFLUENT_METADATA_SERVER_OAUTHBEARER_SUB_CLAIM_NAME: sub
       KAFKA_CONFLUENT_METADATA_SERVER_OAUTHBEARER_GROUPS_CLAIM_NAME: groups
 
+      # OAuth Bearer allowed URLs
+      KAFKA_OPTS: "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080/realms/cp/protocol/openid-connect/certs,http://keycloak:8080/realms/cp/protocol/openid-connect/token"
+
     volumes:
       - ./create-certificates.sh:/tmp/create-certificates.sh
-    command: "bash -c 'if [ ! -f /tmp/create-certificates.sh ]; then echo \"ERROR: Did you forget the create-certificates.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/create-certificates.sh && /etc/confluent/docker/run ; fi'"
+      - ./graalvm-manifests-800:/tmp/graalvm-manifests-800
+      - ./graalvm-agent-800:/tmp/graalvm-agent-800
+#    command: "bash -c 'if [ ! -f /tmp/create-certificates.sh ]; then echo \"ERROR: Did you forget the create-certificates.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/create-certificates.sh && /etc/confluent/docker/run ; fi'"
+    entrypoint:
+      - sleep
+      - "100000"

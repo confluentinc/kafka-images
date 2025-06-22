@@ -1,0 +1,167 @@
+#
+# Copyright 2019 Confluent Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+ARG DOCKER_UPSTREAM_REGISTRY
+ARG DOCKER_UPSTREAM_TAG=ubi9-latest
+
+FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-new:${DOCKER_UPSTREAM_TAG} AS confluent-base
+
+ARG PROJECT_VERSION
+ARG ARTIFACT_ID
+ARG GIT_COMMIT
+
+LABEL maintainer="partner-support@confluent.io"
+LABEL vendor="Confluent"
+LABEL version=$GIT_COMMIT
+LABEL release=$PROJECT_VERSION
+LABEL name=$ARTIFACT_ID
+LABEL summary="Confluent platform server graalvm native image."
+LABEL description="Confluent platform server graalvm native image."
+LABEL io.confluent.docker=true
+LABEL io.confluent.docker.git.id=$GIT_COMMIT
+ARG BUILD_NUMBER=-1
+LABEL io.confluent.docker.build.number=$BUILD_NUMBER
+LABEL io.confluent.docker.git.repo="confluentinc/kafka-images"
+
+ARG CONFLUENT_VERSION
+ARG CONFLUENT_PACKAGES_REPO
+ARG CONFLUENT_PLATFORM_LABEL
+
+# allow arg override of required env params
+ARG KAFKA_ADVERTISED_LISTENERS
+ENV KAFKA_ADVERTISED_LISTENERS=${KAFKA_ADVERTISED_LISTENERS}
+ARG CLUSTER_ID
+ENV CLUSTER_ID=${CLUSTER_ID}
+
+ENV COMPONENT=kafka
+
+# primary
+EXPOSE 9092
+
+USER root
+
+RUN echo "===> Installing ${COMPONENT}..." \
+    && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
+    && rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
+    && printf "[Confluent] \n\
+name=Confluent repository \n\
+baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
+gpgcheck=1 \n\
+gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
+enabled=1 " > /etc/yum.repos.d/confluent.repo \
+    && echo "===> installing ${COMPONENT}..." \
+    && yum install -y confluent-server-${CONFLUENT_VERSION} \
+    && echo "===> installing confluent-rebalancer ..." \
+    && yum install -y confluent-rebalancer-${CONFLUENT_VERSION} \
+    && echo "===> installing confluent-security ..." \
+    && yum install -y confluent-security-${CONFLUENT_VERSION} \
+    && echo "===> clean up ..."  \
+    && yum clean all \
+    && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo \
+    && echo "===> Setting up ${COMPONENT} dirs" \
+    && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
+    && chown -R appuser:root /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /etc/${COMPONENT}/secrets \
+    && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets /var/log/kafka
+
+VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
+
+# Stage 2: GraalVM for native-image
+FROM ghcr.io/graalvm/graalvm-community:21 AS build-native-image
+
+WORKDIR /app
+ARG COMPONENT=kafka
+ENV COMPONENT=kafka
+USER root
+
+# Set environment variables for GraalVM
+ENV GRAALVM_HOME=/opt/graalvm
+ENV PATH="$GRAALVM_HOME/bin:$PATH"
+
+# Copy Kafka source code from the previous stage
+COPY --from=confluent-base /usr/share/java /usr/share/java
+
+# Copy reflection configs to create GraalVM native binary
+COPY native-image-configs-oauth /app/native-image-configs-oauth
+
+RUN microdnf install -y zip unzip && \
+    echo "Scanning for JARs to clean..." && \
+    find /usr/share/java -name "*.jar" | while read jar; do \
+      jarname=$(basename "$jar"); \
+      if [[ "$jarname" == azure-core*.jar || "$jarname" == gax-2.43.0.jar ]]; then \
+        echo "Modifying $jarname"; \
+        mkdir -p /tmp/jar_unpack && cd /tmp/jar_unpack && \
+        unzip -q "$jar"; \
+        if find META-INF/native-image -name "native-image.properties" | grep -q .; then \
+          echo "Replacing --initialize-at-build-time with --initialize-at-run-time"; \
+          find META-INF/native-image -name "native-image.properties" -exec sed -i 's/--initialize-at-build-time/--initialize-at-run-time/g' {} \;; \
+          zip -q -r /tmp/cleaned.jar .; \
+          mv /tmp/cleaned.jar "$jar"; \
+          echo "Updated $jar"; \
+        else \
+          echo "No native-image.properties in $jar"; \
+        fi; \
+        rm -rf /tmp/jar_unpack/* /tmp/cleaned.jar; \
+      else \
+        echo "Skipping $jarname"; \
+      fi; \
+    done
+
+# Build native image for the Kafka application
+RUN mkdir /app/kafka; \
+    native-image --no-fallback -H:-CheckToolchain --enable-http \
+                                                    --enable-https \
+                                                    --add-exports org.graalvm.nativeimage.builder/com.oracle.svm.core.configure=ALL-UNNAMED \
+                                                    --add-exports org.graalvm.nativeimage/org.graalvm.nativeimage.impl=ALL-UNNAMED \
+                                                    --allow-incomplete-classpath \
+                                                    --report-unsupported-elements-at-runtime \
+                                                    --install-exit-handlers \
+                                                    --initialize-at-run-time=io.netty \
+                                                    --enable-monitoring=jmxserver,jmxclient,heapdump,jvmstat \
+                                                    -H:+ReportExceptionStackTraces \
+                                                    -H:+PrintClassInitialization \
+                                                    -H:+EnableAllSecurityServices \
+                                                    -H:EnableURLProtocols=http,https \
+                                                    -H:AdditionalSecurityProviders=sun.security.jgss.SunProvider \
+                                                    -H:ReflectionConfigurationFiles=/app/native-image-configs-oauth/reflect-config.json \
+                                                    -H:JNIConfigurationFiles=/app/native-image-configs-oauth/jni-config.json \
+                                                    -H:ResourceConfigurationFiles=/app/native-image-configs-oauth/resource-config.json \
+                                                    -H:SerializationConfigurationFiles=/app/native-image-configs-oauth/serialization-config.json \
+                                                    -H:PredefinedClassesConfigurationFiles=/app/native-image-configs-oauth/predefined-classes-config.json \
+                                                    -H:DynamicProxyConfigurationFiles=/app/native-image-configs-oauth/proxy-config.json \
+                                                    --verbose \
+                                                    -march=compatibility \
+                                                    -cp "/usr/bin/../share/java/kafka/*:/usr/bin/../share/java/confluent-metadata-service/*:/usr/bin/../share/java/rest-utils/*:/usr/bin/../share/java/confluent-common/*:/usr/bin/../share/java/ce-kafka-http-server/*:/usr/bin/../share/java/ce-kafka-rest-servlet/*:/usr/bin/../share/java/ce-kafka-rest-extensions/*:/usr/bin/../share/java/kafka-rest-lib/*:/usr/bin/../share/java/confluent-security/kafka-rest/*:/usr/bin/../share/java/confluent-security/schema-validator/*:/usr/bin/../share/java/confluent-telemetry/*" kafka.Kafka -o /app/kafka/kafka.Kafka
+
+# Stage 3: Final runtime image with native binary
+FROM ubuntu:latest
+
+# Copy the native executable from the GraalVM build stage
+COPY --from=build-native-image /app /app
+
+COPY --from=confluent-base /usr/local/bin /usr/local/bin
+COPY --from=confluent-base /usr/bin /usr/bin
+COPY include/etc/confluent/docker /etc/confluent/docker
+COPY include/etc/confluent/docker/kafka.properties /etc/kafka/kafka.properties
+COPY include/etc/confluent/docker/server.properties /etc/kafka/server.properties
+COPY include/etc/confluent/docker/log4j2.yaml /etc/kafka/log4j2.yaml
+COPY include/etc/confluent/docker/tools-log4j2.yaml /etc/kafka/tools-log4j2.yaml
+COPY include/etc/confluent/docker/meta.properties /var/lib/kafka/data/meta.properties
+
+# Set permissions and the entrypoint
+# USER appuser
+USER root
+RUN mkdir -p /var/lib/kafka/data /etc/kafka/secrets
+RUN apt update && apt install vim -y
+CMD ["/etc/confluent/docker/run"]
