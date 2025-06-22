@@ -23,7 +23,7 @@ services:
 
 
   broker1:
-    image: confluentinc/cp-server:8.0.x-latest
+    image: cp-server-native-local-80x-oauth:latest
     hostname: broker1
     container_name: broker1
     depends_on:
@@ -39,6 +39,9 @@ services:
       - "9101:9101"
       - "9095:9095"
       - "8091:8091"
+    entrypoint:
+      - sleep
+      - "100000"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,INTERNAL:SASL_PLAINTEXT,EXTERNAL:SASL_PLAINTEXT
@@ -100,6 +103,9 @@ services:
       KAFKA_CONFLUENT_METADATA_SERVER_OAUTHBEARER_SUB_CLAIM_NAME: sub
       KAFKA_CONFLUENT_METADATA_SERVER_OAUTHBEARER_GROUPS_CLAIM_NAME: groups
 
+      # OAuth Bearer allowed URLs
+      KAFKA_OPTS: "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080/realms/cp/protocol/openid-connect/certs,http://keycloak:8080/realms/cp/protocol/openid-connect/token"
+
     volumes:
       - ./create-certificates.sh:/tmp/create-certificates.sh
-    command: "bash -c 'if [ ! -f /tmp/create-certificates.sh ]; then echo \"ERROR: Did you forget the create-certificates.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/create-certificates.sh && /etc/confluent/docker/run ; fi'"
+    # command: "bash -c 'if [ ! -f /tmp/create-certificates.sh ]; then echo \"ERROR: Did you forget the create-certificates.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/create-certificates.sh && /etc/confluent/docker/run ; fi'"
