@@ -37,4 +37,4 @@ echo "===> Launching kafka... "
 #cat /etc/kafka/kafka.properties
 echo "===> Kafka start..."
 # exec "${COMPONENT}"-server-start /etc/"${COMPONENT}"/"${COMPONENT}".properties
-exec /app/kafka/kafka.Kafka /etc/kafka/kafka.properties
+exec /app/kafka/kafka.Kafka /etc/kafka/server.properties
