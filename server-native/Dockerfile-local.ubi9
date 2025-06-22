@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG DOCKER_UPSTREAM_REGISTRY
-ARG DOCKER_UPSTREAM_TAG=ubi9-latest
+ARG DOCKER_UPSTREAM_REGISTRY=519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/
+ARG DOCKER_UPSTREAM_TAG=8.0.x-latest-ubi9
+ARG CONFLUENT_PACKAGES_REPO=https://nightly-packages.confluent.io/8.0.x/6512/rpm/8.0
+ARG CONFLUENT_VERSION=8.0.1
 
 FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-new:${DOCKER_UPSTREAM_TAG} AS confluent-base
 
