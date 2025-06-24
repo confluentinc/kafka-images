@@ -1,0 +1,15 @@
+Configuration:
+  name: "Log4j2"
+
+  Appenders:
+    Console:
+      name: STDERR
+      target: SYSTEM_ERR
+      PatternLayout:
+        Pattern: "[%d] %p %m (%c)%n"
+
+  Loggers:
+    Root:
+      level: "{{ env['KAFKA_TOOLS_LOG4J_LOGLEVEL'] | default('WARN') }}"
+      AppenderRef:
+        - ref: STDERR

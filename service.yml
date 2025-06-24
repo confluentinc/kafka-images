@@ -17,7 +17,8 @@ semaphore:
     'confluentinc/cp-kafka-connect-base',
     'confluentinc/cp-kafka',
     'confluentinc/confluent-local',
-    'confluentinc/cp-server'
+    'confluentinc/cp-server',
+    'confluentinc/cp-server-native'
   ]
   community_docker_repos: [
     'confluentinc/cp-kafka-connect',
@@ -103,6 +104,7 @@ code_artifact:
     - maven-snapshots/maven/io.confluent.kafka-images/cp-server-connect-base
     - maven-snapshots/maven/io.confluent.kafka-images/cp-server-connect
     - maven-snapshots/maven/io.confluent.kafka-images/cp-server
+    - maven-snapshots/maven/io.confluent.kafka-images/cp-server-native
     - maven-snapshots/maven/io.confluent.kafka-images/confluent-local
     - maven-snapshots/maven/io.confluent.kafka-images/cp-kafka-connect-base
     - maven-snapshots/maven/io.confluent.kafka-images/cp-kafka-connect
