@@ -1,4 +1,3 @@
-{% set connect_props = env_to_props('CONNECT_', '') -%}
-{% for name, value in connect_props.items() -%}
-{{name}}={{value}}
-{% endfor -%}
+{{- range $k, $v := envToProps "CONNECT_" "" }}
+{{ $k }}={{ $v }}
+{{- end }}
