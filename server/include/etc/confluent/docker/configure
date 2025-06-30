@@ -142,6 +142,6 @@ then
   KAFKA_CONFLUENT_BALANCER_ENABLE="true"
 fi
 
-ub render-template "/etc/confluent/docker/${COMPONENT}.properties.template" "/etc/${COMPONENT}/${COMPONENT}.properties"
-ub render-template "/etc/confluent/docker/log4j2.yaml.template" "/etc/${COMPONENT}/log4j2.yaml"
-ub render-template "/etc/confluent/docker/tools-log4j2.yaml.template" "/etc/${COMPONENT}/tools-log4j2.yaml"
+ub render-template "/etc/confluent/docker/${COMPONENT}.properties.template" > /etc/${COMPONENT}/${COMPONENT}.properties
+ub render-template "/etc/confluent/docker/log4j2.yaml.template" > /etc/${COMPONENT}/log4j2.yaml
+ub render-template "/etc/confluent/docker/tools-log4j2.yaml.template" > /etc/${COMPONENT}/tools-log4j2.yaml
