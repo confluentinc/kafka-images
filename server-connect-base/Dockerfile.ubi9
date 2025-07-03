@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG DOCKER_REGISTRY
+# ARG DOCKER_REGISTRY
 ARG DOCKER_UPSTREAM_TAG=ubi9-latest
 ARG DOCKER_TAG
 
-FROM ${DOCKER_REGISTRY}confluentinc/cp-server:${DOCKER_TAG}
+FROM 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server:dev-master-17272b99-ubi9.arm64
 
 ARG PROJECT_VERSION
 ARG ARTIFACT_ID
@@ -65,7 +65,9 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && echo "===> Setting up ${COMPONENT} dirs ..." \
     && mkdir -p /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /usr/logs /usr/share/confluent-hub-components \
     && chown appuser:root -R /etc/kafka /etc/${COMPONENT} /etc/schema-registry /usr/logs /usr/share/confluent-hub-components \
-    && chmod -R ug+w /etc/kafka /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /etc/schema-registry
+    && chmod -R ug+w /etc/kafka /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /etc/schema-registry \
+    && cd /usr/share/java \
+    && package_dedupe $(pwd)
 
 ENV CONNECT_PLUGIN_PATH=/usr/share/java/,/usr/share/confluent-hub-components/
 

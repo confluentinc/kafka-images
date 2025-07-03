@@ -1,3 +1,4 @@
-{{- range $k, $v := envToProps "CONNECT_" "" }}
+{{- $connect_props := envToProps "CONNECT_" "" nil nil nil -}}
+{{ range $k, $v := $connect_props }}
 {{ $k }}={{ $v }}
-{{- end }}
+{{ end }}
