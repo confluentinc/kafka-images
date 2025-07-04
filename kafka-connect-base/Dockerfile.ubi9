@@ -64,9 +64,9 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && microdnf clean all \
     && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo \
     && echo "===> Setting up ${COMPONENT} dirs ..." \
-    && mkdir -p /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /usr/logs /usr/share/confluent-hub-components \
-    && chown appuser:root -R /etc/kafka /etc/${COMPONENT} /etc/schema-registry /usr/logs /usr/share/confluent-hub-components \
-    && chmod -R ug+w /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /etc/schema-registry /usr/share/confluent-hub-components\
+    && mkdir -p /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /usr/share/confluent-hub-components \
+    && chown appuser:root -R /etc/kafka /etc/${COMPONENT} /usr/logs /etc/schema-registry /usr/share/confluent-hub-components \
+    && chmod -R ug+w /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /etc/schema-registry /usr/share/confluent-hub-components \
     && cd /usr/share/java \
     && package_dedupe $(pwd)
 
