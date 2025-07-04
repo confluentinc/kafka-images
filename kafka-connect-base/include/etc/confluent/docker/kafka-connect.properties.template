@@ -1,4 +1,4 @@
-{{- $excluded_props := "CONNECT_METRIC_REPORTERS" -}}
+{{- $excluded_props := stringSlice "CONNECT_METRIC_REPORTERS" -}}
 {{- $connect_props := envToProps "CONNECT_" "" nil nil $excluded_props -}}
 {{- range $k, $v := $connect_props }}
 {{ $k }}={{ $v }}
