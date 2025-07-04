@@ -65,7 +65,9 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && echo "===> Setting up ${COMPONENT} dirs ..." \
     && mkdir -p /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /usr/logs /usr/share/confluent-hub-components \
     && chown appuser:root -R /etc/kafka /etc/${COMPONENT} /etc/schema-registry /usr/logs /usr/share/confluent-hub-components \
-    && chmod -R ug+w /etc/kafka /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /etc/schema-registry
+    && chmod -R ug+w /etc/kafka /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /etc/schema-registry \
+    && cd /usr/share/java \
+    && package_dedupe $(pwd)
 
 ENV CONNECT_PLUGIN_PATH=/usr/share/java/,/usr/share/confluent-hub-components/
 
