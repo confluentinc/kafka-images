@@ -14,11 +14,15 @@ Configuration:
       AppenderRef:
         - ref: STDOUT
     Logger:
-{{- $loggerDefaults := "org.reflections=ERROR" -}}
-{{- $loggers := getEnv "CONNECT_LOG4J_LOGGERS" "" -}}
-{{ range $k, $v := splitToMapDefaults ","  $loggerDefaults $loggers}}
+{{- $defaultLoggers := createStringSliceMap -}}
+{{- $defaultLoggers = setStringSliceMapValue $defaultLoggers "org.reflections" "ERROR" -}}
+{{- $loggers := $defaultLoggers -}}
+{{- if getEnv "CONNECT_LOG4J_LOGGERS" -}}
+{{- $loggers = parseLog4jLoggers (getEnv "CONNECT_LOG4J_LOGGERS") $defaultLoggers -}}
+{{- end -}}
+{{- range $k, $v := $loggers }}
       - name: "{{ $k }}"
         level: "{{ $v }}"
         AppenderRef:
           - ref: STDOUT
-{{ end }}
+{{- end }}
