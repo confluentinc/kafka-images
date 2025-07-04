@@ -1,6 +1,5 @@
-{% set excluded_props = ['CONNECT_METRIC_REPORTERS'] -%}
-
-{% set connect_props = env_to_props('CONNECT_', '', exclude=excluded_props) -%}
-{% for name, value in connect_props.items() -%}
-{{name}}={{value}}
-{% endfor -%}
+{{- $excluded_props := "CONNECT_METRIC_REPORTERS" -}}
+{{- $connect_props := envToProps "CONNECT_" "" nil nil $excluded_props -}}
+{{- range $k, $v := $connect_props }}
+{{ $k }}={{ $v }}
+{{- end }}
