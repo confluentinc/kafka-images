@@ -98,7 +98,6 @@ ENV PATH="$GRAALVM_HOME/bin:$PATH"
 
 # Copy Kafka source code from the previous stage
 COPY --from=confluent-base /usr/share/java /usr/share/java
-COPY --from=confluent-base /etc/confluent/docker /etc/confluent/docker
 
 # Copy reflection configs to create GraalVM native binary
 COPY native-image-configs-oauth /app/native-image-configs-oauth
@@ -161,6 +160,7 @@ COPY --from=build-native-image /app /app
 COPY --from=confluent-base /usr/local/bin /usr/local/bin
 COPY --from=confluent-base /usr/bin /usr/bin
 COPY --from=build-ub /build/ub/ub /usr/bin/ub
+COPY --from=confluent-base /etc/confluent/docker /etc/confluent/docker
 COPY include/etc/confluent/docker /etc/confluent/docker
 # COPY include/etc/confluent/docker/kafka.properties /etc/kafka/kafka.properties
 # COPY include/etc/confluent/docker/server.properties /etc/kafka/server.properties
