@@ -23,7 +23,7 @@ services:
 
 
   broker1:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-b7e282d9-ubi9.arm64
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-1d176f98-ubi9.arm64
     hostname: broker1
     container_name: broker1
     depends_on:
@@ -118,6 +118,14 @@ services:
       KAFKA_OPTS: "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080/realms/cp/protocol/openid-connect/token,http://keycloak:8080/realms/cp/protocol/openid-connect/certs"
     volumes:
       - ./client-docker.properties:/tmp/client.properties
+    entrypoint:
+      - sleep
+      - "infinity"
+        
+  curl-pod:
+    image: curlimages/curl:latest
+    hostname: curl-pod
+    container_name: curl-pod
     entrypoint:
       - sleep
       - "infinity"

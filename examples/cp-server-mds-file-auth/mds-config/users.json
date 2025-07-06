@@ -1,0 +1,12 @@
+{
+  "users": [
+    {
+      "principal": "User:admin",
+      "password": "admin-secret"
+    },
+    {
+      "principal": "User:developer",
+      "password": "dev-secret"
+    }
+  ]
+}
