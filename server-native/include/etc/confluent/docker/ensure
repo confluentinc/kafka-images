@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+#
+# Copyright 2020 Confluent Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+. /etc/confluent/docker/bash-config
+
+export KAFKA_DATA_DIRS=${KAFKA_DATA_DIRS:-"/var/lib/kafka/data"}
+echo "===> Check if $KAFKA_DATA_DIRS is writable ..."
+dub path "$KAFKA_DATA_DIRS" writable
+
+if [[ -n "${KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE-}" ]] && [[ $KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE == "true" ]]
+then
+    echo "===> Skipping Zookeeper health check for SSL connections..."
+elif [[ -n "${KAFKA_PROCESS_ROLES-}" ]]
+then 
+    echo "===> Running in KRaft mode, skipping Zookeeper health check..."
+else
+    echo "===> Check if Zookeeper is healthy ..."
+    cub zk-ready "$KAFKA_ZOOKEEPER_CONNECT" "${KAFKA_CUB_ZK_TIMEOUT:-40}"
+fi
+
+
+# KRaft required step: Format the storage directory with provided cluster ID unless it already exists.
+if [[ -n "${KAFKA_PROCESS_ROLES-}" ]]
+then
+    echo "===> Using provided cluster id $CLUSTER_ID ..."
+
+    # A bit of a hack to not error out if the storage is already formatted.  Need storage-tool to support this
+    result=$(kafka-storage format --cluster-id=$CLUSTER_ID -c /etc/kafka/kafka.properties 2>&1) || \
+        echo $result | grep -i "already formatted" || \
+        { echo $result && (exit 1) }
+
+    echo "===> Done kafka-storage"
+fi

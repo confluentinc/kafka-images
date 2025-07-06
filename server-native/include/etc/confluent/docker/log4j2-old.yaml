@@ -1,0 +1,49 @@
+Configuration:
+  name: "Log4j2"
+
+  Appenders:
+    Console:
+      name: STDOUT
+      target: SYSTEM_OUT
+      PatternLayout:
+        Pattern: "[%d] %p %m (%c)%n"
+
+  Loggers:
+    Root:
+      level: "INFO"
+      AppenderRef:
+        - ref: STDOUT
+
+    Logger:
+      - name: "kafka"
+        level: "INFO"
+        AppenderRef:
+          ref: STDOUT
+      - name: "kafka.network.RequestChannel$"
+        level: "WARN"
+        AppenderRef:
+          ref: STDOUT
+      - name: "kafka.producer.async.DefaultEventHandler"
+        level: "DEBUG"
+        AppenderRef:
+          ref: STDOUT
+      - name: "kafka.request.logger"
+        level: "WARN"
+        AppenderRef:
+          ref: STDOUT
+      - name: "kafka.controller"
+        level: "TRACE"
+        AppenderRef:
+          ref: STDOUT
+      - name: "kafka.log.LogCleaner"
+        level: "INFO"
+        AppenderRef:
+          ref: STDOUT
+      - name: "state.change.logger"
+        level: "TRACE"
+        AppenderRef:
+          ref: STDOUT
+      - name: "kafka.authorizer.logger"
+        level: "WARN"
+        AppenderRef:
+          ref: STDOUT
