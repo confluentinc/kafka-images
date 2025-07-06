@@ -164,8 +164,8 @@ COPY --from=build-ub /build/ub/ub /usr/bin/ub
 COPY include/etc/confluent/docker /etc/confluent/docker
 # COPY include/etc/confluent/docker/kafka.properties /etc/kafka/kafka.properties
 # COPY include/etc/confluent/docker/server.properties /etc/kafka/server.properties
-COPY include/etc/confluent/docker/log4j2.yaml /etc/kafka/log4j2.yaml
-COPY include/etc/confluent/docker/tools-log4j2.yaml /etc/kafka/tools-log4j2.yaml
+# COPY include/etc/confluent/docker/log4j2.yaml /etc/kafka/log4j2.yaml
+# COPY include/etc/confluent/docker/tools-log4j2.yaml /etc/kafka/tools-log4j2.yaml
 COPY include/etc/confluent/docker/meta.properties /var/lib/kafka/data/meta.properties
 
 # Set permissions and the entrypoint
