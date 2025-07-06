@@ -7,7 +7,7 @@ version: v1.0
 name: build-test-release
 agent:
   machine:
-    type: s1-prod-ubuntu24-04-amd64-1
+    type: s1-prod-ubuntu24-04-amd64-4
 
 fail_fast:
   cancel:
@@ -72,7 +72,7 @@ global_job_config:
       - export LATEST_TAG=$BRANCH_TAG-latest
       - export DOCKER_UPSTREAM_TAG="$LATEST_TAG"
       - export DOCKER_REPOS="confluentinc/cp-server-connect confluentinc/cp-server-connect-base confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-kafka confluentinc/confluent-local
-        confluentinc/cp-server"
+        confluentinc/cp-server confluentinc/cp-server-native"
       - export COMMUNITY_DOCKER_REPOS="confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-kafka confluentinc/confluent-local"
       - |
         if [[ $SKIP_COMMUNITY == "True" ]]; then
@@ -145,7 +145,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu24-04-arm64-1
+          type: s1-prod-ubuntu24-04-arm64-4
       jobs:
         - name: Build & Test ubi9
           commands:
