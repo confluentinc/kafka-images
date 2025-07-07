@@ -167,6 +167,7 @@ COPY include/etc/confluent/docker /etc/confluent/docker
 # COPY include/etc/confluent/docker/log4j2.yaml /etc/kafka/log4j2.yaml
 # COPY include/etc/confluent/docker/tools-log4j2.yaml /etc/kafka/tools-log4j2.yaml
 COPY include/etc/confluent/docker/meta.properties /var/lib/kafka/data/meta.properties
+ENV COMPONENT=kafka
 
 # Set permissions and the entrypoint
 # USER appuser
