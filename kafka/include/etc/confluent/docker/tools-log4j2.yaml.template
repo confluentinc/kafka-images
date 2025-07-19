@@ -10,6 +10,6 @@ Configuration:
 
   Loggers:
     Root:
-      level: "{{ env['KAFKA_TOOLS_LOG4J_LOGLEVEL'] | default('WARN') }}"
+      level: "{{ getEnv "KAFKA_TOOLS_LOG4J_LOGLEVEL" | default "WARN" }}"
       AppenderRef:
         - ref: STDERR
