@@ -23,7 +23,7 @@ services:
 
 
   broker1:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-b7e282d9-ubi9.arm64
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-11c32404-ubi9.arm64
     hostname: broker1
     container_name: broker1
     depends_on:

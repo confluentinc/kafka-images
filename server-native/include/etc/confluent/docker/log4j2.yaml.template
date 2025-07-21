@@ -48,7 +48,8 @@ Configuration:
         AppenderRef:
           ref: STDOUT
 {{- if getEnv "KAFKA_LOG4J_LOGGERS" "" -}}
-{{- $customLoggers := parseLog4jLoggers (getEnv "KAFKA_LOG4J_LOGGERS" "") -}}
+{{- $defaultLoggers := splitToMapDefaults "," "org.reflections=ERROR" "" -}}
+{{- $customLoggers := parseLog4jLoggers (getEnv "KAFKA_LOG4J_LOGGERS" "") $defaultLoggers -}}
 {{- range $logger, $loglevel := $customLoggers -}}
       - name: "{{ $logger }}"
         level: "{{ $loglevel }}"
