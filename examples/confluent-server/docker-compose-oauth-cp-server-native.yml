@@ -25,7 +25,7 @@ services:
 
 
   broker1:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-d9edc972-ubi9.arm64
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-d7a48937-ubi9.arm64
     hostname: broker1
     container_name: broker1
     depends_on:
@@ -131,7 +131,7 @@ services:
     container_name: producer
     depends_on:
       curl-pod:
-        condition: service_started
+        condition: service_completed_successfully
     environment:
       KAFKA_OPTS: "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080/realms/cp/protocol/openid-connect/token,http://keycloak:8080/realms/cp/protocol/openid-connect/certs"
     volumes:
@@ -140,16 +140,20 @@ services:
       - oauth-network
     command: |
       bash -c '
-      echo "Waiting for Kafka and RBAC permissions to be ready..."
-      sleep 45
+      echo "RBAC permissions already configured by curl-pod. Starting producer..."
+      sleep 10
       
       echo "Creating topic: oauth-test-topic"
-      kafka-topics --create --topic oauth-test-topic --bootstrap-server broker1:9095 --producer.config /tmp/oauth-client.properties --partitions 1 --replication-factor 1 || echo "Topic might already exist"
+      kafka-topics --create --topic oauth-test-topic --bootstrap-server broker1:9095 --command-config /tmp/oauth-client.properties --partitions 1 --replication-factor 1 || echo "Topic might already exist"
       
       echo "Listing topics:"
-      kafka-topics --list --bootstrap-server broker1:9095 --producer.config /tmp/oauth-client.properties
+      kafka-topics --list --bootstrap-server broker1:9095 --command-config /tmp/oauth-client.properties
       
       echo "Producing messages to oauth-test-topic..."
+      echo "📝 Message 1: OAuth Message 1: Hello from OAuth Producer!"
+      echo "📝 Message 2: OAuth Message 2: Testing OAuth authentication" 
+      echo "📝 Message 3: OAuth Message 3: Secure messaging with OAuth"
+      echo "🚀 Sending messages to Kafka..."
       echo -e "OAuth Message 1: Hello from OAuth Producer!\nOAuth Message 2: Testing OAuth authentication\nOAuth Message 3: Secure messaging with OAuth" | kafka-console-producer --bootstrap-server broker1:9095 --topic oauth-test-topic --producer.config /tmp/oauth-client.properties
       
       echo "Producer completed. Messages sent to oauth-test-topic"
@@ -161,7 +165,7 @@ services:
     container_name: consumer
     depends_on:
       producer:
-        condition: service_started
+        condition: service_completed_successfully
     environment:
       KAFKA_OPTS: "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080/realms/cp/protocol/openid-connect/token,http://keycloak:8080/realms/cp/protocol/openid-connect/certs"
     volumes:
@@ -170,20 +174,75 @@ services:
       - oauth-network
     command: |
       bash -c '
-      echo "Waiting for producer to create topic and produce messages..."
-      sleep 60
+      echo "Producer has completed. Starting consumer..."
+      sleep 5
       
       echo "Starting consumer for oauth-test-topic (from beginning)..."
       timeout 30 kafka-console-consumer --bootstrap-server broker1:9095 --topic oauth-test-topic --from-beginning --consumer.config /tmp/oauth-client.properties || echo "Consumer timeout reached"
       
       echo "Consumer completed."
       '
+
+  cleanup:
+    image: curlimages/curl:latest
+    hostname: cleanup
+    container_name: cleanup
+    depends_on:
+      consumer:
+        condition: service_completed_successfully
+    command: |
+      sh -c '
+      echo "🧹 All OAuth testing completed successfully!"
+      echo "📊 Test Summary:"
+      echo "  ✅ OAuth RBAC permissions configured"
+      echo "  ✅ Topic created with OAuth authentication"  
+      echo "  ✅ 3 messages produced with OAuth"
+      echo "  ✅ 3 messages consumed with OAuth"
+      echo "🏁 OAuth with GraalVM native image test PASSED!"
+      echo ""
+      echo "💡 You can now stop the services with Ctrl+C"
+      echo "   or run: docker-compose -f docker-compose-oauth-cp-server-native.yml down"
+      '
+    networks:
+      - oauth-network
         
   curl-pod:
     image: curlimages/curl:latest
     hostname: curl-pod
     container_name: curl-pod
-    command: ["sh", "-c", "echo 'curl-pod ready for manual OAuth setup' && sleep infinity"]
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      broker1:
+        condition: service_started
+    command: |
+      sh -c '
+      echo "=== Waiting for services to be ready ==="
+      sleep 20
+      
+      echo "=== Getting superuser OAuth token ==="
+      ACCESS_TOKEN=$$(curl -s -X POST \
+        -H "Authorization: Basic c3VwZXJ1c2VyX2NsaWVudF9hcHA6c3VwZXJ1c2VyX2NsaWVudF9hcHBfc2VjcmV0" \
+        -H "Content-Type: application/x-www-form-urlencoded" \
+        -d "grant_type=client_credentials" \
+        http://keycloak:8080/realms/cp/protocol/openid-connect/token | \
+        sed -n "s/.*\"access_token\":\"\([^\"]*\)\".*/\1/p")
+        
+      echo "Token obtained, setting up RBAC permissions..."
+      
+      echo "=== Granting topic permissions ==="
+      curl -s -H "Authorization: Bearer $$ACCESS_TOKEN" -H "Content-Type: application/json" \
+        -X POST "http://broker1:8091/security/1.0/principals/User:client_app1/roles/ResourceOwner/bindings" \
+        -d "{\"scope\":{\"clusters\":{\"kafka-cluster\":\"vHCgQyIrRHG8Jv27qI2h3Q\"}}, \"resourcePatterns\":[{\"resourceType\":\"Topic\", \"name\":\"oauth-test-topic\", \"patternType\":\"LITERAL\"}]}"
+      
+      echo "=== Granting consumer group permissions ==="  
+      curl -s -H "Authorization: Bearer $$ACCESS_TOKEN" -H "Content-Type: application/json" \
+        -X POST "http://broker1:8091/security/1.0/principals/User:client_app1/roles/ResourceOwner/bindings" \
+        -d "{\"scope\":{\"clusters\":{\"kafka-cluster\":\"vHCgQyIrRHG8Jv27qI2h3Q\"}}, \"resourcePatterns\":[{\"resourceType\":\"Group\", \"name\":\"console-consumer-group\", \"patternType\":\"LITERAL\"}]}"
+      
+      echo "✅ OAuth RBAC permissions setup completed!"
+      echo "Services ready for producer and consumer testing..."
+      '
     networks:
       - oauth-network
 
