@@ -25,7 +25,7 @@ services:
 
 
   broker1:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-11c32404-ubi9.arm64
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-d9edc972-ubi9.arm64
     hostname: broker1
     container_name: broker1
     depends_on:
@@ -109,7 +109,7 @@ services:
 
     volumes:
       - ./create-certificates.sh:/tmp/create-certificates.sh
-    command: "bash -c 'if [ ! -f /tmp/create-certificates.sh ]; then echo \"ERROR: Did you forget the create-certificates.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/create-certificates.sh && echo \"Certificates created. Container ready for manual testing.\" && sleep infinity ; fi'"
+    command: "bash -c 'if [ ! -f /tmp/create-certificates.sh ]; then echo \"ERROR: Did you forget the create-certificates.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/create-certificates.sh && echo \"Certificates created. Container ready for manual testing.\" && /etc/confluent/docker/run ; fi'"
     networks:
       - oauth-network
 
