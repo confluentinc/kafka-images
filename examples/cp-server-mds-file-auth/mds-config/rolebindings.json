@@ -1,0 +1,24 @@
+{
+  "roleBindings": [
+    {
+      "principal": "User:admin",
+      "role": "SystemAdmin",
+      "resourcePatterns": [
+        {
+          "resourceType": "Cluster",
+          "name": "kafka-cluster"
+        }
+      ]
+    },
+    {
+      "principal": "User:developer",
+      "role": "DeveloperWrite",
+      "resourcePatterns": [
+        {
+          "resourceType": "Topic",
+          "name": "test-topic"
+        }
+      ]
+    }
+  ]
+}
