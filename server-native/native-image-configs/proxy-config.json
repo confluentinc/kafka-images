@@ -1,0 +1,61 @@
+[
+  {
+    "interfaces":["jakarta.ws.rs.core.HttpHeaders","org.glassfish.hk2.api.ProxyCtl"]
+  },
+  {
+    "interfaces":["jakarta.ws.rs.core.UriInfo","org.glassfish.hk2.api.ProxyCtl"]
+  },
+  {
+    "interfaces":["sun.misc.SignalHandler"]
+  },
+  {
+    "interfaces": [
+      "io.confluent.telemetry.client.BufferingAsyncClient"
+    ]
+  },
+  {
+    "interfaces": [
+      "io.confluent.telemetry.client.TelemetryClient"
+    ]
+  },
+  {
+    "interfaces": [
+      "io.confluent.telemetry.client.TelemetryClientBuilder"
+    ]
+  },
+  {
+    "interfaces": [
+      "io.confluent.telemetry.client.TelemetryClientFactory"
+    ]
+  },
+  {
+    "interfaces": [
+      "io.confluent.telemetry.client.TelemetryClientProvider"
+    ]
+  },
+  {
+    "interfaces": [
+      "io.confluent.telemetry.client.TelemetryClientProviderFactory"
+    ]
+  },
+  {
+    "interfaces": [
+      "io.confluent.telemetry.client.TelemetryClientProviderImpl"
+    ]
+  },
+  {
+    "interfaces": [
+      "io.confluent.telemetry.client.TelemetryClientProviderService"
+    ]
+  },
+  {
+    "interfaces": [
+      "io.confluent.telemetry.client.TelemetryClientService"
+    ]
+  },
+  {
+    "interfaces": [
+      "io.confluent.telemetry.client.TelemetryClientServiceImpl"
+    ]
+  }
+]
