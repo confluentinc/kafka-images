@@ -1,8 +1,17 @@
 ---
 version: '2'
 services:
+  graalvm:
+    image: ghcr.io/graalvm/graalvm-community:21
+    hostname: graalvm
+    container_name: graalvm
+    volumes:
+      - ./graalvm-agent-800:/tmp/graalvm-agent-800
+    entrypoint:
+      - sleep
+      - "1000000"
   broker:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-d7a48937-ubi9.arm64
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
     hostname: broker
     container_name: broker
     ports:
@@ -10,6 +19,12 @@ services:
       - "9101:9101"
       - "8090:8090"
       - "28090:28090"  # Metadata Server (with REST API support)
+    volumes:
+      - ./graalvm-manifests-800:/tmp/graalvm-manifests-800
+      - ./graalvm-agent-800:/tmp/graalvm-agent-800
+    entrypoint:
+      - sleep
+      - "1000000"
     environment:
       COMPONENT: 'kafka'
       KAFKA_NODE_ID: 1
@@ -47,77 +62,77 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION: 1
       KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION: 1
 
-  producer:
-    image: curlimages/curl:latest
-    hostname: producer
-    container_name: producer
-    depends_on:
-      broker:
-        condition: service_started
-    command:
-      - sh
-      - -c
-      - |
-        echo '=== Waiting for Kafka and Metadata Server to be ready ==='
-        sleep 45
+  # producer:
+  #   image: curlimages/curl:latest
+  #   hostname: producer
+  #   container_name: producer
+  #   depends_on:
+  #     broker:
+  #       condition: service_started
+  #   command:
+  #     - sh
+  #     - -c
+  #     - |
+  #       echo '=== Waiting for Kafka and Metadata Server to be ready ==='
+  #       sleep 45
         
-        echo '=== Testing Metadata Server availability ==='
-        for i in 1 2 3 4 5 6 7 8 9 10; do
-          if curl -s --connect-timeout 5 http://broker:28090/kafka/v3/clusters > /dev/null; then
-            echo "✅ Metadata Server is ready!"
-            break
-          else
-            echo "⏳ Waiting for Metadata Server... attempt $i/10"
-            sleep 10
-          fi
-        done
+  #       echo '=== Testing Metadata Server availability ==='
+  #       for i in 1 2 3 4 5 6 7 8 9 10; do
+  #         if curl -s --connect-timeout 5 http://broker:28090/kafka/v3/clusters > /dev/null; then
+  #           echo "✅ Metadata Server is ready!"
+  #           break
+  #         else
+  #           echo "⏳ Waiting for Metadata Server... attempt $i/10"
+  #           sleep 10
+  #         fi
+  #       done
 
-        echo '=== Testing Embedded REST Proxy v3 APIs ==='
+  #       echo '=== Testing Embedded REST Proxy v3 APIs ==='
         
-        echo '🔍 GET /kafka/v3/clusters - List clusters'
-        curl -s http://broker:28090/kafka/v3/clusters | head -200
+  #       echo '🔍 GET /kafka/v3/clusters - List clusters'
+  #       curl -s http://broker:28090/kafka/v3/clusters | head -200
         
-        echo ''
-        echo '🔍 GET /kafka/v3/clusters/{cluster_id} - Get cluster details'
-        curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q | head -200
+  #       echo ''
+  #       echo '🔍 GET /kafka/v3/clusters/{cluster_id} - Get cluster details'
+  #       curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q | head -200
         
-        echo ''
-        echo '🔍 GET /kafka/v3/clusters/{cluster_id}/brokers - List brokers'
-        curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/brokers | head -200
+  #       echo ''
+  #       echo '🔍 GET /kafka/v3/clusters/{cluster_id}/brokers - List brokers'
+  #       curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/brokers | head -200
         
-        echo ''
-        echo '🔍 GET /kafka/v3/clusters/{cluster_id}/broker-configs - List broker configs'
-        curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/broker-configs | head -300
+  #       echo ''
+  #       echo '🔍 GET /kafka/v3/clusters/{cluster_id}/broker-configs - List broker configs'
+  #       curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/broker-configs | head -300
         
-        echo ''
-        echo '=== Creating topic via REST API ==='
-        curl -X POST http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics \
-          -H "Content-Type: application/json" \
-          -d '{
-            "topic_name": "rest-proxy-topic",
-            "partitions_count": 3,
-            "replication_factor": 1
-          }' || echo "Topic might already exist"
+  #       echo ''
+  #       echo '=== Creating topic via REST API ==='
+  #       curl -X POST http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics \
+  #         -H "Content-Type: application/json" \
+  #         -d '{
+  #           "topic_name": "rest-proxy-topic",
+  #           "partitions_count": 3,
+  #           "replication_factor": 1
+  #         }' || echo "Topic might already exist"
 
-        echo '=== Listing topics via REST API ==='
-        curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics | head -200
+  #       echo '=== Listing topics via REST API ==='
+  #       curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics | head -200
         
-        echo ''
-        echo '🔍 GET /kafka/v3/clusters/{cluster_id}/topics/{topic} - Get topic details'
-        curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic | head -200
+  #       echo ''
+  #       echo '🔍 GET /kafka/v3/clusters/{cluster_id}/topics/{topic} - Get topic details'
+  #       curl -s http://localhost:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic | head -200
         
-        echo ''
-        echo '🔍 GET /kafka/v3/clusters/{cluster_id}/topics/{topic}/partitions - List topic partitions'
-        curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/partitions | head -200
+  #       echo ''
+  #       echo '🔍 GET /kafka/v3/clusters/{cluster_id}/topics/{topic}/partitions - List topic partitions'
+  #       curl -s http://localhost:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/partitions | head -200
         
-        echo ''
-        echo '🔍 GET /kafka/v3/clusters/{cluster_id}/topic-configs - List topic configs'
-        curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topic-configs | head -300
+  #       echo ''
+  #       echo '🔍 GET /kafka/v3/clusters/{cluster_id}/topic-configs - List topic configs'
+  #       curl -s http://localhost:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topic-configs | head -300
         
-        echo ''
-        echo '=== Producing messages via REST API ==='
-        echo '📝 Message 1: REST API Message 1 - Hello from Embedded REST Proxy!'
-        curl -X POST http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/records \
+  #       echo ''
+  #       echo '=== Producing messages via REST API ==='
+  #       echo '📝 Message 1: REST API Message 1 - Hello from Embedded REST Proxy!'
+        curl -X POST http://localhost:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/records \
           -H "Content-Type: application/json" \
           -d '{
             "value": {
@@ -126,8 +141,8 @@ services:
             }
           }'
         
-        echo '📝 Message 2: REST API Message 2 - Testing GraalVM Native REST endpoints'  
-        curl -X POST http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/records \
+  #       echo '📝 Message 2: REST API Message 2 - Testing GraalVM Native REST endpoints'  
+        curl -X POST http://localhost:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/records \
           -H "Content-Type: application/json" \
           -d '{
             "value": {
@@ -136,8 +151,8 @@ services:
             }
           }'
           
-        echo '📝 Message 3: REST API Message 3 - Embedded REST Proxy test completed'
-        curl -X POST http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/records \
+  #       echo '📝 Message 3: REST API Message 3 - Embedded REST Proxy test completed'
+        curl -X POST http://localhost:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/records \
           -H "Content-Type: application/json" \
           -d '{
             "value": {
@@ -146,78 +161,78 @@ services:
             }
           }'
         
-        echo '🚀 Messages sent via REST API!'
+  #       echo '🚀 Messages sent via REST API!'
         
-        echo ''
-        echo '=== Testing additional REST API endpoints ==='
+  #       echo ''
+  #       echo '=== Testing additional REST API endpoints ==='
         
-        echo '🔍 GET /kafka/v3/clusters/{cluster_id}/consumer-groups - List consumer groups'
-        curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/consumer-groups | head -200
+  #       echo '🔍 GET /kafka/v3/clusters/{cluster_id}/consumer-groups - List consumer groups'
+  #       curl -s http://localhost:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/consumer-groups | head -200
         
-        echo ''
-        echo '🔍 GET /kafka/v3/clusters/{cluster_id}/acls - List ACLs'
-        curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/acls | head -200
+  #       echo ''
+  #       echo '🔍 GET /kafka/v3/clusters/{cluster_id}/acls - List ACLs'
+  #       curl -s http://localhost:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/acls | head -200
         
-        echo ''
-        echo '🔍 GET /kafka/v3/clusters/{cluster_id}/partitions - List all partitions'
-        curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/partitions | head -200
+  #       echo ''
+  #       echo '🔍 GET /kafka/v3/clusters/{cluster_id}/partitions - List all partitions'
+  #       curl -s http://localhost:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/partitions | head -200
         
-        echo ''
-        echo '🔍 GET /kafka/v3/clusters/{cluster_id}/topics/{topic}/configs - Get topic-specific configs'
-        curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/configs | head -200
+  #       echo ''
+  #       echo '🔍 GET /kafka/v3/clusters/{cluster_id}/topics/{topic}/configs - Get topic-specific configs'
+  #       curl -s http://localhost:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/configs | head -200
         
-        echo ''
-        echo '🎉 Producer completed. All REST API endpoints tested!'
+  #       echo ''
+  #       echo '🎉 Producer completed. All REST API endpoints tested!'
 
-  consumer:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
-    hostname: consumer
-    container_name: consumer
-    depends_on:
-      producer:
-        condition: service_completed_successfully
-    command:
-      - bash
-      - -c
-      - |
-        echo '=== Consumer starting, producer has completed successfully ==='
-        sleep 5
+  # consumer:
+  #   image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
+  #   hostname: consumer
+  #   container_name: consumer
+  #   depends_on:
+  #     producer:
+  #       condition: service_completed_successfully
+  #   command:
+  #     - bash
+  #     - -c
+  #     - |
+  #       echo '=== Consumer starting, producer has completed successfully ==='
+  #       sleep 5
         
-        echo '=== Starting to consume messages from REST-produced topic ==='
-        kafka-console-consumer --topic rest-proxy-topic --bootstrap-server broker:29092 --from-beginning --max-messages 3
+  #       echo '=== Starting to consume messages from REST-produced topic ==='
+  #       kafka-console-consumer --topic rest-proxy-topic --bootstrap-server broker:29092 --from-beginning --max-messages 3
         
-        echo '=== Consumer finished successfully ==='
+  #       echo '=== Consumer finished successfully ==='
 
-  cleanup:
-    image: curlimages/curl:latest
-    hostname: cleanup
-    container_name: cleanup
-    depends_on:
-      consumer:
-        condition: service_completed_successfully
-    command:
-      - sh
-      - -c
-      - |
-        echo '🧹 GraalVM REST API testing completed successfully!'
-        echo '📊 Test Summary:'
-        echo '  ✅ GraalVM native image with Metadata Server REST API (port 28090)'
-        echo '  ✅ GET /kafka/v3/clusters - List clusters'
-        echo '  ✅ GET /kafka/v3/clusters/{cluster_id} - Get cluster details'
-        echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/brokers - List brokers'
-        echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/broker-configs - List broker configs'
-        echo '  ✅ POST /kafka/v3/clusters/{cluster_id}/topics - Create topic'
-        echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/topics - List topics'
-        echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/topics/{topic} - Get topic details'
-        echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/topics/{topic}/partitions - List partitions'
-        echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/topic-configs - List topic configs'
-        echo '  ✅ POST /kafka/v3/clusters/{cluster_id}/topics/{topic}/records - Produce messages'
-        echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/consumer-groups - List consumer groups'
-        echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/acls - List ACLs'
-        echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/partitions - List all partitions'
-        echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/topics/{topic}/configs - Get topic configs'
-        echo '  ✅ 3 messages consumed via Kafka console consumer'
-        echo '🏁 GraalVM Native REST API v3 comprehensive test PASSED!'
-        echo ''
-        echo '💡 You can now stop the services with Ctrl+C'
-        echo '   or run: docker-compose -f docker-compose-erp-cp-server-native.yml down'
+  # cleanup:
+  #   image: curlimages/curl:latest
+  #   hostname: cleanup
+  #   container_name: cleanup
+  #   depends_on:
+  #     consumer:
+  #       condition: service_completed_successfully
+  #   command:
+  #     - sh
+  #     - -c
+  #     - |
+  #       echo '🧹 GraalVM REST API testing completed successfully!'
+  #       echo '📊 Test Summary:'
+  #       echo '  ✅ GraalVM native image with Metadata Server REST API (port 28090)'
+  #       echo '  ✅ GET /kafka/v3/clusters - List clusters'
+  #       echo '  ✅ GET /kafka/v3/clusters/{cluster_id} - Get cluster details'
+  #       echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/brokers - List brokers'
+  #       echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/broker-configs - List broker configs'
+  #       echo '  ✅ POST /kafka/v3/clusters/{cluster_id}/topics - Create topic'
+  #       echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/topics - List topics'
+  #       echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/topics/{topic} - Get topic details'
+  #       echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/topics/{topic}/partitions - List partitions'
+  #       echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/topic-configs - List topic configs'
+  #       echo '  ✅ POST /kafka/v3/clusters/{cluster_id}/topics/{topic}/records - Produce messages'
+  #       echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/consumer-groups - List consumer groups'
+  #       echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/acls - List ACLs'
+  #       echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/partitions - List all partitions'
+  #       echo '  ✅ GET /kafka/v3/clusters/{cluster_id}/topics/{topic}/configs - Get topic configs'
+  #       echo '  ✅ 3 messages consumed via Kafka console consumer'
+  #       echo '🏁 GraalVM Native REST API v3 comprehensive test PASSED!'
+  #       echo ''
+  #       echo '💡 You can now stop the services with Ctrl+C'
+  #       echo '   or run: docker-compose -f docker-compose-erp-cp-server-native.yml down'

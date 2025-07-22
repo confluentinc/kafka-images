@@ -100,9 +100,9 @@ def merge_graalvm_configs(file1, file2):
 def main():
     # Paths
     base_dir = "/Users/snehawadhwa/Documents/repos/kafka-images"
-    set1_dir = f"{base_dir}/server-native/native-image-configs"
-    set2_dir = f"{base_dir}/examples/confluent-server-oauth/graalvm-manifests-800"
-    output_dir = f"{base_dir}/examples/confluent-server-oauth/merged-graalvm-configs"
+    set1_dir = f"{base_dir}/server-native/native-image-configs-erp"
+    set2_dir = f"{base_dir}/server-native/native-image-configs-oauth copy"
+    output_dir = f"{base_dir}/server-native/native-image-configs-erp-oauth"
     
     # Create output directory
     os.makedirs(output_dir, exist_ok=True)
@@ -110,7 +110,7 @@ def main():
     # Config files to merge
     config_files = [
         "reflect-config.json",
-        "resource-config.json", 
+        "resource-config.json",
         "proxy-config.json",
         "jni-config.json",
         "serialization-config.json",
@@ -118,8 +118,8 @@ def main():
     ]
     
     print("🔄 Merging GraalVM configurations...")
-    print(f"Set 1 (Basic): {set1_dir}")
-    print(f"Set 2 (OAuth): {set2_dir}")
+    print(f"Set 1: {set1_dir}")
+    print(f"Set 2: {set2_dir}")
     print(f"Output: {output_dir}")
     print("-" * 60)
     
@@ -138,14 +138,14 @@ def main():
             print(f"✅ Saved: {output_file}")
             
         elif os.path.exists(file2):
-            print(f"📄 Copying {config_file} (only in OAuth set)...")
+            print(f"📄 Copying {config_file} (only in set 2)...")
             with open(file2, 'r') as f:
                 config = json.load(f)
             with open(output_file, 'w') as f:
                 f.write(format_graalvm_json(config))
                 
         elif os.path.exists(file1):
-            print(f"📄 Copying {config_file} (only in basic set)...")
+            print(f"📄 Copying {config_file} (only in set 1)...")
             with open(file1, 'r') as f:
                 config = json.load(f)
             with open(output_file, 'w') as f:
