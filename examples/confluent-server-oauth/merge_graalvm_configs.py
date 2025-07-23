@@ -100,9 +100,9 @@ def merge_graalvm_configs(file1, file2):
 def main():
     # Paths
     base_dir = "/Users/snehawadhwa/Documents/repos/kafka-images"
-    set1_dir = f"{base_dir}/server-native/native-image-configs-erp"
-    set2_dir = f"{base_dir}/server-native/native-image-configs-oauth copy"
-    output_dir = f"{base_dir}/server-native/native-image-configs-erp-oauth"
+    set1_dir = f"{base_dir}/server-native/native-image-configs-mds"
+    set2_dir = f"{base_dir}/server-native/native-image-configs-erp-oauth copy"
+    output_dir = f"{base_dir}/server-native/native-image-configs-erp-oauth-mds"
     
     # Create output directory
     os.makedirs(output_dir, exist_ok=True)
