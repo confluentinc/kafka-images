@@ -58,9 +58,9 @@ gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
 enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && echo "===> Installing Schema Registry (for Avro jars) ..." \
     && microdnf install -y confluent-schema-registry-${CONFLUENT_VERSION} \
-    && echo "===> Installing Confluent Hub client ..." \
+    && echo "===> Installing Confluent Hub client ..."\
     && microdnf install -y confluent-hub-client-${CONFLUENT_VERSION} \
-    && echo "===> Cleaning up ..."  \
+    && echo "===> Cleaning up ..." \
     && microdnf clean all \
     && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo \
     && echo "===> Setting up ${COMPONENT} dirs ..." \
