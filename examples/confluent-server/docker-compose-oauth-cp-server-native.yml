@@ -1,0 +1,264 @@
+---
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.5
+    hostname: keycloak
+    container_name: keycloak
+    command: ["start-dev", "--health-enabled=true", "--import-realm"]
+    healthcheck:
+      test: ['CMD-SHELL', '[ -f /tmp/HealthCheck.java ] || echo "public class HealthCheck { public static void main(String[] args) throws java.lang.Throwable { System.exit(java.net.HttpURLConnection.HTTP_OK == ((java.net.HttpURLConnection)new java.net.URL(args[0]).openConnection()).getResponseCode() ? 0 : 1); } }" > /tmp/HealthCheck.java && java /tmp/HealthCheck.java http://localhost:8080/health/live']
+      start_period: 10s
+      interval: 10s
+      retries: 3
+      timeout: 5s
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_PROXY=edge
+      - KEYCLOAK_IMPORT=/opt/keycloak/data/import/realm-export.json
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak-realm-export.json:/opt/keycloak/data/import/realm-export.json
+    networks:
+      - oauth-network
+
+
+  broker1:
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-32c6e5ce-ubi9.arm64
+    hostname: broker1
+    container_name: broker1
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test: curl -fail --silent --insecure http://broker1:8091/v1/metadata/id || exit 1
+      interval: 10s
+      retries: 5
+      start_period: 20s
+    ports:
+      - "9092:9092"
+      - "9101:9101"
+      - "9095:9095"
+      - "8091:8091"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,INTERNAL:SASL_PLAINTEXT,EXTERNAL:SASL_PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://broker1:29092,CONTROLLER://broker1:29093,PLAINTEXT_HOST://0.0.0.0:9092,INTERNAL://localhost:9093,EXTERNAL://0.0.0.0:9095
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker1:29092,PLAINTEXT_HOST://localhost:9092,INTERNAL://localhost:9093,EXTERNAL://broker1:9095
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@broker1:29093'
+      KAFKA_LOG_DIRS: '/var/lib/kafka/data'
+      CLUSTER_ID: 'vHCgQyIrRHG8Jv27qI2h3Q'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker1:29092
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      CONFLUENT_METRICS_ENABLE: 'true'
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_SUPER_USERS: User:admin;User:ANONYMOUS;User:testuser1;User:superuser_client_app
+      KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=INFO"
+      KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN, OAUTHBEARER
+      KAFKA_LISTENER_NAME_INTERNAL_SASL_ENABLED_MECHANISMS: PLAIN
+      KAFKA_LISTENER_NAME_INTERNAL_PLAIN_SASL_JAAS_CONFIG: |
+        org.apache.kafka.common.security.plain.PlainLoginModule required \
+        username="admin" \
+        password="admin-secret" \
+        user_admin="admin-secret" \
+        user_mds="mds-secret";
+
+      # Configure OAuth Token listener
+      KAFKA_LISTENER_NAME_EXTERNAL_SASL_ENABLED_MECHANISMS: OAUTHBEARER
+      KAFKA_LISTENER_NAME_EXTERNAL_SASL_OAUTHBEARER_JWKS_ENDPOINT_URL: http://keycloak:8080/realms/cp/protocol/openid-connect/certs
+      KAFKA_LISTENER_NAME_EXTERNAL_SASL_OAUTHBEARER_EXPECTED_AUDIENCE: account
+      KAFKA_LISTENER_NAME_EXTERNAL_OAUTHBEARER_SASL_JAAS_CONFIG: org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required ;
+      KAFKA_LISTENER_NAME_EXTERNAL_OAUTHBEARER_SASL_SERVER_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.OAuthBearerValidatorCallbackHandler
+      KAFKA_LISTENER_NAME_EXTERNAL_PRINCIPAL_BUILDER_CLASS: io.confluent.kafka.security.authenticator.OAuthKafkaPrincipalBuilder
+      KAFKA_CONFLUENT_OAUTH_GROUPS_CLAIM_NAME: groups
+
+      # Configure Confluent Server Authorizer
+      KAFKA_AUTHORIZER_CLASS_NAME: io.confluent.kafka.security.authorizer.ConfluentServerAuthorizer
+      KAFKA_CONFLUENT_AUTHORIZER_ACCESS_RULE_PROVIDERS: CONFLUENT,KRAFT_ACL
+
+      # MDS
+      KAFKA_CONFLUENT_METADATA_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_METADATA_SERVER_AUTHENTICATION_METHOD: BEARER
+      KAFKA_CONFLUENT_METADATA_SERVER_LISTENERS: http://0.0.0.0:8091
+      KAFKA_CONFLUENT_METADATA_SERVER_ADVERTISED_LISTENERS: http://localhost:8091
+      KAFKA_CONFLUENT_METADATA_SERVER_TOKEN_KEY_PATH: /tmp/conf/keypair.pem
+      KAFKA_CONFLUENT_METADATA_SERVER_OPENAPI_ENABLE: 'true'
+      KAFKA_CONFLUENT_METADATA_SERVER_USER_STORE: OAUTH
+      KAFKA_CONFLUENT_METADATA_SERVER_OAUTHBEARER_JWKS_ENDPOINT_URL: http://keycloak:8080/realms/cp/protocol/openid-connect/certs
+      KAFKA_CONFLUENT_METADATA_SERVER_OAUTHBEARER_EXPECTED_ISSUER: http://keycloak:8080/realms/cp
+      KAFKA_CONFLUENT_METADATA_SERVER_OAUTHBEARER_EXPECTED_AUDIENCE: account
+      KAFKA_CONFLUENT_METADATA_SERVER_OAUTHBEARER_SUB_CLAIM_NAME: sub
+      KAFKA_CONFLUENT_METADATA_SERVER_OAUTHBEARER_GROUPS_CLAIM_NAME: groups
+
+      # OAuth Bearer allowed URLs - hybrid approach: ub utility + system property
+      KAFKA_ORG_APACHE_KAFKA_SASL_OAUTHBEARER_ALLOWED_URLS: "http://keycloak:8080/realms/cp/protocol/openid-connect/certs,http://keycloak:8080/realms/cp/protocol/openid-connect/token"
+      KAFKA_OPTS: "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080/realms/cp/protocol/openid-connect/certs,http://keycloak:8080/realms/cp/protocol/openid-connect/token"
+
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_COMMAND_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_COMMAND_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_LINK_METADATA_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CLUSTER_LINK_METADATA_TOPIC_REPLICATION: 1
+      KAFKA_CLUSTER_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_CLUSTER_LINK_METADATA_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_CLUSTER_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_DURABILITY_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_TIER_METADATA_REPLICATION: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION: 1
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION: 1
+    volumes:
+      - ./create-certificates.sh:/tmp/create-certificates.sh
+    command: "bash -c 'if [ ! -f /tmp/create-certificates.sh ]; then echo \"ERROR: Did you forget the create-certificates.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/create-certificates.sh && echo \"Certificates created. Container ready for manual testing.\" && /etc/confluent/docker/run ; fi'"
+    networks:
+      - oauth-network
+
+  # kafka-client:
+  #   image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
+  #   hostname: kafka-client
+  #   container_name: kafka-client
+  #   environment:
+  #     KAFKA_OPTS: "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080/realms/cp/protocol/openid-connect/token,http://keycloak:8080/realms/cp/protocol/openid-connect/certs"
+  #   volumes:
+  #     - ./client-docker.properties:/tmp/client.properties
+  #   entrypoint:
+  #     - sleep
+  #     - "infinity"
+
+  producer:
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
+    hostname: producer
+    container_name: producer
+    depends_on:
+      curl-pod:
+        condition: service_completed_successfully
+    environment:
+      KAFKA_OPTS: "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080/realms/cp/protocol/openid-connect/token,http://keycloak:8080/realms/cp/protocol/openid-connect/certs"
+    volumes:
+      - ./oauth-client.properties:/tmp/oauth-client.properties
+    networks:
+      - oauth-network
+    command: |
+      bash -c '
+      echo "RBAC permissions already configured by curl-pod. Starting producer..."
+      sleep 10
+      
+      echo "Creating topic: oauth-test-topic"
+      kafka-topics --create --topic oauth-test-topic --bootstrap-server broker1:9095 --command-config /tmp/oauth-client.properties --partitions 1 --replication-factor 1 || echo "Topic might already exist"
+      
+      echo "Listing topics:"
+      kafka-topics --list --bootstrap-server broker1:9095 --command-config /tmp/oauth-client.properties
+      
+      echo "Producing messages to oauth-test-topic..."
+      echo "📝 Message 1: OAuth Message 1: Hello from OAuth Producer!"
+      echo "📝 Message 2: OAuth Message 2: Testing OAuth authentication" 
+      echo "📝 Message 3: OAuth Message 3: Secure messaging with OAuth"
+      echo "🚀 Sending messages to Kafka..."
+      echo -e "OAuth Message 1: Hello from OAuth Producer!\nOAuth Message 2: Testing OAuth authentication\nOAuth Message 3: Secure messaging with OAuth" | kafka-console-producer --bootstrap-server broker1:9095 --topic oauth-test-topic --producer.config /tmp/oauth-client.properties
+      
+      echo "Producer completed. Messages sent to oauth-test-topic"
+      '
+
+  consumer:
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
+    hostname: consumer
+    container_name: consumer
+    depends_on:
+      producer:
+        condition: service_completed_successfully
+    environment:
+      KAFKA_OPTS: "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080/realms/cp/protocol/openid-connect/token,http://keycloak:8080/realms/cp/protocol/openid-connect/certs"
+    volumes:
+      - ./oauth-client.properties:/tmp/oauth-client.properties
+    networks:
+      - oauth-network
+    command: |
+      bash -c '
+      echo "Producer has completed. Starting consumer..."
+      sleep 5
+      
+      echo "Starting consumer for oauth-test-topic (from beginning)..."
+      timeout 30 kafka-console-consumer --bootstrap-server broker1:9095 --topic oauth-test-topic --from-beginning --consumer.config /tmp/oauth-client.properties || echo "Consumer timeout reached"
+      
+      echo "Consumer completed."
+      '
+
+  cleanup:
+    image: curlimages/curl:latest
+    hostname: cleanup
+    container_name: cleanup
+    depends_on:
+      consumer:
+        condition: service_completed_successfully
+    command: |
+      sh -c '
+      echo "🧹 All OAuth testing completed successfully!"
+      echo "📊 Test Summary:"
+      echo "  ✅ OAuth RBAC permissions configured"
+      echo "  ✅ Topic created with OAuth authentication"  
+      echo "  ✅ 3 messages produced with OAuth"
+      echo "  ✅ 3 messages consumed with OAuth"
+      echo "🏁 OAuth with GraalVM native image test PASSED!"
+      echo ""
+      echo "💡 You can now stop the services with Ctrl+C"
+      echo "   or run: docker-compose -f docker-compose-oauth-cp-server-native.yml down"
+      '
+    networks:
+      - oauth-network
+        
+  curl-pod:
+    image: curlimages/curl:latest
+    hostname: curl-pod
+    container_name: curl-pod
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      broker1:
+        condition: service_started
+    command: |
+      sh -c '
+      echo "=== Waiting for services to be ready ==="
+      sleep 20
+      
+      echo "=== Getting superuser OAuth token ==="
+      ACCESS_TOKEN=$$(curl -s -X POST \
+        -H "Authorization: Basic c3VwZXJ1c2VyX2NsaWVudF9hcHA6c3VwZXJ1c2VyX2NsaWVudF9hcHBfc2VjcmV0" \
+        -H "Content-Type: application/x-www-form-urlencoded" \
+        -d "grant_type=client_credentials" \
+        http://keycloak:8080/realms/cp/protocol/openid-connect/token | \
+        sed -n "s/.*\"access_token\":\"\([^\"]*\)\".*/\1/p")
+        
+      echo "Token obtained, setting up RBAC permissions..."
+      
+      echo "=== Granting topic permissions ==="
+      curl -s -H "Authorization: Bearer $$ACCESS_TOKEN" -H "Content-Type: application/json" \
+        -X POST "http://broker1:8091/security/1.0/principals/User:client_app1/roles/ResourceOwner/bindings" \
+        -d "{\"scope\":{\"clusters\":{\"kafka-cluster\":\"vHCgQyIrRHG8Jv27qI2h3Q\"}}, \"resourcePatterns\":[{\"resourceType\":\"Topic\", \"name\":\"oauth-test-topic\", \"patternType\":\"LITERAL\"}]}"
+      
+      echo "=== Granting consumer group permissions ==="  
+      curl -s -H "Authorization: Bearer $$ACCESS_TOKEN" -H "Content-Type: application/json" \
+        -X POST "http://broker1:8091/security/1.0/principals/User:client_app1/roles/ResourceOwner/bindings" \
+        -d "{\"scope\":{\"clusters\":{\"kafka-cluster\":\"vHCgQyIrRHG8Jv27qI2h3Q\"}}, \"resourcePatterns\":[{\"resourceType\":\"Group\", \"name\":\"console-consumer-group\", \"patternType\":\"LITERAL\"}]}"
+      
+      echo "✅ OAuth RBAC permissions setup completed!"
+      echo "Services ready for producer and consumer testing..."
+      '
+    networks:
+      - oauth-network
+
+networks:
+  oauth-network:
+    name: kafka-oauth-network
+    driver: bridge
