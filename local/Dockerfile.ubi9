@@ -67,8 +67,7 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && mkdir -p /var/lib/kafka/data /etc/kafka/secrets \
     && chown appuser:root -R /etc/kafka-rest /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /etc/kafka/secrets /var/lib/kafka /etc/kafka \
     && chmod -R ug+w /etc/kafka-rest /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/kafka /etc/kafka/secrets /etc/kafka \
-    && cd /usr/share/java \
-    && package_dedupe $(pwd)
+    && package_dedupe /usr/share/java
 
 
 VOLUME ["/var/lib/kafka/data", "/etc/kafka/secrets"]
