@@ -16,7 +16,7 @@
 ARG DOCKER_UPSTREAM_REGISTRY
 ARG DOCKER_UPSTREAM_TAG=ubi9-latest
 
-FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-lite:${DOCKER_UPSTREAM_TAG}
+FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-java:${DOCKER_UPSTREAM_TAG}
 
 ARG PROJECT_VERSION
 ARG ARTIFACT_ID
@@ -58,15 +58,16 @@ baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
 gpgcheck=1 \n\
 gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
 enabled=1 " > /etc/yum.repos.d/confluent.repo \
-    && yum install -y confluent-kafka-${CONFLUENT_VERSION} \
-    && yum install -y confluent-kafka-rest-${CONFLUENT_VERSION} \
+    && microdnf install -y confluent-kafka-${CONFLUENT_VERSION} \
+    && microdnf install -y confluent-kafka-rest-${CONFLUENT_VERSION} \
     && echo "===> clean up ..."  \
-    && yum clean all \
+    && microdnf clean all \
     && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo \
     && echo "===> Setting up dirs" \
     && mkdir -p /var/lib/kafka/data /etc/kafka/secrets \
     && chown appuser:root -R /etc/kafka-rest /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /etc/kafka/secrets /var/lib/kafka /etc/kafka \
-    && chmod -R ug+w /etc/kafka-rest /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/kafka /etc/kafka/secrets /etc/kafka
+    && chmod -R ug+w /etc/kafka-rest /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/kafka /etc/kafka/secrets /etc/kafka \
+    && package_dedupe /usr/share/java
 
 
 VOLUME ["/var/lib/kafka/data", "/etc/kafka/secrets"]
