@@ -11,7 +11,7 @@ services:
 #      - sleep
 #      - "1000000"
   broker:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-3bcc7212-ubi9.amd64
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-32c6e5ce-ubi9.arm64
     hostname: broker
     container_name: broker
     ports:
@@ -61,7 +61,12 @@ services:
       KAFKA_CONFLUENT_TIER_METADATA_REPLICATION: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION: 1
       KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION: 1
-
+  kafka-client:
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
+    container_name: kafka-client
+    entrypoint:
+      - sleep
+      - "infinity"
   # producer:
   #   image: curlimages/curl:latest
   #   hostname: producer
@@ -106,24 +111,24 @@ services:
         
   #       echo ''
   #       echo '=== Creating topic via REST API ==='
-         curl -X POST http://localhost:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics \
-           -H "Content-Type: application/json" \
-           -d '{
-             "topic_name": "rest-proxy-topic",
-             "partitions_count": 3,
-             "replication_factor": 1
-           }' || echo "Topic might already exist"
+#         curl -X POST http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics \
+#           -H "Content-Type: application/json" \
+#           -d '{
+#             "topic_name": "rest-proxy-topic",
+#             "partitions_count": 3,
+#             "replication_factor": 1
+#           }' || echo "Topic might already exist"
 
   #       echo '=== Listing topics via REST API ==='
-  #       curl -s http://localhost:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics | head -200
+#         curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics | head -200
         
   #       echo ''
   #       echo '🔍 GET /kafka/v3/clusters/{cluster_id}/topics/{topic} - Get topic details'
-  #       curl -s http://localhost:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic | head -200
+#         curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic | head -200
         
   #       echo ''
   #       echo '🔍 GET /kafka/v3/clusters/{cluster_id}/topics/{topic}/partitions - List topic partitions'
-  #       curl -s http://localhost:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/partitions | head -200
+#         curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/partitions | head -200
         
   #       echo ''
   #       echo '🔍 GET /kafka/v3/clusters/{cluster_id}/topic-configs - List topic configs'
@@ -132,17 +137,17 @@ services:
   #       echo ''
   #       echo '=== Producing messages via REST API ==='
   #       echo '📝 Message 1: REST API Message 1 - Hello from Embedded REST Proxy!'
-        curl -X POST http://localhost:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/records \
-          -H "Content-Type: application/json" \
-          -d '{
-            "value": {
-              "type": "JSON",
-              "data": {"message": "REST API Message 1 - Hello from Embedded REST Proxy!", "timestamp": "2025-07-22T10:00:00Z"}
-            }
-          }'
+#        curl -X POST http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/records \
+#          -H "Content-Type: application/json" \
+#          -d '{
+#            "value": {
+#              "type": "JSON",
+#              "data": {"message": "REST API Message 1 - Hello from Embedded REST Proxy!", "timestamp": "2025-07-22T10:00:00Z"}
+#            }
+#          }'
 #
   #       echo '📝 Message 2: REST API Message 2 - Testing GraalVM Native REST endpoints'  
-#        curl -X POST http://localhost:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/records \
+#        curl -X POST http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/records \
 #          -H "Content-Type: application/json" \
 #          -d '{
 #            "value": {
@@ -197,11 +202,11 @@ services:
   #     - |
   #       echo '=== Consumer starting, producer has completed successfully ==='
   #       sleep 5
-        
+
   #       echo '=== Starting to consume messages from REST-produced topic ==='
   #       kafka-console-consumer --topic rest-proxy-topic --bootstrap-server broker:29092 --from-beginning --max-messages 3
 #       on local machine/ host outside container ./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic rest-proxy-topic --from-beginning
-        
+
   #       echo '=== Consumer finished successfully ==='
 
   # cleanup:

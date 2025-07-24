@@ -5033,6 +5033,7 @@
     {"name":"append","parameterTypes":["java.lang.String","java.lang.StringBuilder"]},
     {"name":"logBytesSent","parameterTypes":["java.lang.StringBuilder","org.eclipse.jetty.server.Request","org.eclipse.jetty.server.Response"]},
     {"name":"logClientHost","parameterTypes":["java.lang.StringBuilder","org.eclipse.jetty.server.Request","org.eclipse.jetty.server.Response"]},
+    {"name":"logClientHost","parameterTypes":["java.lang.StringBuilder","org.eclipse.jetty.server.Request","org.eclipse.jetty.server.Response","boolean"]},
     {"name":"logLatencyMilliseconds","parameterTypes":["java.lang.StringBuilder","org.eclipse.jetty.server.Request","org.eclipse.jetty.server.Response"]},
     {"name":"logNothing","parameterTypes":["java.lang.StringBuilder","org.eclipse.jetty.server.Request","org.eclipse.jetty.server.Response"]},
     {"name":"logRequestAttribute","parameterTypes":["java.lang.String","java.lang.StringBuilder","org.eclipse.jetty.server.Request","org.eclipse.jetty.server.Response"]},
@@ -7558,6 +7559,9 @@
   "queryAllPublicMethods":true,
   "queryAllDeclaredConstructors":true,
   "queryAllPublicConstructors":true,
+  "constructors":[
+    {"parameterTypes":["jakarta.inject.Provider","io.confluent.kafkarest.response.CrnFactory","io.confluent.kafkarest.response.UrlFactory"]}
+  ],
   "methods":[
     {"name":"<init>","parameterTypes":["jakarta.inject.Provider","io.confluent.kafkarest.response.CrnFactory","io.confluent.kafkarest.response.UrlFactory"]},
     {"name":"deleteClusterConfig","parameterTypes":["jakarta.ws.rs.container.AsyncResponse","java.lang.String","io.confluent.kafkarest.entities.ClusterConfig$Type","java.lang.String"]},
