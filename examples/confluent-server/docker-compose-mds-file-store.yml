@@ -1,0 +1,131 @@
+---
+services:
+  kafka:
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-32c6e5ce-ubi9.amd64
+    container_name: kafka
+    hostname: kafka
+    ports:
+      - "9092:9092"     # Kafka listener
+      - "8090:8090"     # MDS HTTP API
+
+    environment:
+      # KRaft mode
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:9093'
+      KAFKA_LISTENERS: 'SASL_PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093'
+      KAFKA_ADVERTISED_LISTENERS: 'SASL_PLAINTEXT://kafka:9092'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'SASL_PLAINTEXT:SASL_PLAINTEXT,CONTROLLER:PLAINTEXT'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'SASL_PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      CLUSTER_ID: '4L6g3nShT-eMCtK--X86sw'
+      KAFKA_LOG_DIRS: '/var/lib/kafka/data'
+
+      # Enable SASL/PLAIN authentication
+      KAFKA_SASL_ENABLED_MECHANISMS: 'PLAIN'
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: 'PLAIN'
+      KAFKA_OPTS: '-Djava.security.auth.login.config=/etc/kafka/server_jaas.conf'
+
+      # MDS Config (file-based user store)
+      CONFLUENT_METADATA_SERVER_ENABLED: "true"
+      KAFKA_CONFLUENT_METADATA_SERVER_LISTENERS: 'http://0.0.0.0:8090'
+      KAFKA_CONFLUENT_METADATA_SERVER_ADVERTISED_LISTENERS: 'http://localhost:8090'
+      KAFKA_CONFLUENT_METADATA_SERVER_USER_STORE: 'FILE'
+      KAFKA_CONFLUENT_METADATA_SERVER_USER_STORE_FILE_PATH: '/etc/kafka/users.properties'
+      KAFKA_CONFLUENT_METADATA_SERVER_AUTHENTICATION_METHOD: 'BASIC'
+      KAFKA_CONFLUENT_METADATA_SERVER_USER_STORE_FILE_HOT_RELOAD: 'true'
+
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      KAFKA_CONFLUENT_COMMAND_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_COMMAND_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_LINK_METADATA_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CLUSTER_LINK_METADATA_TOPIC_REPLICATION: 1
+      KAFKA_CLUSTER_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_CLUSTER_LINK_METADATA_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_CLUSTER_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_DURABILITY_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_TIER_METADATA_REPLICATION: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION: 1
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION: 1
+    volumes:
+      - ./mds-config/server_jaas.conf:/etc/kafka/server_jaas.conf
+      - ./mds-config/users.properties:/etc/kafka/users.properties
+
+  kafka-producer:
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
+    container_name: kafka-producer
+    depends_on:
+      - kafka
+    command: >
+      bash -c "
+        echo 'Waiting for Kafka to be ready...'
+        sleep 30
+        
+        echo 'Creating client.properties...'
+        echo 'security.protocol=SASL_PLAINTEXT' > /tmp/client.properties
+        echo 'sasl.mechanism=PLAIN' >> /tmp/client.properties
+        echo 'sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=\"alice\" password=\"alice-secret\";' >> /tmp/client.properties
+        
+        echo 'Listing existing topics...'
+        kafka-topics --bootstrap-server kafka:9092 --list --command-config /tmp/client.properties
+        
+        echo 'Creating poc-demo topic...'
+        kafka-topics --bootstrap-server kafka:9092 --create --topic poc-demo --command-config /tmp/client.properties
+        
+        echo 'Listing topics after creation...'
+        kafka-topics --bootstrap-server kafka:9092 --list --command-config /tmp/client.properties
+        
+        echo 'Testing MDS API...'
+        curl -s http://kafka:8090/kafka/v3/clusters | head -200
+        
+        echo 'Starting to produce messages automatically...'
+        
+        # Send some test messages
+        for i in {1..10}; do
+          echo \"Message \$i: Hello from automated producer at \$(date)\" | kafka-console-producer --bootstrap-server kafka:9092 --topic poc-demo --producer.config /tmp/client.properties
+          sleep 1
+        done
+        
+        echo 'Sent 10 test messages successfully!'
+        echo 'Producer container staying alive for manual testing if needed.'
+        echo 'Use: docker exec -it kafka-producer bash'
+        echo 'Then: kafka-console-producer --bootstrap-server kafka:9092 --topic poc-demo --producer.config /tmp/client.properties'
+        
+        sleep infinity
+      "
+
+  kafka-consumer:
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
+    container_name: kafka-consumer
+    depends_on:
+      - kafka
+    command: >
+      bash -c "
+        echo 'Waiting for Kafka to be ready...'
+        sleep 40
+        
+        echo 'Creating client.properties for consumer...'
+        echo 'security.protocol=SASL_PLAINTEXT' > /tmp/client.properties
+        echo 'sasl.mechanism=PLAIN' >> /tmp/client.properties
+        echo 'sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=\"alice\" password=\"alice-secret\";' >> /tmp/client.properties
+        
+        echo 'Starting consumer for poc-demo topic...'
+        
+        # Consume exactly 10 messages and then exit
+        kafka-console-consumer --bootstrap-server kafka:9092 --topic poc-demo --from-beginning --max-messages 10 --consumer.config /tmp/client.properties
+        
+        echo 'Consumer finished capturing 10 messages!'
+        echo 'Consumer container staying alive for manual testing if needed.'
+        echo 'Use: docker exec -it kafka-consumer bash'
+        echo 'Then: kafka-console-consumer --bootstrap-server kafka:9092 --topic poc-demo --from-beginning --consumer.config /tmp/client.properties'
+        echo 'Or for new messages only: kafka-console-consumer --bootstrap-server kafka:9092 --topic poc-demo --consumer.config /tmp/client.properties'
+        
+        sleep infinity
+      "

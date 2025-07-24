@@ -106,7 +106,19 @@ services:
       KAFKA_ORG_APACHE_KAFKA_SASL_OAUTHBEARER_ALLOWED_URLS: "http://keycloak:8080/realms/cp/protocol/openid-connect/certs,http://keycloak:8080/realms/cp/protocol/openid-connect/token"
       KAFKA_OPTS: "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080/realms/cp/protocol/openid-connect/certs,http://keycloak:8080/realms/cp/protocol/openid-connect/token"
 
-
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_COMMAND_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_COMMAND_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_LINK_METADATA_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CLUSTER_LINK_METADATA_TOPIC_REPLICATION: 1
+      KAFKA_CLUSTER_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_CLUSTER_LINK_METADATA_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_CLUSTER_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_DURABILITY_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_TIER_METADATA_REPLICATION: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION: 1
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION: 1
     volumes:
       - ./create-certificates.sh:/tmp/create-certificates.sh
     command: "bash -c 'if [ ! -f /tmp/create-certificates.sh ]; then echo \"ERROR: Did you forget the create-certificates.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/create-certificates.sh && echo \"Certificates created. Container ready for manual testing.\" && /etc/confluent/docker/run ; fi'"
