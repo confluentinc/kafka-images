@@ -24,15 +24,15 @@ services:
       - oauth-network
 
 
-  broker1:
+  broker:
     image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-32c6e5ce-ubi9.arm64
-    hostname: broker1
-    container_name: broker1
+    hostname: broker
+    container_name: broker
     depends_on:
       keycloak:
         condition: service_healthy
     healthcheck:
-      test: curl -fail --silent --insecure http://broker1:8091/v1/metadata/id || exit 1
+      test: curl -fail --silent --insecure http://broker:8091/v1/metadata/id || exit 1
       interval: 10s
       retries: 5
       start_period: 20s
@@ -44,11 +44,11 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,INTERNAL:SASL_PLAINTEXT,EXTERNAL:SASL_PLAINTEXT
-      KAFKA_LISTENERS: PLAINTEXT://broker1:29092,CONTROLLER://broker1:29093,PLAINTEXT_HOST://0.0.0.0:9092,INTERNAL://localhost:9093,EXTERNAL://0.0.0.0:9095
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker1:29092,PLAINTEXT_HOST://localhost:9092,INTERNAL://localhost:9093,EXTERNAL://broker1:9095
+      KAFKA_LISTENERS: PLAINTEXT://broker:29092,CONTROLLER://broker:29093,PLAINTEXT_HOST://0.0.0.0:9092,INTERNAL://localhost:9093,EXTERNAL://0.0.0.0:9095
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092,INTERNAL://localhost:9093,EXTERNAL://broker:9095
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
       KAFKA_PROCESS_ROLES: 'broker,controller'
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@broker1:29093'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@broker:29093'
       KAFKA_LOG_DIRS: '/var/lib/kafka/data'
       CLUSTER_ID: 'vHCgQyIrRHG8Jv27qI2h3Q'
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -58,7 +58,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_JMX_PORT: 9101
       KAFKA_JMX_HOSTNAME: localhost
-      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker1:29092
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker:29092
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
       CONFLUENT_METRICS_ENABLE: 'true'
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
@@ -125,24 +125,12 @@ services:
     networks:
       - oauth-network
 
-  # kafka-client:
-  #   image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
-  #   hostname: kafka-client
-  #   container_name: kafka-client
-  #   environment:
-  #     KAFKA_OPTS: "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080/realms/cp/protocol/openid-connect/token,http://keycloak:8080/realms/cp/protocol/openid-connect/certs"
-  #   volumes:
-  #     - ./client-docker.properties:/tmp/client.properties
-  #   entrypoint:
-  #     - sleep
-  #     - "infinity"
-
   producer:
     image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
     hostname: producer
     container_name: producer
     depends_on:
-      curl-pod:
+      oauth-setup:
         condition: service_completed_successfully
     environment:
       KAFKA_OPTS: "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080/realms/cp/protocol/openid-connect/token,http://keycloak:8080/realms/cp/protocol/openid-connect/certs"
@@ -152,23 +140,28 @@ services:
       - oauth-network
     command: |
       bash -c '
-      echo "RBAC permissions already configured by curl-pod. Starting producer..."
+      echo "RBAC permissions already configured by oauth-setup. Starting producer..."
       sleep 10
       
       echo "Creating topic: oauth-test-topic"
-      kafka-topics --create --topic oauth-test-topic --bootstrap-server broker1:9095 --command-config /tmp/oauth-client.properties --partitions 1 --replication-factor 1 || echo "Topic might already exist"
+      kafka-topics --create --topic oauth-test-topic --bootstrap-server broker:9095 --command-config /tmp/oauth-client.properties --partitions 1 --replication-factor 1 || echo "Topic might already exist"
       
       echo "Listing topics:"
-      kafka-topics --list --bootstrap-server broker1:9095 --command-config /tmp/oauth-client.properties
+      kafka-topics --list --bootstrap-server broker:9095 --command-config /tmp/oauth-client.properties
       
       echo "Producing messages to oauth-test-topic..."
       echo "📝 Message 1: OAuth Message 1: Hello from OAuth Producer!"
       echo "📝 Message 2: OAuth Message 2: Testing OAuth authentication" 
       echo "📝 Message 3: OAuth Message 3: Secure messaging with OAuth"
       echo "🚀 Sending messages to Kafka..."
-      echo -e "OAuth Message 1: Hello from OAuth Producer!\nOAuth Message 2: Testing OAuth authentication\nOAuth Message 3: Secure messaging with OAuth" | kafka-console-producer --bootstrap-server broker1:9095 --topic oauth-test-topic --producer.config /tmp/oauth-client.properties
+      echo -e "OAuth Message 1: Hello from OAuth Producer!\nOAuth Message 2: Testing OAuth authentication\nOAuth Message 3: Secure messaging with OAuth" | kafka-console-producer --bootstrap-server broker:9095 --topic oauth-test-topic --producer.config /tmp/oauth-client.properties
       
-      echo "Producer completed. Messages sent to oauth-test-topic"
+      echo "🚀 3 messages sent to oauth-test-topic!"
+      echo "Producer container staying alive for manual testing."
+      echo "Use: docker exec -it producer bash"
+      echo "Then: kafka-console-producer --bootstrap-server broker:9095 --topic oauth-test-topic --producer.config /tmp/oauth-client.properties"
+      
+      sleep infinity
       '
 
   consumer:
@@ -176,8 +169,8 @@ services:
     hostname: consumer
     container_name: consumer
     depends_on:
-      producer:
-        condition: service_completed_successfully
+      broker:
+        condition: service_started
     environment:
       KAFKA_OPTS: "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080/realms/cp/protocol/openid-connect/token,http://keycloak:8080/realms/cp/protocol/openid-connect/certs"
     volumes:
@@ -186,46 +179,29 @@ services:
       - oauth-network
     command: |
       bash -c '
-      echo "Producer has completed. Starting consumer..."
-      sleep 5
+      echo "Waiting for producer to send messages..."
+      sleep 25
       
-      echo "Starting consumer for oauth-test-topic (from beginning)..."
-      timeout 30 kafka-console-consumer --bootstrap-server broker1:9095 --topic oauth-test-topic --from-beginning --consumer.config /tmp/oauth-client.properties || echo "Consumer timeout reached"
+      echo "Starting consumer for oauth-test-topic (consuming 3 messages)..."
+      kafka-console-consumer --bootstrap-server broker:9095 --topic oauth-test-topic --from-beginning --max-messages 3 --consumer.config /tmp/oauth-client.properties
       
-      echo "Consumer completed."
+      echo "Consumer finished capturing 3 messages!"
+      echo "Consumer container staying alive for manual testing."
+      echo "Use: docker exec -it consumer bash" 
+      echo "Then: kafka-console-consumer --bootstrap-server broker:9095 --topic oauth-test-topic --from-beginning --consumer.config /tmp/oauth-client.properties"
+      echo "Or for new messages only: kafka-console-consumer --bootstrap-server broker:9095 --topic oauth-test-topic --consumer.config /tmp/oauth-client.properties"
+      
+      sleep infinity
       '
 
-  cleanup:
+  oauth-setup:
     image: curlimages/curl:latest
-    hostname: cleanup
-    container_name: cleanup
-    depends_on:
-      consumer:
-        condition: service_completed_successfully
-    command: |
-      sh -c '
-      echo "🧹 All OAuth testing completed successfully!"
-      echo "📊 Test Summary:"
-      echo "  ✅ OAuth RBAC permissions configured"
-      echo "  ✅ Topic created with OAuth authentication"  
-      echo "  ✅ 3 messages produced with OAuth"
-      echo "  ✅ 3 messages consumed with OAuth"
-      echo "🏁 OAuth with GraalVM native image test PASSED!"
-      echo ""
-      echo "💡 You can now stop the services with Ctrl+C"
-      echo "   or run: docker-compose -f docker-compose-oauth-cp-server-native.yml down"
-      '
-    networks:
-      - oauth-network
-        
-  curl-pod:
-    image: curlimages/curl:latest
-    hostname: curl-pod
-    container_name: curl-pod
+    hostname: oauth-setup
+    container_name: oauth-setup
     depends_on:
       keycloak:
         condition: service_healthy
-      broker1:
+      broker:
         condition: service_started
     command: |
       sh -c '
@@ -244,12 +220,12 @@ services:
       
       echo "=== Granting topic permissions ==="
       curl -s -H "Authorization: Bearer $$ACCESS_TOKEN" -H "Content-Type: application/json" \
-        -X POST "http://broker1:8091/security/1.0/principals/User:client_app1/roles/ResourceOwner/bindings" \
+        -X POST "http://broker:8091/security/1.0/principals/User:client_app1/roles/ResourceOwner/bindings" \
         -d "{\"scope\":{\"clusters\":{\"kafka-cluster\":\"vHCgQyIrRHG8Jv27qI2h3Q\"}}, \"resourcePatterns\":[{\"resourceType\":\"Topic\", \"name\":\"oauth-test-topic\", \"patternType\":\"LITERAL\"}]}"
       
       echo "=== Granting consumer group permissions ==="  
       curl -s -H "Authorization: Bearer $$ACCESS_TOKEN" -H "Content-Type: application/json" \
-        -X POST "http://broker1:8091/security/1.0/principals/User:client_app1/roles/ResourceOwner/bindings" \
+        -X POST "http://broker:8091/security/1.0/principals/User:client_app1/roles/ResourceOwner/bindings" \
         -d "{\"scope\":{\"clusters\":{\"kafka-cluster\":\"vHCgQyIrRHG8Jv27qI2h3Q\"}}, \"resourcePatterns\":[{\"resourceType\":\"Group\", \"name\":\"console-consumer-group\", \"patternType\":\"LITERAL\"}]}"
       
       echo "✅ OAuth RBAC permissions setup completed!"

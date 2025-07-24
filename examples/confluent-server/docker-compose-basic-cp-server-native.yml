@@ -56,18 +56,28 @@ services:
         sleep 15
 
         echo '=== Creating topic: demo-topic ==='
-        kafka-topics --create --topic demo-topic --partitions 3 --replication-factor 1 --bootstrap-server broker:29092
+        kafka-topics --create --topic demo-topic --partitions 1 --replication-factor 1 --bootstrap-server broker:29092
         
         echo '=== Listing all topics ==='
         kafka-topics --list --bootstrap-server broker:29092
         
         echo '=== Producing 3 unique messages ==='
-        echo "Message 1: Hello from Docker Producer at $(date)" | kafka-console-producer --topic demo-topic --bootstrap-server broker:29092
-        echo "Message 2: Testing Kafka Native Binary at $(date)" | kafka-console-producer --topic demo-topic --bootstrap-server broker:29092  
-        echo "Message 3: Producer container completed at $(date)" | kafka-console-producer --topic demo-topic --bootstrap-server broker:29092
+        
+        echo '📝 Producing Message 1: Hello from Docker Producer'
+        echo "Message 1: Hello from Docker Producer" | kafka-console-producer --topic demo-topic --bootstrap-server broker:29092
+        
+        echo '📝 Producing Message 2: Testing Kafka Native Binary'
+        echo "Message 2: Testing Kafka Native Binary" | kafka-console-producer --topic demo-topic --bootstrap-server broker:29092
+        
+        echo '📝 Producing Message 3: Producer container completed'  
+        echo "Message 3: Producer container completed" | kafka-console-producer --topic demo-topic --bootstrap-server broker:29092
         
         echo '=== Producer finished successfully ==='
-
+        echo 'Producer container staying alive for manual testing.'
+        echo 'Use: docker exec -it producer bash'
+        echo 'Then: kafka-console-producer --topic demo-topic --bootstrap-server broker:29092'
+        
+        sleep infinity
   consumer:
     image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
     hostname: consumer
@@ -85,3 +95,8 @@ services:
         kafka-console-consumer --topic demo-topic --bootstrap-server broker:29092 --from-beginning --max-messages 3
         
         echo '=== Consumer finished successfully ==='
+        echo 'Consumer container staying alive for manual testing.'
+        echo 'Use: docker exec -it consumer bash'
+        echo 'Then: kafka-console-consumer --topic demo-topic --bootstrap-server broker:29092 --from-beginning'
+        
+        sleep infinity
