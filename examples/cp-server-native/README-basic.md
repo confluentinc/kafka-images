@@ -1,6 +1,6 @@
 # Basic Kafka Native Image Demo
 
-This example demonstrates a simple Kafka setup using GraalVM native images with automated producer and consumer testing.
+This example demonstrates a simple Kafka setup using `cp-server-native` GraalVM native image with automated producer and consumer testing.
 
 ## What This Demonstrates
 

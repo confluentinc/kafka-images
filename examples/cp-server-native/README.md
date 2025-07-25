@@ -1,6 +1,6 @@
 # Confluent Server Native Docker Examples
 
-This directory contains comprehensive Docker Compose examples demonstrating various Confluent Server configurations with GraalVM native images. Each example includes automated testing and interactive manual testing capabilities.
+This directory contains comprehensive Docker Compose examples demonstrating various Confluent Server configurations with cp-server GraalVM native image. Each example includes automated testing and interactive manual testing capabilities.
 
 ## 🚀 Available Scenarios
 
@@ -34,11 +34,11 @@ docker exec -it consumer bash    # Receive messages
 All scenarios use consistent container names and similar architectures:
 
 ```
-┌─────────┐    ┌──────────┐    ┌──────────┐
-│ broker  │    │ producer │    │ consumer │
-│         │◄───┤          │───►│          │
-│         │    │          │    │          │
-└─────────┘    └──────────┘    └──────────┘
+┌──────────┐    ┌─────────┐    ┌──────────┐
+│ producer │    │ broker  │    │ consumer │
+│          ├───►│         │───►│          │
+│          │    │         │    │          │
+└──────────┘    └─────────┘    └──────────┘
 ```
 
 ## 📖 Detailed Documentation

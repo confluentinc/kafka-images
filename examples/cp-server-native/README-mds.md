@@ -1,6 +1,6 @@
 # MDS File Store + SASL Authentication Demo
 
-This example demonstrates Metadata Server (MDS) with file-based user store and SASL/PLAIN authentication using GraalVM native Kafka.
+This example demonstrates Metadata Server (MDS) with file-based user store and SASL/PLAIN authentication using `cp-server-native` GraalVM native image.
 
 ## What This Demonstrates
 

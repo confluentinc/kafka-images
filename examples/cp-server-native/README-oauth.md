@@ -1,6 +1,6 @@
 # OAuth with Keycloak + GraalVM Native Kafka Demo
 
-This example demonstrates OAuth authentication with Keycloak integrated with GraalVM native Kafka, including RBAC permissions and automated testing.
+This example demonstrates OAuth authentication with Keycloak integrated with `cp-server-native` GraalVM native Kafka, including RBAC permissions and automated testing.
 
 ## What This Demonstrates
 

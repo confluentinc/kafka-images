@@ -1,6 +1,6 @@
 # Embedded REST Proxy (ERP) + GraalVM Native Kafka Demo
 
-This example demonstrates Kafka's Embedded REST Proxy functionality with GraalVM native images, showcasing REST API v3 endpoints for topic management and message production.
+This example demonstrates Kafka's Embedded REST Proxy functionality with `cp-server-native` GraalVM native image, showcasing REST API v3 endpoints for topic management and message production.
 
 ## What This Demonstrates
 
