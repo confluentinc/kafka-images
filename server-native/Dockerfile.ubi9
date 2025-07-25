@@ -162,10 +162,6 @@ COPY --from=confluent-base /usr/bin /usr/bin
 COPY --from=build-ub /build/ub/ub /usr/bin/ub
 COPY --from=confluent-base /etc/confluent/docker /etc/confluent/docker
 COPY include/etc/confluent/docker /etc/confluent/docker
-# COPY include/etc/confluent/docker/kafka.properties /etc/kafka/kafka.properties
-# COPY include/etc/confluent/docker/server.properties /etc/kafka/server.properties
-# COPY include/etc/confluent/docker/log4j2.yaml /etc/kafka/log4j2.yaml
-# COPY include/etc/confluent/docker/tools-log4j2.yaml /etc/kafka/tools-log4j2.yaml
 COPY include/etc/confluent/docker/meta.properties /var/lib/kafka/data/meta.properties
 ENV COMPONENT=kafka
 
@@ -173,5 +169,4 @@ ENV COMPONENT=kafka
 # USER appuser
 USER root
 RUN mkdir -p /var/lib/kafka/data /etc/kafka/secrets
-RUN apt update && apt install vim -y
 CMD ["/etc/confluent/docker/run"]

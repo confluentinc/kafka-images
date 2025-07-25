@@ -163,17 +163,6 @@ docker-compose -f <compose-file> down -v
 docker system prune -f
 ```
 
-## 📊 Comparison Matrix
-
-| Feature | Basic | MDS | ERP | OAuth |
-|---------|-------|-----|-----|--------|
-| **Startup Time** | ~10s | ~15s | ~20s | ~45s |
-| **Memory Usage** | Low | Low | Medium | High |
-| **Authentication** | None | SASL | None | OAuth |
-| **REST API** | No | MDS only | Full v3 | MDS only |
-| **Production Ready** | Dev/Test | Staging | Integration | Production |
-| **Complexity** | Simple | Medium | Medium | High |
-
 ## 🎯 Use Case Guide
 
 ### Choose **Basic** if you want:

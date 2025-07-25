@@ -34,5 +34,4 @@ if [ "$KAFKA_JMX_PORT" ]; then
 fi
 
 echo "===> Launching ${COMPONENT} ... "
-# exec "${COMPONENT}"-server-start /etc/"${COMPONENT}"/"${COMPONENT}".properties
 exec /app/kafka/kafka.Kafka /etc/kafka/kafka.properties ${KAFKA_OPTS-}
