@@ -18,7 +18,7 @@
 
 export KAFKA_DATA_DIRS=${KAFKA_DATA_DIRS:-"/var/lib/kafka/data"}
 echo "===> Check if $KAFKA_DATA_DIRS is writable ..."
-dub path "$KAFKA_DATA_DIRS" writable
+ub path "$KAFKA_DATA_DIRS" writable
 
 # Required step: Format the storage directory with provided cluster ID unless it already exists.
 echo "===> Using provided cluster id $CLUSTER_ID ..."
