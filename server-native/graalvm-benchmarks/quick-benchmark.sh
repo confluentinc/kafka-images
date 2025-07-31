@@ -125,7 +125,7 @@ EOF
                 memory_stats=$(docker stats --no-stream --format "{{.MemUsage}}" "broker-quick-${image_type}")
                 memory_with_unit=$(echo "$memory_stats" | cut -d'/' -f1 | xargs)
                 
-                # Convert to MB based on unit
+                # Convert to MB based on unit (maximum precision)
                 if [[ "$memory_with_unit" == *"GiB"* ]]; then
                     memory_value=$(echo "$memory_with_unit" | sed 's/[^0-9.]//g')
                     memory_mb=$(echo "$memory_value * 1024" | bc -l)
@@ -133,7 +133,7 @@ EOF
                     memory_mb=$(echo "$memory_with_unit" | sed 's/[^0-9.]//g')
                 elif [[ "$memory_with_unit" == *"KiB"* ]]; then
                     memory_value=$(echo "$memory_with_unit" | sed 's/[^0-9.]//g')
-                    memory_mb=$(echo "scale=2; $memory_value / 1024" | bc -l)
+                    memory_mb=$(echo "$memory_value / 1024" | bc -l)
                 else
                     # Default to treating as MB if no unit found
                     memory_mb=$(echo "$memory_with_unit" | sed 's/[^0-9.]//g')
@@ -143,7 +143,7 @@ EOF
                 total_memory=$(echo "$total_memory + $memory_mb" | bc -l)
                 successful_runs=$((successful_runs + 1))
                 
-                echo "    Startup: ${startup_time}s, Memory: ${memory_mb}MB"
+                echo "    Startup: $(printf "%.2f" $startup_time)s, Memory: $(printf "%.2f" $memory_mb)MB"
                 break
             fi
             sleep 1
@@ -155,13 +155,13 @@ EOF
     done
     
     if [[ $successful_runs -gt 0 ]]; then
-        local avg_startup=$(echo "scale=2; $total_startup / $successful_runs" | bc -l)
-        local avg_memory=$(echo "scale=1; $total_memory / $successful_runs" | bc -l)
+        local avg_startup=$(echo "$total_startup / $successful_runs" | bc -l)
+        local avg_memory=$(echo "$total_memory / $successful_runs" | bc -l)
         
         echo "$avg_startup" > "$RESULTS_DIR/${image_type}_startup_avg.txt"
         echo "$avg_memory" > "$RESULTS_DIR/${image_type}_memory_avg.txt"
         
-        echo -e "${GREEN}  Average - Startup: ${avg_startup}s, Memory: ${avg_memory}MB${NC}"
+        echo -e "${GREEN}  Average - Startup: $(printf "%.2f" $avg_startup)s, Memory: $(printf "%.2f" $avg_memory)MB${NC}"
     else
         echo "  No successful runs!"
     fi
@@ -169,6 +169,40 @@ EOF
     # Cleanup temp file
     rm -f "docker-compose-quick-${image_type}.yml"
 }
+
+# Function to compare image sizes
+compare_image_sizes() {
+    echo -e "${YELLOW}📏 Comparing Image Sizes...${NC}"
+    
+    # Get image sizes in bytes
+    jvm_bytes=$(docker image inspect --format '{{.Size}}' $JVM_IMAGE 2>/dev/null || echo "0")
+    native_bytes=$(docker image inspect --format '{{.Size}}' $NATIVE_IMAGE 2>/dev/null || echo "0")
+    
+    if [[ "$jvm_bytes" != "0" ]] && [[ "$native_bytes" != "0" ]]; then
+        # Convert to MB (maximum precision)
+        jvm_mb=$(echo "$jvm_bytes / 1024 / 1024" | bc -l)
+        native_mb=$(echo "$native_bytes / 1024 / 1024" | bc -l)
+        
+        # Calculate size reduction percentage (maximum precision)
+        size_reduction=$(echo "($jvm_bytes - $native_bytes) / $jvm_bytes * 100" | bc -l)
+        
+        # Save results with full precision
+        echo "$jvm_mb" > "$RESULTS_DIR/jvm_size.txt"
+        echo "$native_mb" > "$RESULTS_DIR/native_size.txt"
+        echo "$size_reduction" > "$RESULTS_DIR/size_reduction.txt"
+        
+        # Display with formatted precision
+        echo "JVM Image Size: $(printf "%.2f" $jvm_mb) MB"
+        echo "Native Image Size: $(printf "%.2f" $native_mb) MB"
+        echo "Size Reduction: $(printf "%.3f" $size_reduction)%"
+    else
+        echo "Could not get image sizes (images may need to be pulled)"
+    fi
+    echo ""
+}
+
+# Compare image sizes first
+compare_image_sizes
 
 # Run benchmarks
 run_benchmark "jvm" "$JVM_IMAGE"
@@ -186,16 +220,27 @@ if [[ -f "$RESULTS_DIR/jvm_startup_avg.txt" && -f "$RESULTS_DIR/native_startup_a
     jvm_memory=$(cat "$RESULTS_DIR/jvm_memory_avg.txt")
     native_memory=$(cat "$RESULTS_DIR/native_memory_avg.txt")
     
-    startup_improvement=$(echo "scale=1; ($jvm_startup - $native_startup) / $jvm_startup * 100" | bc -l)
-    memory_improvement=$(echo "scale=1; ($jvm_memory - $native_memory) / $jvm_memory * 100" | bc -l)
+    startup_improvement=$(echo "($jvm_startup - $native_startup) / $jvm_startup * 100" | bc -l)
+    memory_improvement=$(echo "($jvm_memory - $native_memory) / $jvm_memory * 100" | bc -l)
     
-    echo "JVM Startup:     ${jvm_startup}s"
-    echo "Native Startup:  ${native_startup}s"
-    echo "Startup Improvement: ${startup_improvement}%"
+    echo "JVM Startup:     $(printf "%.2f" $jvm_startup)s"
+    echo "Native Startup:  $(printf "%.2f" $native_startup)s"
+    echo "Startup Improvement: $(printf "%.3f" $startup_improvement)%"
     echo ""
-    echo "JVM Memory:      ${jvm_memory}MB"
-    echo "Native Memory:   ${native_memory}MB"
-    echo "Memory Improvement: ${memory_improvement}%"
+    echo "JVM Memory:      $(printf "%.2f" $jvm_memory)MB"
+    echo "Native Memory:   $(printf "%.2f" $native_memory)MB"
+    echo "Memory Improvement: $(printf "%.3f" $memory_improvement)%"
+    
+    # Add image size comparison if available
+    if [[ -f "$RESULTS_DIR/jvm_size.txt" && -f "$RESULTS_DIR/native_size.txt" ]]; then
+        jvm_size=$(cat "$RESULTS_DIR/jvm_size.txt")
+        native_size=$(cat "$RESULTS_DIR/native_size.txt")
+        size_reduction=$(cat "$RESULTS_DIR/size_reduction.txt")
+        echo ""
+        echo "JVM Image Size:  $(printf "%.2f" $jvm_size)MB"
+        echo "Native Image Size: $(printf "%.2f" $native_size)MB"
+        echo "Size Improvement: $(printf "%.3f" $size_reduction)%"
+    fi
 fi
 
 echo ""

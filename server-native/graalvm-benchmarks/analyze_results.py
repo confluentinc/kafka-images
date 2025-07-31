@@ -26,8 +26,8 @@ except ImportError:
 def load_benchmark_data(results_dir: str) -> Dict:
     """Load benchmark data from results directory"""
     data = {
-        'jvm': {'startup': [], 'memory': []},
-        'native': {'startup': [], 'memory': []}
+        'jvm': {'startup': [], 'memory': [], 'size': None},
+        'native': {'startup': [], 'memory': [], 'size': None}
     }
     
     # Find all result files
@@ -67,6 +67,39 @@ def load_benchmark_data(results_dir: str) -> Dict:
                 data[image_type]['memory'].extend(values)
         except Exception as e:
             print(f"Error reading {file_path}: {e}")
+    
+    # Load image sizes (single values)
+    size_files = glob.glob(f"{results_dir}/*_size_*.txt")
+    for file_path in size_files:
+        file_name = os.path.basename(file_path)
+        if 'jvm' in file_name:
+            image_type = 'jvm'
+        elif 'native' in file_name:
+            image_type = 'native'
+        else:
+            continue
+            
+        try:
+            with open(file_path, 'r') as f:
+                value = float(f.readline().strip())
+                data[image_type]['size'] = value
+        except Exception as e:
+            print(f"Error reading {file_path}: {e}")
+    
+    # Also try to load from quick benchmark results
+    quick_size_files = [
+        f"{results_dir}/jvm_size.txt",
+        f"{results_dir}/native_size.txt"
+    ]
+    for file_path in quick_size_files:
+        if os.path.exists(file_path):
+            image_type = 'jvm' if 'jvm' in file_path else 'native'
+            try:
+                with open(file_path, 'r') as f:
+                    value = float(f.readline().strip())
+                    data[image_type]['size'] = value
+            except Exception as e:
+                print(f"Error reading {file_path}: {e}")
     
     return data
 
@@ -109,6 +142,11 @@ def print_statistics(data: Dict):
         print(f"     Std Dev: {memory_stats['std']:.1f}MB")
         print(f"     Range: {memory_stats['min']:.1f}MB - {memory_stats['max']:.1f}MB")
         print(f"     Samples: {memory_stats['count']}")
+        
+        # Image size
+        if data[image_type]['size'] is not None:
+            print(f"  📦 Image Size:")
+            print(f"     Size: {data[image_type]['size']:.1f}MB")
 
 def calculate_improvements(data: Dict):
     """Calculate performance improvements of Native vs JVM"""
@@ -135,6 +173,17 @@ def calculate_improvements(data: Dict):
         if memory_improvement > 0:
             memory_ratio = jvm_memory['mean'] / native_memory['mean']
             print(f"   Native uses {memory_ratio:.1f}x less memory")
+    
+    # Image size comparison
+    if data['jvm']['size'] is not None and data['native']['size'] is not None:
+        jvm_size = data['jvm']['size']
+        native_size = data['native']['size']
+        size_improvement = ((jvm_size - native_size) / jvm_size) * 100
+        print(f"📦 Image Size: {size_improvement:.1f}% smaller")
+        
+        if size_improvement > 0:
+            size_ratio = jvm_size / native_size
+            print(f"   Native image is {size_ratio:.1f}x smaller")
 
 def create_visualizations(data: Dict, output_dir: str):
     """Create visualization charts"""

@@ -25,7 +25,7 @@ services:
 
 
   broker:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-32c6e5ce-ubi9.arm64
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-ba754285-ubi9.arm64
     hostname: broker
     container_name: broker
     depends_on:
@@ -218,12 +218,12 @@ services:
         
       echo "Token obtained, setting up RBAC permissions..."
       
-      echo "=== Granting topic permissions ==="
+      echo "=== Granting user client_app1 permissions on the topic oauth-test-topic ==="
       curl -s -H "Authorization: Bearer $$ACCESS_TOKEN" -H "Content-Type: application/json" \
         -X POST "http://broker:8091/security/1.0/principals/User:client_app1/roles/ResourceOwner/bindings" \
         -d "{\"scope\":{\"clusters\":{\"kafka-cluster\":\"vHCgQyIrRHG8Jv27qI2h3Q\"}}, \"resourcePatterns\":[{\"resourceType\":\"Topic\", \"name\":\"oauth-test-topic\", \"patternType\":\"LITERAL\"}]}"
       
-      echo "=== Granting consumer group permissions ==="  
+      echo "=== Granting user client_app1 permissions on the consumer group console-consumer-group ==="  
       curl -s -H "Authorization: Bearer $$ACCESS_TOKEN" -H "Content-Type: application/json" \
         -X POST "http://broker:8091/security/1.0/principals/User:client_app1/roles/ResourceOwner/bindings" \
         -d "{\"scope\":{\"clusters\":{\"kafka-cluster\":\"vHCgQyIrRHG8Jv27qI2h3Q\"}}, \"resourcePatterns\":[{\"resourceType\":\"Group\", \"name\":\"console-consumer-group\", \"patternType\":\"LITERAL\"}]}"

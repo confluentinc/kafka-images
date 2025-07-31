@@ -8,13 +8,15 @@ This directory contains comprehensive benchmarking tools to compare **JVM-based 
 
 | Metric | JVM | Native | Improvement |
 |--------|-----|--------|-------------|
-| **Startup Time** | 9.62s | 1.85s | **⚡ 80% faster** |
-| **Memory Usage** | 646.6MB | 289.3MB | **💾 50% less** |
+| **Startup Time** | 9.62s | 1.85s | **⚡ 81% faster** |
+| **Memory Usage** | 646.6MB | 289.3MB | **💾 55% lower** |
+| **Image Size** | 2,428.3MB | 726.7MB | **📦 70% smaller** |
 | **Startup Range** | 8.6s - 9.9s | 1.8s - 1.9s | Consistent performance |
 
 ### **Key Findings:**
 - **81% faster startup** with GraalVM native compilation
 - **55% lower memory footprint** 
+- **70% smaller image size** (2.4GB vs 726.7MB)
 - **Consistent performance** across multiple runs
 - **True operational readiness** measured via "Kafka Server started" log message
 
@@ -37,7 +39,7 @@ This directory contains comprehensive benchmarking tools to compare **JVM-based 
 ### **Comprehensive Benchmark (Full Analysis)**
 ```bash
 # Run full benchmark suite with detailed reporting
-./benchmark-comparison.sh
+./detailed-benchmark.sh
 
 # Results saved to timestamped directory in benchmark-results/
 ```
@@ -98,6 +100,12 @@ docker stats --no-stream --format "{{.MemUsage}}" container_name
 2. Get container memory stats
 3. Parse and convert to MB for consistent reporting
 4. Record peak memory usage
+
+**Image Size Measurement:**
+1. Pull both images if not already available
+2. Use `docker image inspect --format '{{.Size}}'` to get size in bytes
+3. Convert bytes to MB: `size_bytes / 1024 / 1024`
+4. Calculate size reduction percentage: `(jvm_bytes - native_bytes) / jvm_bytes * 100`
 
 ---
 
@@ -196,7 +204,7 @@ rm manual-jvm-test.yml
 
 ```
 examples/confluent-server/
-├── benchmark-comparison.sh     # Comprehensive benchmark suite
+├── detailed-benchmark.sh       # Comprehensive benchmark suite
 ├── quick-benchmark.sh         # Fast iteration testing
 ├── analyze_results.py         # Python analysis and visualization
 ├── BENCHMARK_README.md        # This documentation
@@ -293,7 +301,8 @@ docker pull 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc
 The GraalVM native Confluent Server demonstrates significant performance improvements:
 
 - **⚡ 81% faster startup** - Critical for serverless and rapid scaling scenarios
-- **💾 55% memory efficiency** - Important for resource-constrained environments
+- **💾 55% memory efficiency** - Important for resource-constrained environments  
+- **📦 70% smaller image size** - Faster downloads, reduced storage costs, improved CI/CD
 - **🔄 Consistent performance** - Reliable across multiple test iterations
 
-These benchmarks provide concrete evidence of GraalVM native compilation benefits for Kafka workloads, making it an excellent choice for modern cloud-native deployments. 
+These benchmarks provide concrete evidence of GraalVM native compilation benefits for Kafka workloads, making it an excellent choice for modern cloud-native deployments where startup speed, memory efficiency, and image size matter. 

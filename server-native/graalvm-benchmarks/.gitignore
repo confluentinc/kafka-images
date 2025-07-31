@@ -1,0 +1,12 @@
+# Temporary benchmark results
+quick-benchmark-results/
+
+
+# Generated analysis charts (keep the directory but not the specific files)
+analysis-charts/*.png
+analysis-charts/*.jpg
+analysis-charts/*.svg
+
+# Generated docker-compose files (created by benchmark scripts)
+docker-compose-benchmark-*.yml
+docker-compose-quick-*.yml

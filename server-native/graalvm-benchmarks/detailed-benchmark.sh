@@ -93,8 +93,8 @@ measure_memory() {
     elif [[ "$memory_with_unit" == *"MiB"* ]]; then
         local memory_used=$(echo "$memory_with_unit" | sed 's/[^0-9.]//g')
     elif [[ "$memory_with_unit" == *"KiB"* ]]; then
-        local memory_value=$(echo "$memory_with_unit" | sed 's/[^0-9.]//g')
-        local memory_used=$(echo "scale=2; $memory_value / 1024" | bc -l)
+        local             memory_value=$(echo "$memory_with_unit" | sed 's/[^0-9.]//g')
+            local memory_used=$(echo "$memory_value / 1024" | bc -l)
     else
         # Default to treating as MB if no unit found
         local memory_used=$(echo "$memory_with_unit" | sed 's/[^0-9.]//g')
@@ -183,7 +183,7 @@ calculate_stats() {
     for value in "${values[@]}"; do
         sum=$(echo "$sum + $value" | bc -l)
     done
-    local mean=$(echo "scale=2; $sum / $count" | bc -l)
+    local mean=$(echo "$sum / $count" | bc -l)
     
     # Calculate min/max
     local min=${values[0]}
@@ -198,12 +198,59 @@ calculate_stats() {
         fi
     done
     
-    printf "Mean: %.2f%s, Min: %.2f%s, Max: %.2f%s" "$mean" "$metric" "$min" "$metric" "$max" "$metric"
+    printf "Mean: %.3f%s, Min: %.3f%s, Max: %.3f%s" "$mean" "$metric" "$min" "$metric" "$max" "$metric"
+}
+
+# Function to compare image sizes
+compare_image_sizes() {
+    echo -e "${YELLOW}📏 Comparing Image Sizes${NC}"
+    echo "Pulling images (if needed)..."
+    
+    # Pull images
+    docker pull $JVM_IMAGE || echo "Warning: Could not pull JVM image"
+    docker pull $NATIVE_IMAGE || echo "Warning: Could not pull Native image"
+    
+    echo ""
+    echo "Getting image sizes..."
+    
+    # Get image sizes in bytes
+    jvm_bytes=$(docker image inspect --format '{{.Size}}' $JVM_IMAGE 2>/dev/null || echo "0")
+    native_bytes=$(docker image inspect --format '{{.Size}}' $NATIVE_IMAGE 2>/dev/null || echo "0")
+    
+    if [[ "$jvm_bytes" == "0" ]] || [[ "$native_bytes" == "0" ]]; then
+        echo -e "${RED}❌ Could not get image sizes${NC}"
+        return 1
+    fi
+    
+    echo "JVM Image Bytes: $jvm_bytes"
+    echo "Native Image Bytes: $native_bytes"
+    
+    # Convert to MB (maximum precision)
+    jvm_mb=$(echo "$jvm_bytes / 1024 / 1024" | bc -l)
+    native_mb=$(echo "$native_bytes / 1024 / 1024" | bc -l)
+    
+    # Calculate size reduction percentage (maximum precision)
+    size_reduction=$(echo "($jvm_bytes - $native_bytes) / $jvm_bytes * 100" | bc -l)
+    
+    # Display with formatted precision
+    echo "JVM Image Size: $(printf "%.2f" $jvm_mb) MB"
+    echo "Native Image Size: $(printf "%.2f" $native_mb) MB"
+    echo "Size Reduction: $(printf "%.3f" $size_reduction)%"
+    
+    # Save results
+    echo "$jvm_mb" > "$RESULTS_DIR/jvm_size_${TIMESTAMP}.txt"
+    echo "$native_mb" > "$RESULTS_DIR/native_size_${TIMESTAMP}.txt"
+    echo "$size_reduction" > "$RESULTS_DIR/size_reduction_${TIMESTAMP}.txt"
+    
+    echo ""
 }
 
 # Main execution
 main() {
     echo -e "${BLUE}🏁 Starting benchmark...${NC}"
+    
+    # Compare image sizes first
+    compare_image_sizes
     
     # Create Docker Compose files
     echo "Creating Docker Compose configurations..."
@@ -232,6 +279,18 @@ main() {
     echo -e "\n${YELLOW}💾 Memory Usage Comparison:${NC}"
     echo "JVM:    $(calculate_stats "$RESULTS_DIR/jvm_memory_${TIMESTAMP}.txt" "MB")"
     echo "Native: $(calculate_stats "$RESULTS_DIR/native_memory_${TIMESTAMP}.txt" "MB")"
+    
+    echo -e "\n${YELLOW}📏 Image Size Comparison:${NC}"
+    if [[ -f "$RESULTS_DIR/jvm_size_${TIMESTAMP}.txt" ]] && [[ -f "$RESULTS_DIR/native_size_${TIMESTAMP}.txt" ]]; then
+        jvm_size=$(cat "$RESULTS_DIR/jvm_size_${TIMESTAMP}.txt")
+        native_size=$(cat "$RESULTS_DIR/native_size_${TIMESTAMP}.txt")
+        size_reduction=$(cat "$RESULTS_DIR/size_reduction_${TIMESTAMP}.txt")
+        echo "JVM:    $(printf "%.2f" $jvm_size) MB"
+        echo "Native: $(printf "%.2f" $native_size) MB"
+        echo "Reduction: $(printf "%.3f" $size_reduction)%"
+    else
+        echo "Image size data not available"
+    fi
     
     # Calculate improvements
     calculate_improvements
@@ -356,8 +415,8 @@ calculate_improvements() {
         local native_startup_avg=$(awk '{sum+=$1} END {print sum/NR}' "$native_startup_file")
         
         if [[ -n "$jvm_startup_avg" && -n "$native_startup_avg" ]]; then
-            local startup_improvement=$(echo "scale=1; ($jvm_startup_avg - $native_startup_avg) / $jvm_startup_avg * 100" | bc -l)
-            echo -e "\n${GREEN}⚡ Startup Improvement: ${startup_improvement}% faster with Native${NC}"
+            local startup_improvement=$(echo "($jvm_startup_avg - $native_startup_avg) / $jvm_startup_avg * 100" | bc -l)
+            echo -e "\n${GREEN}⚡ Startup Improvement: $(printf "%.3f" $startup_improvement)% faster with Native${NC}"
         fi
     fi
     
@@ -366,8 +425,8 @@ calculate_improvements() {
         local native_memory_avg=$(awk '{sum+=$1} END {print sum/NR}' "$native_memory_file")
         
         if [[ -n "$jvm_memory_avg" && -n "$native_memory_avg" ]]; then
-            local memory_improvement=$(echo "scale=1; ($jvm_memory_avg - $native_memory_avg) / $jvm_memory_avg * 100" | bc -l)
-            echo -e "${GREEN}💾 Memory Improvement: ${memory_improvement}% less memory with Native${NC}"
+            local memory_improvement=$(echo "($jvm_memory_avg - $native_memory_avg) / $jvm_memory_avg * 100" | bc -l)
+            echo -e "${GREEN}💾 Memory Improvement: $(printf "%.3f" $memory_improvement)% less memory with Native${NC}"
         fi
     fi
 }
@@ -418,6 +477,13 @@ $(cat "$RESULTS_DIR/jvm_memory_${TIMESTAMP}.txt" 2>/dev/null || echo "No data")
 ### Native Memory Usage (MB)
 \`\`\`
 $(cat "$RESULTS_DIR/native_memory_${TIMESTAMP}.txt" 2>/dev/null || echo "No data")
+\`\`\`
+
+### Image Sizes
+\`\`\`
+JVM Image Size: $(cat "$RESULTS_DIR/jvm_size_${TIMESTAMP}.txt" 2>/dev/null || echo "No data") MB
+Native Image Size: $(cat "$RESULTS_DIR/native_size_${TIMESTAMP}.txt" 2>/dev/null || echo "No data") MB
+Size Reduction: $(cat "$RESULTS_DIR/size_reduction_${TIMESTAMP}.txt" 2>/dev/null || echo "No data")%
 \`\`\`
 
 ## Methodology
