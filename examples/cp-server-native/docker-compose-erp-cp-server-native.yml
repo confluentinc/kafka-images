@@ -1,0 +1,165 @@
+---
+version: '2'
+services:
+  broker:
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-ba754285-ubi9.arm64
+    hostname: broker
+    container_name: broker
+    ports:
+      - "9092:9092"
+      - "9101:9101"
+      - "8090:8090"
+      - "28090:28090"  # Metadata Server (with REST API support)
+    environment:
+      COMPONENT: 'kafka'
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@broker:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://broker:29092,CONTROLLER://broker:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      CLUSTER_ID: 'vHCgQyIrRHG8Jv27qI2h3Q'
+      
+      # REST API available through Metadata Server on port 28090
+      # Metadata Server Configuration
+      KAFKA_CONFLUENT_METADATA_SERVER_LISTENERS: 'http://0.0.0.0:28090'
+      KAFKA_CONFLUENT_METADATA_SERVER_ADVERTISED_LISTENERS: http://localhost:28090
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: 'localhost:29092'
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      
+      # Replication factors for single broker setup
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      KAFKA_CONFLUENT_COMMAND_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_LINK_METADATA_TOPIC_REPLICATION: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION: 1
+      KAFKA_CLUSTER_LINK_METADATA_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_CLUSTER_LINK_METADATA_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_DURABILITY_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_TIER_METADATA_REPLICATION: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION: 1
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_COMMAND_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CLUSTER_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_CLUSTER_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
+
+  producer:
+    image: curlimages/curl:latest
+    hostname: producer
+    container_name: producer
+    depends_on:
+      - broker
+    command:
+      - sh
+      - -c
+      - |
+        echo '=== Waiting for Kafka and Metadata Server to be ready ==='
+        sleep 20
+        
+        echo '=== Testing Metadata Server availability ==='
+        for i in 1 2 3 4 5 6 7 8 9 10; do
+          if curl -s --connect-timeout 5 http://broker:28090/kafka/v3/clusters > /dev/null; then
+            echo "✅ Metadata Server is ready!"
+            break
+          else
+            echo "⏳ Waiting for Metadata Server... attempt $i/10"
+            sleep 5
+          fi
+        done
+
+        echo '=== Testing Embedded REST Proxy v3 APIs ==='
+        
+        echo '🔍 GET /kafka/v3/clusters - List clusters'
+        curl -s http://broker:28090/kafka/v3/clusters | head -200
+        
+        echo ''
+        echo '🔍 GET /kafka/v3/clusters/{cluster_id} - Get cluster details'
+        curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q | head -200
+        
+        echo ''
+        echo '🔍 GET /kafka/v3/clusters/{cluster_id}/brokers - List brokers'
+        curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/brokers | head -200
+        
+        echo ''
+        echo '=== Creating topic via REST API ==='
+        curl -X POST http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics \
+          -H "Content-Type: application/json" \
+          -d '{
+            "topic_name": "rest-proxy-topic",
+            "partitions_count": 3,
+            "replication_factor": 1
+          }' || echo "Topic might already exist"
+
+        echo '=== Listing topics via REST API ==='
+        curl -s http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics | head -200
+        
+        echo ''
+        echo '=== Producing messages via REST API ==='
+        
+        echo '📝 Producing Message 1: REST API Message 1 - Hello from Embedded REST Proxy!'
+        curl -X POST http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/records \
+          -H "Content-Type: application/json" \
+          -d '{
+            "value": {
+              "type": "JSON",
+              "data": {"message": "REST API Message 1 - Hello from Embedded REST Proxy!", "timestamp": "2025-01-22T10:00:00Z"}
+            }
+          }'
+
+        echo '📝 Producing Message 2: REST API Message 2 - Testing GraalVM Native REST endpoints'  
+        curl -X POST http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/records \
+          -H "Content-Type: application/json" \
+          -d '{
+            "value": {
+              "type": "JSON",
+              "data": {"message": "REST API Message 2 - Testing GraalVM Native REST endpoints", "timestamp": "2025-01-22T10:01:00Z"}
+            }
+          }'
+          
+        echo '📝 Producing Message 3: REST API Message 3 - Embedded REST Proxy test completed'
+        curl -X POST http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q/topics/rest-proxy-topic/records \
+          -H "Content-Type: application/json" \
+          -d '{
+            "value": {
+              "type": "JSON",
+              "data": {"message": "REST API Message 3 - Embedded REST Proxy test completed", "timestamp": "2025-01-22T10:02:00Z"}
+            }
+          }'
+        
+        echo '🚀 Messages sent via REST API!'
+        echo 'Producer container staying alive for manual testing.'
+        echo 'Use: docker exec -it producer sh'
+        echo 'REST API endpoint: http://broker:28090/kafka/v3/clusters/vHCgQyIrRHG8Jv27qI2h3Q'
+        
+        sleep infinity
+
+  consumer:
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
+    hostname: consumer
+    container_name: consumer
+    depends_on:
+      - broker
+    command:
+      - bash
+      - -c
+      - |
+        echo '=== Consumer starting, waiting for messages ==='
+        sleep 30
+
+        echo '=== Starting to consume messages from REST-produced topic ==='
+        kafka-console-consumer --topic rest-proxy-topic --bootstrap-server broker:29092 --from-beginning --max-messages 3
+
+        echo '=== Consumer finished successfully ==='
+        echo 'Consumer container staying alive for manual testing.'
+        echo 'Use: docker exec -it consumer bash'
+        echo 'Then: kafka-console-consumer --topic rest-proxy-topic --bootstrap-server broker:29092 --from-beginning'
+        echo 'Or for new messages only: kafka-console-consumer --topic rest-proxy-topic --bootstrap-server broker:29092'
+        
+        sleep infinity
