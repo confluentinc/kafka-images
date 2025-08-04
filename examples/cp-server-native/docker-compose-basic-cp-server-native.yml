@@ -1,0 +1,102 @@
+---
+version: '2'
+services:
+  broker:
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-ba754285-ubi9.arm64
+    hostname: broker
+    container_name: broker
+    ports:
+      - "9092:9092"
+      - "9101:9101"
+      - "8090:8090"
+    environment:
+      COMPONENT: 'kafka'
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@broker:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://broker:29092,CONTROLLER://broker:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      CLUSTER_ID: '4L6g3nShT-eMCtK--X86sw'
+      KAFKA_CONFLUENT_METADATA_SERVER_LISTENERS: 'http://localhost:28090'
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: 'localhost:29092'
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      KAFKA_CONFLUENT_COMMAND_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_LINK_METADATA_TOPIC_REPLICATION: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION: 1
+      KAFKA_CLUSTER_LINK_METADATA_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_CLUSTER_LINK_METADATA_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_DURABILITY_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_TIER_METADATA_REPLICATION: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION: 1
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION: 1
+      KAFKA_CONFLUENT_COMMAND_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CLUSTER_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_CLUSTER_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
+  producer:
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-6701-ubi9
+    hostname: producer
+    container_name: producer
+    depends_on:
+      - broker
+    command:
+      - bash
+      - -c
+      - |
+        echo '=== Waiting for Kafka to be ready ==='
+        sleep 5
+
+        echo '=== Creating topic: demo-topic ==='
+        kafka-topics --create --topic demo-topic --partitions 1 --replication-factor 1 --bootstrap-server broker:29092
+        
+        echo '=== Listing all topics ==='
+        kafka-topics --list --bootstrap-server broker:29092
+        
+        echo '=== Producing 3 unique messages ==='
+        
+        echo '📝 Producing Message 1: Hello from Docker Producer'
+        echo "Message 1: Hello from Docker Producer" | kafka-console-producer --topic demo-topic --bootstrap-server broker:29092
+        
+        echo '📝 Producing Message 2: Testing Kafka Native Binary'
+        echo "Message 2: Testing Kafka Native Binary" | kafka-console-producer --topic demo-topic --bootstrap-server broker:29092
+        
+        echo '📝 Producing Message 3: Producer container completed'  
+        echo "Message 3: Producer container completed" | kafka-console-producer --topic demo-topic --bootstrap-server broker:29092
+        
+        echo '=== Producer finished successfully ==='
+        echo 'Producer container staying alive for manual testing.'
+        echo 'Use: docker exec -it producer bash'
+        echo 'Then: kafka-console-producer --topic demo-topic --bootstrap-server broker:29092'
+        
+        sleep infinity
+  consumer:
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-6701-ubi9
+    hostname: consumer
+    container_name: consumer
+    depends_on:
+      - broker
+    command:
+      - bash
+      - -c
+      - |
+        echo '=== Consumer starting, waiting 10 seconds ==='
+        sleep 10
+        
+        echo '=== Starting to consume messages from beginning ==='
+        kafka-console-consumer --topic demo-topic --bootstrap-server broker:29092 --from-beginning --max-messages 3
+        
+        echo '=== Consumer finished successfully ==='
+        echo 'Consumer container staying alive for manual testing.'
+        echo 'Use: docker exec -it consumer bash'
+        echo 'Then: kafka-console-consumer --topic demo-topic --bootstrap-server broker:29092 --from-beginning'
+        
+        sleep infinity
