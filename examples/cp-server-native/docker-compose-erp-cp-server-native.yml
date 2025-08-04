@@ -61,7 +61,7 @@ services:
       - -c
       - |
         echo '=== Waiting for Kafka and Metadata Server to be ready ==='
-        sleep 20
+        sleep 5
         
         echo '=== Testing Metadata Server availability ==='
         for i in 1 2 3 4 5 6 7 8 9 10; do
@@ -151,7 +151,7 @@ services:
       - -c
       - |
         echo '=== Consumer starting, waiting for messages ==='
-        sleep 30
+        sleep 5
 
         echo '=== Starting to consume messages from REST-produced topic ==='
         kafka-console-consumer --topic rest-proxy-topic --bootstrap-server broker:29092 --from-beginning --max-messages 3

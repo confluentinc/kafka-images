@@ -141,7 +141,7 @@ services:
     command: |
       bash -c '
       echo "RBAC permissions already configured by oauth-setup. Starting producer..."
-      sleep 10
+      sleep 5
       
       echo "Creating topic: oauth-test-topic"
       kafka-topics --create --topic oauth-test-topic --bootstrap-server broker:9095 --command-config /tmp/oauth-client.properties --partitions 1 --replication-factor 1 || echo "Topic might already exist"
@@ -180,7 +180,7 @@ services:
     command: |
       bash -c '
       echo "Waiting for producer to send messages..."
-      sleep 25
+      sleep 15
       
       echo "Starting consumer for oauth-test-topic (consuming 3 messages)..."
       kafka-console-consumer --bootstrap-server broker:9095 --topic oauth-test-topic --from-beginning --max-messages 3 --consumer.config /tmp/oauth-client.properties
@@ -206,7 +206,7 @@ services:
     command: |
       sh -c '
       echo "=== Waiting for services to be ready ==="
-      sleep 20
+      sleep 5
       
       echo "=== Getting superuser OAuth token ==="
       ACCESS_TOKEN=$$(curl -s -X POST \

@@ -1,7 +1,7 @@
 ---
 services:
   broker:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-ba754285-ubi9.amd64
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-ba754285-ubi9.arm64
     container_name: broker
     hostname: broker
     ports:
@@ -66,7 +66,7 @@ services:
     command: >
       bash -c "
         echo 'Waiting for Kafka to be ready...'
-        sleep 30
+        sleep 5
         
         echo 'Creating client.properties...'
         echo 'security.protocol=SASL_PLAINTEXT' > /tmp/client.properties
@@ -116,7 +116,7 @@ services:
     command: >
       bash -c "
         echo 'Waiting for Kafka to be ready...'
-        sleep 40
+        sleep 7
         
         echo 'Creating client.properties for consumer...'
         echo 'security.protocol=SASL_PLAINTEXT' > /tmp/client.properties
