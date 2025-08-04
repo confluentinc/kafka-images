@@ -59,7 +59,7 @@ services:
       - ./mds-config/users.properties:/etc/kafka/users.properties
 
   producer:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-6701-ubi9
     container_name: producer
     depends_on:
       - broker
@@ -109,7 +109,7 @@ services:
       "
 
   consumer:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-6701-ubi9
     container_name: consumer
     depends_on:
       - broker

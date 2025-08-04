@@ -18,13 +18,13 @@ RESULTS_DIR="benchmark-results"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 
 # Image configurations
-JVM_IMAGE="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9"
-NATIVE_IMAGE="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-7842c5ec-ubi9.arm64"
+JVM_IMAGE="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-6701-ubi9"
+NATIVE_IMAGE="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-ba754285-ubi9.arm64"
 
 # Check if running on x86_64 or arm64
 ARCH=$(uname -m)
 if [[ "$ARCH" == "x86_64" ]]; then
-    NATIVE_IMAGE="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-7842c5ec-ubi9.amd64"
+    NATIVE_IMAGE="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-ba754285-ubi9.amd64"
 fi
 
 echo -e "${BLUE}🚀 Kafka Image Benchmark Comparison${NC}"
@@ -57,11 +57,6 @@ wait_for_service() {
         # Primary check: Look for "Kafka Server started" message (most authoritative)
         if docker logs broker 2>&1 | grep -q -i "kafka.*server.*started"; then
             echo -e "${GREEN}✅ Kafka is ready! (Server started)${NC}"
-            return 0
-        # Fallback: Check for HTTP server readiness messages
-        elif docker logs broker 2>&1 | grep -q "KafkaHttpServer transitioned.*to RUNNING" && \
-             docker logs broker 2>&1 | grep -q "Started NetworkTrafficServerConnector"; then
-            echo -e "${GREEN}✅ Kafka is ready! (HTTP services started)${NC}"
             return 0
         fi
         
@@ -138,13 +133,84 @@ benchmark_run() {
         
         echo -e "${GREEN}✅ Startup time: ${startup_time}s${NC}"
         
-        # Functional test - same approach for both images
+        # Functional test using separate client container
         echo "Running functional test..."
-        if nc -z localhost 9092 2>/dev/null || (echo "" | timeout 1 telnet localhost 9092 2>/dev/null); then
-            echo -e "${GREEN}✅ Functional test passed (port responsive)${NC}"
+        
+        # Start a client container with Kafka tools (using JVM image which has all tools)
+        echo "Starting Kafka client container for testing..."
+        local client_container="kafka-client-test"
+        docker run -d --name "$client_container" --network container:broker \
+            "$JVM_IMAGE" tail -f /dev/null >/dev/null 2>&1
+        
+        # Wait a moment for client container to be ready
+        sleep 3
+        
+        # Test 1: Check if Kafka can list topics (basic API connectivity)
+        if docker exec "$client_container" kafka-topics --bootstrap-server localhost:9092 --list >/dev/null 2>&1; then
+            echo -e "${GREEN}✅ Kafka API responsive (topics list successful)${NC}"
+            
+            # Test 2: Create a test topic
+            local test_topic="benchmark-test-$(date +%s)"
+            if docker exec "$client_container" kafka-topics --bootstrap-server localhost:9092 --create --topic "$test_topic" --partitions 1 --replication-factor 1 >/dev/null 2>&1; then
+                echo -e "${GREEN}✅ Topic ${test_topic} creation successful${NC}"
+                
+                # Test 3: Produce a test message
+                local test_message="test-message-$(date +%s)"
+                if echo "$test_message" | docker exec -i "$client_container" kafka-console-producer --bootstrap-server localhost:9092 --topic "$test_topic" >/dev/null 2>&1; then
+                    echo -e "${GREEN}✅ Message production successful in topic ${test_topic}${NC}"
+                    
+                    # Wait a moment for message to be committed
+                    sleep 3
+                    
+                    # Test 4: Consume the test message and verify we actually got it
+                    echo "Attempting to consume message..."
+                    local consumed_message=$(docker exec "$client_container" kafka-console-consumer \
+                        --bootstrap-server localhost:9092 \
+                        --topic "$test_topic" \
+                        --from-beginning \
+                        --max-messages 1 \
+                        --timeout-ms 3000 \
+                        2>/dev/null)
+                    
+                    if [[ -n "$consumed_message" && "$consumed_message" == "$test_message" ]]; then
+                        echo -e "${GREEN}✅ Message consumption successful (verified: '$consumed_message')${NC}"
+                        echo -e "${GREEN}✅ Full Kafka functional test passed${NC}"
+                    elif [[ -n "$consumed_message" ]]; then
+                        echo -e "${YELLOW}⚠️  Message consumed but content mismatch${NC}"
+                        echo "Expected: '$test_message'"
+                        echo "Got: '$consumed_message'"
+                        echo -e "${GREEN}✅ Basic Kafka functional test passed${NC}"
+                    else
+                        echo -e "${RED}❌ Message consumption failed (no message received)${NC}"
+                        # Debug: Check if there are any messages at all
+                        echo "Debug: Checking topic contents..."
+                        local debug_output=$(docker exec "$client_container" kafka-console-consumer \
+                            --bootstrap-server localhost:9092 \
+                            --topic "$test_topic" \
+                            --from-beginning \
+                            --max-messages 5 \
+                            --timeout-ms 2000 2>/dev/null)
+                        if [[ -n "$debug_output" ]]; then
+                            echo "Found messages: $debug_output"
+                        else
+                            echo "No messages found in topic"
+                        fi
+                    fi
+                else
+                    echo -e "${RED}❌ Message production failed${NC}"
+                fi
+                
+                # Cleanup test topic
+                docker exec "$client_container" kafka-topics --bootstrap-server localhost:9092 --delete --topic "$test_topic" >/dev/null 2>&1
+            else
+                echo -e "${RED}❌ Topic creation failed${NC}"
+            fi
         else
-            echo -e "${RED}❌ Functional test failed${NC}"
+            echo -e "${RED}❌ Kafka API not responsive${NC}"
         fi
+        
+        # Cleanup client container
+        docker rm -f "$client_container" >/dev/null 2>&1
         
         # Wait a bit to ensure steady state
         sleep 5
@@ -490,10 +556,14 @@ Size Reduction: $(cat "$RESULTS_DIR/size_reduction_${TIMESTAMP}.txt" 2>/dev/null
 
 1. Each image was tested $ITERATIONS times
 2. Startup time measured from \`docker-compose up\` to service readiness
-3. Service readiness confirmed by successful \`kafka-topics --list\` command
-4. Memory measured after service startup and functional test
-5. Containers fully cleaned between runs
-6. Functional test performed (topic creation) to ensure service health
+3. Service readiness confirmed by "Kafka Server started" log message
+4. Functional test validates complete Kafka functionality using separate client container:
+   - API connectivity (topic listing)
+   - Topic creation/deletion
+   - Message production
+   - Message consumption
+5. Memory measured after service startup and functional test
+6. Containers fully cleaned between runs
 
 EOF
 

@@ -10,7 +10,7 @@ The **Confluent Server Native** image represents a significant advancement in Ka
 |---------|--------|-------|
 | **⚡ Ultra-Fast Startup** | 81% faster than JVM | 1.85s vs 9.62s |
 | **💾 Memory Efficiency** | 55% lower memory usage | 289.3MB vs 646.6MB |
-| **📦 Compact Images** | 70% smaller image size | 726.7MB vs 2.4GB |
+| **📦 Compact Images** | 75% smaller image size | 607.1MB vs 2.4GB |
 | **🔄 Consistent Performance** | Reliable across iterations | Stable startup times |
 
 ---
@@ -52,13 +52,13 @@ Modern development workflows demand **speed, efficiency, and reliability**. Trad
 |--------|-----|--------|-------------|
 | **Startup Time** | 9.62s | 1.85s | **⚡ 81% faster** |
 | **Memory Usage** | 646.6MB | 289.3MB | **💾 55% lower** |
-| **Image Size** | 2,428.3MB | 726.7MB | **📦 70% smaller** |
+| **Image Size** | 2,443.3MB | 607.1MB | **📦 75% smaller** |
 | **Startup Range** | 8.6s - 9.9s | 1.8s - 1.9s | Consistent performance |
 
 ### **Key Findings:**
 - **81% faster startup** with GraalVM native compilation
 - **55% lower memory footprint** enabling more concurrent instances
-- **70% smaller image size** reducing storage and transfer costs
+- **75% smaller image size** reducing storage and transfer costs
 - **Consistent performance** across multiple runs
 - **True operational readiness** measured via "Kafka Server started" log message
 
@@ -66,17 +66,21 @@ Modern development workflows demand **speed, efficiency, and reliability**. Trad
 
 ```bash
 # Traditional JVM Workflow
-$ time docker-compose up kafka
+$ time docker-compose up
 # ⏱️  ~10 seconds waiting...
 # 💾 646MB memory consumed
 # 📦 2.4GB image to download/store
 
 # Native Image Workflow  
-$ time docker-compose up kafka
+$ time docker-compose up
 # ⚡ ~2 seconds - ready to go!
 # 💾 289MB memory consumed  
-# 📦 727MB image to download/store
+# 📦 607MB image to download/store
 ```
+
+- **Faster downloads**: 607MB vs 2.4GB = **4x faster image pulls**
+- **Storage savings**: **1.8GB less** per image stored
+- **CI/CD efficiency**: **75% faster** image transfers in pipelines
 
 ---
 
@@ -189,6 +193,6 @@ server-native/
 - **Reduced infrastructure costs**
 
 ### **Operational Excellence**
-- **70% smaller images** = faster deployments
+- **75% smaller images** = faster deployments
 - **Consistent performance** = predictable operations
 - **Production-ready** from day one

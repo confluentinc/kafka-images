@@ -17,12 +17,12 @@ TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 
 # Image configurations
 ARCH=$(uname -m)
-JVM_IMAGE="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9"
+JVM_IMAGE="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-6701-ubi9"
 
 if [[ "$ARCH" == "x86_64" ]]; then
-    NATIVE_IMAGE="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-7842c5ec-ubi9.amd64"
+    NATIVE_IMAGE="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-ba754285-ubi9.amd64"
 else
-    NATIVE_IMAGE="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-7842c5ec-ubi9.arm64"
+    NATIVE_IMAGE="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-ba754285-ubi9.arm64"
 fi
 
 echo -e "${BLUE}⚡ Quick Kafka Benchmark${NC}"
@@ -109,10 +109,6 @@ EOF
             # Primary check: Look for "Kafka Server started" message (most definitive)
             if docker logs "broker-quick-${image_type}" 2>&1 | grep -q -i "kafka.*server.*started"; then
                 kafka_ready=true
-            # Fallback: Check for HTTP server readiness messages
-            elif docker logs "broker-quick-${image_type}" 2>&1 | grep -q "KafkaHttpServer transitioned.*to RUNNING" && \
-                 docker logs "broker-quick-${image_type}" 2>&1 | grep -q "Started NetworkTrafficServerConnector"; then
-                kafka_ready=true
             else
                 kafka_ready=false
             fi
@@ -142,6 +138,23 @@ EOF
                 total_startup=$(echo "$total_startup + $startup_time" | bc -l)
                 total_memory=$(echo "$total_memory + $memory_mb" | bc -l)
                 successful_runs=$((successful_runs + 1))
+                
+                # Quick functional test using client container
+                echo "    Running functional test..."
+                local client_container="kafka-client-quick-${image_type}"
+                docker run -d --name "$client_container" --network "container:broker-quick-${image_type}" \
+                    "$JVM_IMAGE" tail -f /dev/null >/dev/null 2>&1
+                
+                sleep 2  # Wait for client container
+                
+                if docker exec "$client_container" kafka-topics --bootstrap-server localhost:9092 --list >/dev/null 2>&1; then
+                    echo "    ✅ Functional test passed"
+                else
+                    echo "    ❌ Functional test failed"
+                fi
+                
+                # Cleanup client container
+                docker rm -f "$client_container" >/dev/null 2>&1
                 
                 echo "    Startup: $(printf "%.2f" $startup_time)s, Memory: $(printf "%.2f" $memory_mb)MB"
                 break

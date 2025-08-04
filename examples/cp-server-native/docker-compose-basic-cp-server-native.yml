@@ -43,7 +43,7 @@ services:
       KAFKA_CLUSTER_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_CONFLUENT_CLUSTER_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
   producer:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-6701-ubi9
     hostname: producer
     container_name: producer
     depends_on:
@@ -53,7 +53,7 @@ services:
       - -c
       - |
         echo '=== Waiting for Kafka to be ready ==='
-        sleep 15
+        sleep 5
 
         echo '=== Creating topic: demo-topic ==='
         kafka-topics --create --topic demo-topic --partitions 1 --replication-factor 1 --bootstrap-server broker:29092
@@ -79,7 +79,7 @@ services:
         
         sleep infinity
   consumer:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-6701-ubi9
     hostname: consumer
     container_name: consumer
     depends_on:
@@ -89,7 +89,7 @@ services:
       - -c
       - |
         echo '=== Consumer starting, waiting 10 seconds ==='
-        sleep 30
+        sleep 10
         
         echo '=== Starting to consume messages from beginning ==='
         kafka-console-consumer --topic demo-topic --bootstrap-server broker:29092 --from-beginning --max-messages 3

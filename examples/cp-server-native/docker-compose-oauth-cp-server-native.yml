@@ -126,7 +126,7 @@ services:
       - oauth-network
 
   producer:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-6701-ubi9
     hostname: producer
     container_name: producer
     depends_on:
@@ -165,7 +165,7 @@ services:
       '
 
   consumer:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-6701-ubi9
     hostname: consumer
     container_name: consumer
     depends_on:

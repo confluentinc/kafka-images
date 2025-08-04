@@ -1,4 +1,4 @@
-# 🚀 Kafka JVM vs GraalVM Native Benchmark Suite
+# 🚀 cp-server JVM vs GraalVM Native Benchmark Suite
 
 This directory contains comprehensive benchmarking tools to compare **JVM-based Confluent Server** with **GraalVM Native Confluent Server** images.
 
@@ -10,13 +10,13 @@ This directory contains comprehensive benchmarking tools to compare **JVM-based 
 |--------|-----|--------|-------------|
 | **Startup Time** | 9.62s | 1.85s | **⚡ 81% faster** |
 | **Memory Usage** | 646.6MB | 289.3MB | **💾 55% lower** |
-| **Image Size** | 2,428.3MB | 726.7MB | **📦 70% smaller** |
+| **Image Size** | 2,443.3MB | 607.1MB | **📦 75% smaller** |
 | **Startup Range** | 8.6s - 9.9s | 1.8s - 1.9s | Consistent performance |
 
 ### **Key Findings:**
 - **81% faster startup** with GraalVM native compilation
 - **55% lower memory footprint** 
-- **70% smaller image size** (2.4GB vs 726.7MB)
+- **75% smaller image size** (2.4GB vs 607.1MB)
 - **Consistent performance** across multiple runs
 - **True operational readiness** measured via "Kafka Server started" log message
 
@@ -114,8 +114,8 @@ docker stats --no-stream --format "{{.MemUsage}}" container_name
 ### **Prerequisites**
 ```bash
 # Ensure Docker images are available
-docker pull 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
-docker pull 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-7842c5ec-ubi9.arm64
+docker pull 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-6701-ubi9
+docker pull 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-ba754285-ubi9.arm64
 
 # Install dependencies
 python3 -m pip install matplotlib numpy
@@ -129,7 +129,7 @@ cat > manual-jvm-test.yml << EOF
 version: '2'
 services:
   broker:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-6701-ubi9
     hostname: broker
     container_name: broker
     ports:
@@ -195,7 +195,7 @@ rm manual-jvm-test.yml
 ### **Manual Native Test**
 ```bash
 # Same process but with native image:
-# Replace image with: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-7842c5ec-ubi9.arm64
+# Replace image with: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-ba754285-ubi9.arm64
 ```
 
 ---
@@ -285,13 +285,13 @@ docker logs broker
 
 ```bash
 # JVM Image (Production)
-docker pull 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-latest-ubi9
+docker pull 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-6701-ubi9
 
 # Native Image (Development - ARM64)
-docker pull 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-7842c5ec-ubi9.arm64
+docker pull 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-ba754285-ubi9.arm64
 
 # Native Image (Development - AMD64)  
-docker pull 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-7842c5ec-ubi9.amd64
+docker pull 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-ba754285-ubi9.amd64
 ```
 
 ---
@@ -302,7 +302,7 @@ The GraalVM native Confluent Server demonstrates significant performance improve
 
 - **⚡ 81% faster startup** - Critical for serverless and rapid scaling scenarios
 - **💾 55% memory efficiency** - Important for resource-constrained environments  
-- **📦 70% smaller image size** - Faster downloads, reduced storage costs, improved CI/CD
+- **📦 75% smaller image size** - 4x faster image downloads, reduced storage costs (1.8GB less), improved CI/CD
 - **🔄 Consistent performance** - Reliable across multiple test iterations
 
 These benchmarks provide concrete evidence of GraalVM native compilation benefits for Kafka workloads, making it an excellent choice for modern cloud-native deployments where startup speed, memory efficiency, and image size matter. 
