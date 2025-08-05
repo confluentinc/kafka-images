@@ -2,7 +2,7 @@
 
 This directory contains comprehensive Docker Compose examples demonstrating various Confluent Server configurations with cp-server GraalVM native image. Each example includes automated testing and interactive manual testing capabilities.
 
-## 🚀 Available Scenarios
+## 🚀 Supported Scenarios
 
 | Scenario | File | Focus | Authentication | Key Features |
 |----------|------|-------|---------------|--------------|

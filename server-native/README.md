@@ -1,25 +1,58 @@
 # 🚀 Confluent Server Native - GraalVM Implementation
 
-## Executive Summary
+## Introduction
 
-The **Confluent Server Native** image represents a significant advancement in Kafka deployment technology, leveraging **GraalVM Native Image** compilation to deliver exceptional performance improvements over traditional JVM-based deployments.
+Confluent Server is a commercial component of Confluent Platform that includes Apache Kafka along with additional enterprise features.
+
+Confluent Server Native (**cp-server-native**) is the GraalVM-based variant of Confluent Server. It leverages GraalVM Native Image technology to compile Kafka ahead-of-time (AOT) into a native executable, delivering faster startup, reduced memory usage, and smaller image sizes compared to the traditional JVM-based **cp-server** docker image.
+
+**Note: This image is experimental and intended for local development and testing only. It is not recommended for production use.**
 
 ### 🎯 Key Benefits
 
-| Benefit | Impact | Value |
-|---------|--------|-------|
-| **⚡ Ultra-Fast Startup** | 81% faster than JVM | 1.85s vs 9.62s |
-| **💾 Memory Efficiency** | 55% lower memory usage | 289.3MB vs 646.6MB |
-| **📦 Compact Images** | 75% smaller image size | 607.1MB vs 2.4GB |
-| **🔄 Consistent Performance** | Reliable across iterations | Stable startup times |
+| Benefit | cp-server JVM image | cp-server-native GraalVM image | Improvement |
+|--------|-----|--------|-------------|
+| **⚡ Ultra-Fast Startup** | 9.62s | 1.85s | **⚡ ~80% faster** |
+| **💾 Memory Efficiency** | 646.6MB | 289.3MB | **💾 ~55% lower** |
+| **📦 Compact Images** | 2,443.3MB | 607.1MB | **📦 75% smaller** |
+
+### **Business Impact**
+
+```bash
+# Traditional cp-server JVM Workflow
+$ time docker-compose up
+# ⏱️  ~10 seconds waiting...
+# 💾 646MB memory consumed
+# 📦 2.4GB image to download/store
+
+# Native cp-server-native Image Workflow  
+$ time docker-compose up
+# ⚡ ~2 seconds - ready to go!
+# 💾 289MB memory consumed  
+# 📦 607MB image to download/store
+```
+
+- **Faster downloads**: 607MB vs 2.4GB = **4x faster image pulls**
+- **Storage savings**: **1.8GB less** per image stored, reducing storage and transfer costs
+- **CI/CD efficiency**: **75% faster** image transfers in pipelines
+- **5x faster** local confluent server startup (~80% improvement)
+- **Improved Development Velocity**
+    - **Reduced waiting time** in development cycles  
+    - **Faster feedback loops** for testing
+- **Resource Efficiency**
+    - **55% memory savings** per Kafka instance
+    - **Enable more concurrent testing**
+    - **Reduced infrastructure costs**
+
+
 
 ---
 
 ## 🎯 Motive: Transforming Local Development & Testing
 
-### **Why GraalVM Native for Kafka?**
+### **Why GraalVM Native for cp-server?**
 
-Modern development workflows demand **speed, efficiency, and reliability**. Traditional JVM-based Kafka deployments, while powerful, introduce friction in:
+Modern development workflows demand **speed, efficiency, and reliability**. Traditional JVM-based cp-server deployments, while powerful, introduce friction in:
 
 - **🐌 Slow startup times** (8-10 seconds) impacting development velocity
 - **🐘 Heavy memory footprint** limiting local testing capacity
@@ -28,12 +61,12 @@ Modern development workflows demand **speed, efficiency, and reliability**. Trad
 ### **Local Development Benefits**
 
 **✅ Rapid Iteration Cycles**
-- Start Kafka clusters in under 2 seconds
+- Start cp-server cluster in under 2 seconds
 - Faster test-driven development
 - Immediate feedback loops
 
 **✅ Resource-Friendly Development**
-- Run multiple Kafka instances locally
+- Run multiple cp-server instances locally
 - Preserve laptop battery and performance
 - Efficient Docker resource utilization
 
@@ -41,46 +74,6 @@ Modern development workflows demand **speed, efficiency, and reliability**. Trad
 - Faster integration test suites
 - Reduced CI/CD pipeline duration
 - Consistent performance across environments
-
----
-
-## 📊 Latest Benchmark Results
-
-### **Performance Comparison (5 iterations, arm64)**
-
-| Metric | JVM | Native | Improvement |
-|--------|-----|--------|-------------|
-| **Startup Time** | 9.62s | 1.85s | **⚡ 81% faster** |
-| **Memory Usage** | 646.6MB | 289.3MB | **💾 55% lower** |
-| **Image Size** | 2,443.3MB | 607.1MB | **📦 75% smaller** |
-| **Startup Range** | 8.6s - 9.9s | 1.8s - 1.9s | Consistent performance |
-
-### **Key Findings:**
-- **81% faster startup** with GraalVM native compilation
-- **55% lower memory footprint** enabling more concurrent instances
-- **75% smaller image size** reducing storage and transfer costs
-- **Consistent performance** across multiple runs
-- **True operational readiness** measured via "Kafka Server started" log message
-
-### **Real-World Impact**
-
-```bash
-# Traditional JVM Workflow
-$ time docker-compose up
-# ⏱️  ~10 seconds waiting...
-# 💾 646MB memory consumed
-# 📦 2.4GB image to download/store
-
-# Native Image Workflow  
-$ time docker-compose up
-# ⚡ ~2 seconds - ready to go!
-# 💾 289MB memory consumed  
-# 📦 607MB image to download/store
-```
-
-- **Faster downloads**: 607MB vs 2.4GB = **4x faster image pulls**
-- **Storage savings**: **1.8GB less** per image stored
-- **CI/CD efficiency**: **75% faster** image transfers in pipelines
 
 ---
 
@@ -100,17 +93,18 @@ cd examples/cp-server-native
 # Choose your scenario and start
 docker-compose -f docker-compose-basic-cp-server-native.yml up -d
 
-# Watch Kafka start in ~2 seconds
 docker logs -f broker
+docker logs -f producer    # See messages being produced
+docker logs -f consumer    # See messages being consumed
 ```
 
 ---
 
 ## 📚 Comprehensive Examples & Use Cases
 
-### **Available Scenarios**
+### **Supported Scenarios** 
 
-Start with our [comprehensive examples](../examples/cp-server-native/README.md) and see the difference GraalVM Native makes!** 🚀
+Start with our [comprehensive examples](../examples/cp-server-native/README.md) and see the difference GraalVM Native makes! 🚀
 
 | Scenario | Use Case | Authentication | Key Features |
 |----------|----------|---------------|--------------|
@@ -152,18 +146,9 @@ cat graalvm-benchmarks/README.md
 
 **➡️ [View Complete Benchmark Suite](graalvm-benchmarks/README.md)**
 
-Includes:
-- ✅ Detailed measurement methodology
-- ✅ Manual testing procedures
-- ✅ Troubleshooting guides
-- ✅ Historical results analysis
-- ✅ Environment configuration details
-
 ---
 
-## 🏗️ Architecture & Components
-
-### **What's Included**
+## **What's Included**
 
 ```
 server-native/
@@ -180,19 +165,3 @@ server-native/
 
 ---
 
-## 🎯 Business Impact
-
-### **Development Velocity**
-- **5x faster** local Kafka startup (81% improvement)
-- **Reduced waiting time** in development cycles  
-- **Faster feedback loops** for testing
-
-### **Resource Efficiency**
-- **55% memory savings** per Kafka instance
-- **Enable more concurrent testing**
-- **Reduced infrastructure costs**
-
-### **Operational Excellence**
-- **75% smaller images** = faster deployments
-- **Consistent performance** = predictable operations
-- **Production-ready** from day one
