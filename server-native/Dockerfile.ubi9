@@ -166,7 +166,6 @@ COPY include/etc/confluent/docker/meta.properties /var/lib/kafka/data/meta.prope
 ENV COMPONENT=kafka
 
 # Set permissions and the entrypoint
-# USER appuser
 USER root
 RUN mkdir -p /var/lib/kafka/data /etc/kafka/secrets
 CMD ["/etc/confluent/docker/run"]
