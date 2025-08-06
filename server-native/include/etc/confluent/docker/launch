@@ -33,5 +33,6 @@ if [ "$KAFKA_JMX_PORT" ]; then
   export KAFKA_JMX_OPTS="$KAFKA_JMX_OPTS -Djava.rmi.server.hostname=$KAFKA_JMX_HOSTNAME -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=$JMX_PORT -Dcom.sun.management.jmxremote.port=$JMX_PORT"
 fi
 
+echo "WARNING: THIS IS AN EXPERIMENTAL DOCKER IMAGE RECOMMENDED FOR LOCAL DEVELOPMENT AND TESTING PURPOSES ONLY."
 echo "===> Launching ${COMPONENT} ... "
 exec /app/kafka/kafka.Kafka /etc/kafka/kafka.properties ${KAFKA_OPTS-}
