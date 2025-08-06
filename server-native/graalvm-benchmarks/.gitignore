@@ -1,0 +1,3 @@
+# Generated docker-compose files (created by benchmark scripts)
+docker-compose-benchmark-*.yml
+docker-compose-quick-*.yml
