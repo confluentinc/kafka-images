@@ -152,7 +152,23 @@ RUN mkdir /app/kafka; \
                                                     -cp "/usr/bin/../share/java/kafka/*:/usr/bin/../share/java/confluent-metadata-service/*:/usr/bin/../share/java/rest-utils/*:/usr/bin/../share/java/confluent-common/*:/usr/bin/../share/java/ce-kafka-http-server/*:/usr/bin/../share/java/ce-kafka-rest-servlet/*:/usr/bin/../share/java/ce-kafka-rest-extensions/*:/usr/bin/../share/java/kafka-rest-lib/*:/usr/bin/../share/java/confluent-security/kafka-rest/*:/usr/bin/../share/java/confluent-security/schema-validator/*:/usr/bin/../share/java/confluent-telemetry/*" kafka.Kafka -o /app/kafka/kafka.Kafka
 
 # Stage 3: Final runtime image with native binary
-FROM ubuntu:latest
+FROM alpine:latest
+
+# # Install minimal runtime dependencies for GraalVM native executable and scripts
+# # Add glibc compatibility for GraalVM native images (Alpine uses musl by default)
+# RUN apk add --no-cache \
+#     wget \
+#     ca-certificates \
+#     && wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
+#     && wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r1/glibc-2.35-r1.apk \
+#     && apk add --no-cache --force-overwrite glibc-2.35-r1.apk \
+#     && rm -f glibc-2.35-r1.apk \
+#     && apk add --no-cache \
+#     bash \
+#     libstdc++ \
+#     tzdata \
+#     && addgroup -g 1000 appuser \
+#     && adduser -D -u 1000 -G appuser appuser
 
 # Copy the native executable from the GraalVM build stage
 COPY --from=build-native-image /app /app
