@@ -1,1 +1,4 @@
 *	@confluentinc/kafka-eng
+
+server-native @confluentinc/cp-build-and-release-team
+examples/cp-server-native @confluentinc/cp-build-and-release-team
