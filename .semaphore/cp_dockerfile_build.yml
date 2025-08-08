@@ -7,7 +7,7 @@ version: v1.0
 name: build-test-release
 agent:
   machine:
-    type: s1-prod-ubuntu24-04-amd64-4
+    type: s1-prod-ubuntu24-04-amd64-1
 
 fail_fast:
   cancel:
@@ -59,7 +59,8 @@ global_job_config:
         else
             export PLATFORM_LABEL=""
         fi
-      - export PACKAGING_BUILD_ARGS=" -DCONFLUENT_VERSION=$CONFLUENT_VERSION  -DCONFLUENT_PLATFORM_LABEL=$PLATFORM_LABEL -DCONFLUENT_DEB_VERSION=$CONFLUENT_DEB_VERSION  -DALLOW_UNSIGNED=$ALLOW_UNSIGNED"
+      - export PACKAGING_BUILD_ARGS=" -DCONFLUENT_VERSION=$CONFLUENT_VERSION  -DCONFLUENT_PLATFORM_LABEL=$PLATFORM_LABEL -DCONFLUENT_DEB_VERSION=$CONFLUENT_DEB_VERSION 
+        -DALLOW_UNSIGNED=$ALLOW_UNSIGNED"
       - >-
         if [[ $IS_RELEASE && $PACKAGING_BUILD_NUMBER ]]; then
           if [[ $IS_RC ]]; then
@@ -78,8 +79,8 @@ global_job_config:
       - export DOCKER_UPSTREAM_REGISTRY=$DOCKER_PROD_REGISTRY
       - export LATEST_TAG=$BRANCH_TAG-latest
       - export DOCKER_UPSTREAM_TAG="$LATEST_TAG"
-      - export DOCKER_REPOS="confluentinc/cp-server-connect confluentinc/cp-server-connect-base confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-kafka confluentinc/confluent-local
-        confluentinc/cp-server confluentinc/cp-server-native"
+      - export DOCKER_REPOS="confluentinc/cp-server-connect confluentinc/cp-server-connect-base confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-kafka 
+        confluentinc/confluent-local confluentinc/cp-server confluentinc/cp-server-native"
       - export COMMUNITY_DOCKER_REPOS="confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-kafka confluentinc/confluent-local"
       - |
         if [[ $SKIP_COMMUNITY == "True" ]]; then
@@ -119,7 +120,7 @@ blocks:
     dependencies: ["Validation"]
     run:
       # don't run the tests on non-functional changes...
-      when: "change_in('/', {exclude: ['/.deployed-versions/', '.github/']})"
+      when: "change_in('/', {exclude: ['/.deployed-versions/', '.github/'], default_branch: 'master'})"
     task:
       jobs:
         - name: Build, Test, & Scan ubi9
@@ -130,9 +131,9 @@ blocks:
             - ci-tools ci-update-version
             - export OS_PACKAGES_URL=$(echo "$PACKAGES_URL" | sed "s/PACKAGE_TYPE/rpm/g")
             - export PACKAGING_BUILD_ARGS="$PACKAGING_BUILD_ARGS -DCONFLUENT_PACKAGES_REPO=$OS_PACKAGES_URL"
-            - mvn -Dmaven.wagon.http.retryHandler.count=3 --batch-mode -P jenkins,docker clean verify dependency:analyze validate -U -Ddocker.registry=$DOCKER_DEV_REGISTRY -Ddocker.upstream-registry=$DOCKER_UPSTREAM_REGISTRY
-              -DBUILD_NUMBER=$BUILD_NUMBER -DGIT_COMMIT=$GIT_COMMIT -Ddocker.tag=$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH -Ddocker.upstream-tag=$DOCKER_UPSTREAM_TAG$OS_TAG -Darch.type=$AMD_ARCH -Ddocker.os_type=ubi9
-              $PACKAGING_BUILD_ARGS -Ddependency.check.skip=true $MAVEN_EXTRA_ARGS
+            - mvn -Dmaven.wagon.http.retryHandler.count=3 --batch-mode -P jenkins,docker clean verify dependency:analyze validate -U -Ddocker.registry=$DOCKER_DEV_REGISTRY 
+              -Ddocker.upstream-registry=$DOCKER_UPSTREAM_REGISTRY -DBUILD_NUMBER=$BUILD_NUMBER -DGIT_COMMIT=$GIT_COMMIT -Ddocker.tag=$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH 
+              -Ddocker.upstream-tag=$DOCKER_UPSTREAM_TAG$OS_TAG -Darch.type=$AMD_ARCH -Ddocker.os_type=ubi9 $PACKAGING_BUILD_ARGS -Ddependency.check.skip=true $MAVEN_EXTRA_ARGS
             - . cache-maven store
             - >-
               for dev_image in $AMD_DOCKER_DEV_FULL_IMAGES;
@@ -357,7 +358,7 @@ blocks:
             - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
             - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
   - name: Deploy AMD confluentinc/cp-server-native
-    dependencies: [ "Build, Test, & Scan AMD" ]
+    dependencies: ["Build, Test, & Scan AMD"]
     run:
       when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
@@ -390,11 +391,11 @@ blocks:
     dependencies: ["Validation"]
     run:
       # don't run the tests on non-functional changes...
-      when: "change_in('/', {exclude: ['/.deployed-versions/', '.github/']})"
+      when: "change_in('/', {exclude: ['/.deployed-versions/', '.github/'], default_branch: 'master'})"
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu24-04-arm64-4
+          type: s1-prod-ubuntu24-04-arm64-1
       jobs:
         - name: Build & Test ubi9
           commands:
@@ -404,9 +405,9 @@ blocks:
             - export OS_PACKAGES_URL=$(echo "$PACKAGES_URL" | sed "s/PACKAGE_TYPE/rpm/g")
             - export PACKAGING_BUILD_ARGS="$PACKAGING_BUILD_ARGS -DCONFLUENT_PACKAGES_REPO=$OS_PACKAGES_URL"
             - ci-tools ci-update-version
-            - mvn -Dmaven.wagon.http.retryHandler.count=3 --batch-mode -P jenkins,docker clean verify dependency:analyze validate -U -Ddocker.registry=$DOCKER_DEV_REGISTRY -Ddocker.upstream-registry=$DOCKER_UPSTREAM_REGISTRY
-              -DBUILD_NUMBER=$BUILD_NUMBER -DGIT_COMMIT=$GIT_COMMIT -Ddocker.tag=$DOCKER_DEV_TAG$OS_TAG$ARM_ARCH -Ddocker.upstream-tag=$DOCKER_UPSTREAM_TAG$OS_TAG -Darch.type=$ARM_ARCH -Ddocker.os_type=ubi9
-              $PACKAGING_BUILD_ARGS -Ddependency.check.skip=true $MAVEN_EXTRA_ARGS
+            - mvn -Dmaven.wagon.http.retryHandler.count=3 --batch-mode -P jenkins,docker clean verify dependency:analyze validate -U -Ddocker.registry=$DOCKER_DEV_REGISTRY 
+              -Ddocker.upstream-registry=$DOCKER_UPSTREAM_REGISTRY -DBUILD_NUMBER=$BUILD_NUMBER -DGIT_COMMIT=$GIT_COMMIT -Ddocker.tag=$DOCKER_DEV_TAG$OS_TAG$ARM_ARCH 
+              -Ddocker.upstream-tag=$DOCKER_UPSTREAM_TAG$OS_TAG -Darch.type=$ARM_ARCH -Ddocker.os_type=ubi9 $PACKAGING_BUILD_ARGS -Ddependency.check.skip=true $MAVEN_EXTRA_ARGS
             - . cache-maven store
             - for image in $ARM_DOCKER_DEV_FULL_IMAGES; do echo "Pushing $image" && docker push $image; done
       epilogue:
@@ -647,7 +648,7 @@ blocks:
             - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
             - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
   - name: Deploy ARM confluentinc/cp-server-native
-    dependencies: [ "Build & Test ARM" ]
+    dependencies: ["Build & Test ARM"]
     run:
       when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
@@ -678,11 +679,12 @@ blocks:
             - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
             - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$ARM_ARCH
             - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG 
+            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
   - name: Create Manifest and Maven Deploy
     dependencies: ["Deploy AMD confluentinc/cp-server-connect", "Deploy AMD confluentinc/cp-server-connect-base", "Deploy AMD confluentinc/cp-kafka-connect", "Deploy AMD confluentinc/cp-kafka-connect-base",
-      "Deploy AMD confluentinc/cp-kafka", "Deploy AMD confluentinc/confluent-local", "Deploy AMD confluentinc/cp-server", "Deploy AMD confluentinc/cp-server-native", "Deploy ARM confluentinc/cp-server-connect", "Deploy ARM confluentinc/cp-server-connect-base",
-      "Deploy ARM confluentinc/cp-kafka-connect", "Deploy ARM confluentinc/cp-kafka-connect-base", "Deploy ARM confluentinc/cp-kafka", "Deploy ARM confluentinc/confluent-local", "Deploy ARM confluentinc/cp-server", "Deploy ARM confluentinc/cp-server-native"]
+      "Deploy AMD confluentinc/cp-kafka", "Deploy AMD confluentinc/confluent-local", "Deploy AMD confluentinc/cp-server", "Deploy AMD confluentinc/cp-server-native", "Deploy ARM confluentinc/cp-server-connect",
+      "Deploy ARM confluentinc/cp-server-connect-base", "Deploy ARM confluentinc/cp-kafka-connect", "Deploy ARM confluentinc/cp-kafka-connect-base", "Deploy ARM confluentinc/cp-kafka", "Deploy ARM confluentinc/confluent-local",
+      "Deploy ARM confluentinc/cp-server", "Deploy ARM confluentinc/cp-server-native"]
     run:
       when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
@@ -722,7 +724,7 @@ after_pipeline:
   task:
     agent:
       machine:
-        type: s1-prod-ubuntu24-04-arm64-0
+        type: s1-prod-ubuntu24-04-arm64-00
     jobs:
       - name: Metrics
         commands:
