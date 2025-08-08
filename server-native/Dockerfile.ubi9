@@ -106,7 +106,7 @@ RUN microdnf install -y zip unzip && \
     echo "Scanning for JARs to clean..." && \
     find /usr/share/java -name "*.jar" | while read jar; do \
       jarname=$(basename "$jar"); \
-      if [[ "$jarname" == azure-core*.jar || "$jarname" == gax-2.43.0.jar ]]; then \
+      if [[ "$jarname" == azure-core*.jar || "$jarname" =~ ^gax-[0-9]+\.[0-9]+\.[0-9]+\.jar$ ]]; then \
         echo "Modifying $jarname"; \
         mkdir -p /tmp/jar_unpack && cd /tmp/jar_unpack && \
         unzip -q "$jar"; \
@@ -114,7 +114,7 @@ RUN microdnf install -y zip unzip && \
           echo "Replacing --initialize-at-build-time with --initialize-at-run-time"; \
           find META-INF/native-image -name "native-image.properties" -exec sed -i 's/--initialize-at-build-time/--initialize-at-run-time/g' {} \;; \
           zip -q -r /tmp/cleaned.jar .; \
-          mv /tmp/cleaned.jar "$jar"; \
+          mv -f /tmp/cleaned.jar "$jar"; \
           echo "Updated $jar"; \
         else \
           echo "No native-image.properties in $jar"; \
@@ -154,18 +154,20 @@ RUN mkdir /app/kafka; \
 # Stage 3: Final runtime image with native binary
 FROM ubuntu:latest
 
+RUN apt-get update \
+    && apt-get install -y \
+        openssl \
+        ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /var/lib/kafka/data /etc/kafka/secrets
 # Copy the native executable from the GraalVM build stage
 COPY --from=build-native-image /app /app
-
-COPY --from=confluent-base /usr/local/bin /usr/local/bin
-COPY --from=confluent-base /usr/bin /usr/bin
 COPY --from=build-ub /build/ub/ub /usr/bin/ub
-COPY --from=confluent-base /etc/confluent/docker /etc/confluent/docker
 COPY include/etc/confluent/docker /etc/confluent/docker
 COPY include/etc/confluent/docker/meta.properties /var/lib/kafka/data/meta.properties
 ENV COMPONENT=kafka
 
 # Set permissions and the entrypoint
 USER root
-RUN mkdir -p /var/lib/kafka/data /etc/kafka/secrets
+
 CMD ["/etc/confluent/docker/run"]
