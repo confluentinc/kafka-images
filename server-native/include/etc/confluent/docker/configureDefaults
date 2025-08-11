@@ -48,10 +48,7 @@ env_defaults=(
   ["KAFKA_CONFLUENT_LINK_METADATA_TOPIC_REPLICATION_FACTOR"]=1
   ["KAFKA_CLUSTER_LINK_METADATA_TOPIC_REPLICATION_FACTOR"]=1
   ["KAFKA_CONFLUENT_CLUSTER_LINK_METADATA_TOPIC_REPLICATION_FACTOR"]=1
-  ["KAFKA_LOG_DIRS"]="/tmp/kraft-combined-logs"
-  ["KAFKA_REST_HOST_NAME"]="rest-proxy"
-  ["KAFKA_REST_BOOTSTRAP_SERVERS"]="localhost:29092"
-  ["KAFKA_REST_LISTENERS"]="http://0.0.0.0:8082"
+  ["KAFKA_LOG_DIRS"]="/var/lib/kafka/data"
 )
 
 for key in "${!env_defaults[@]}"; do
