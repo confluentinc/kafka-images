@@ -25,7 +25,7 @@ services:
 
 
   broker:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-ba754285-ubi9.arm64
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-3d40baa7-ubi9.arm64
     hostname: broker
     container_name: broker
     depends_on:
@@ -126,7 +126,8 @@ services:
       - oauth-network
 
   producer:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-6701-ubi9
+    # Using cp-kafka for kafka console client tools (producer/consumer)
+    image: confluentinc/cp-kafka:8.0.0
     hostname: producer
     container_name: producer
     depends_on:
@@ -165,7 +166,8 @@ services:
       '
 
   consumer:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-6701-ubi9
+    # Using cp-kafka for kafka console client tools (producer/consumer)
+    image: confluentinc/cp-kafka:8.0.0
     hostname: consumer
     container_name: consumer
     depends_on:

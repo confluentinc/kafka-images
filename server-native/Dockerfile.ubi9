@@ -157,6 +157,7 @@ RUN apt-get update \
 COPY --from=build-native-image /app /app
 COPY --from=confluent-base /usr/bin/ub /usr/bin/ub
 COPY include/etc/confluent/docker /etc/confluent/docker
+COPY --from=confluent-base /etc/confluent/docker/bash-config /etc/confluent/docker/bash-config
 COPY include/etc/confluent/docker/meta.properties /var/lib/kafka/data/meta.properties
 ENV COMPONENT=kafka
 
