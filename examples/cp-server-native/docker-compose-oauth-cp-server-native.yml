@@ -23,9 +23,8 @@ services:
     networks:
       - oauth-network
 
-
   broker:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-ba754285-ubi9.arm64
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-ca0567a6-ubi9.arm64
     hostname: broker
     container_name: broker
     depends_on:
@@ -51,11 +50,6 @@ services:
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@broker:29093'
       KAFKA_LOG_DIRS: '/var/lib/kafka/data'
       CLUSTER_ID: 'vHCgQyIrRHG8Jv27qI2h3Q'
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_JMX_PORT: 9101
       KAFKA_JMX_HOSTNAME: localhost
       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker:29092
@@ -105,20 +99,6 @@ services:
       # OAuth Bearer allowed URLs - hybrid approach: ub utility + system property
       KAFKA_ORG_APACHE_KAFKA_SASL_OAUTHBEARER_ALLOWED_URLS: "http://keycloak:8080/realms/cp/protocol/openid-connect/certs,http://keycloak:8080/realms/cp/protocol/openid-connect/token"
       KAFKA_OPTS: "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080/realms/cp/protocol/openid-connect/certs,http://keycloak:8080/realms/cp/protocol/openid-connect/token"
-
-      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION: 1
-      KAFKA_CONFLUENT_COMMAND_TOPIC_REPLICATION: 1
-      KAFKA_CONFLUENT_COMMAND_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CONFLUENT_LINK_METADATA_TOPIC_REPLICATION: 1
-      KAFKA_CONFLUENT_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CLUSTER_LINK_METADATA_TOPIC_REPLICATION: 1
-      KAFKA_CLUSTER_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CONFLUENT_CLUSTER_LINK_METADATA_TOPIC_REPLICATION: 1
-      KAFKA_CONFLUENT_CLUSTER_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CONFLUENT_DURABILITY_TOPIC_REPLICATION: 1
-      KAFKA_CONFLUENT_TIER_METADATA_REPLICATION: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION: 1
-      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION: 1
     volumes:
       - ./create-certificates.sh:/tmp/create-certificates.sh
     command: "bash -c 'if [ ! -f /tmp/create-certificates.sh ]; then echo \"ERROR: Did you forget the create-certificates.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/create-certificates.sh && echo \"Certificates created. Container ready for manual testing.\" && /etc/confluent/docker/run ; fi'"
@@ -126,7 +106,8 @@ services:
       - oauth-network
 
   producer:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-6701-ubi9
+    # Using cp-kafka for kafka console client tools (producer/consumer)
+    image: confluentinc/cp-kafka:8.0.0
     hostname: producer
     container_name: producer
     depends_on:
@@ -164,8 +145,10 @@ services:
       sleep infinity
       '
 
+
   consumer:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-6701-ubi9
+    # Using cp-kafka for kafka console client tools (producer/consumer)
+    image: confluentinc/cp-kafka:8.0.0
     hostname: consumer
     container_name: consumer
     depends_on:
