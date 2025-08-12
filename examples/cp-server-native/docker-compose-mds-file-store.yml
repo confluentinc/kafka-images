@@ -1,7 +1,7 @@
 ---
 services:
   broker:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-ba754285-ubi9.arm64
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server-native:8.0.x-latest-ubi9
     container_name: broker
     hostname: broker
     ports:
@@ -34,32 +34,13 @@ services:
       KAFKA_CONFLUENT_METADATA_SERVER_USER_STORE_FILE_PATH: '/etc/kafka/users.properties'
       KAFKA_CONFLUENT_METADATA_SERVER_AUTHENTICATION_METHOD: 'BASIC'
       KAFKA_CONFLUENT_METADATA_SERVER_USER_STORE_FILE_HOT_RELOAD: 'true'
-
-      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
-      KAFKA_CONFLUENT_COMMAND_TOPIC_REPLICATION: 1
-      KAFKA_CONFLUENT_COMMAND_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CONFLUENT_LINK_METADATA_TOPIC_REPLICATION: 1
-      KAFKA_CONFLUENT_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CLUSTER_LINK_METADATA_TOPIC_REPLICATION: 1
-      KAFKA_CLUSTER_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CONFLUENT_CLUSTER_LINK_METADATA_TOPIC_REPLICATION: 1
-      KAFKA_CONFLUENT_CLUSTER_LINK_METADATA_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CONFLUENT_DURABILITY_TOPIC_REPLICATION: 1
-      KAFKA_CONFLUENT_TIER_METADATA_REPLICATION: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION: 1
-      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION: 1
     volumes:
       - ./mds-config/server_jaas.conf:/etc/kafka/server_jaas.conf
       - ./mds-config/users.properties:/etc/kafka/users.properties
 
   producer:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-6701-ubi9
+    # Using cp-kafka for kafka console client tools (producer/consumer)
+    image: confluentinc/cp-kafka:8.0.0
     container_name: producer
     depends_on:
       - broker
@@ -109,7 +90,8 @@ services:
       "
 
   consumer:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.x-6701-ubi9
+    # Using cp-kafka for kafka console client tools (producer/consumer)
+    image: confluentinc/cp-kafka:8.0.0
     container_name: consumer
     depends_on:
       - broker
