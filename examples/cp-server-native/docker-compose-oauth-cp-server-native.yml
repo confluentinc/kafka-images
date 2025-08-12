@@ -24,7 +24,7 @@ services:
       - oauth-network
 
   broker:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/confluentinc/cp-server-native:dev-8.0.x-7d43f942-ubi9.arm64
+    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server-native:8.0.x-latest-ubi9
     hostname: broker
     container_name: broker
     depends_on:
