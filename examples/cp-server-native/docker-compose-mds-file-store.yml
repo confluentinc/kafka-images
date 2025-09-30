@@ -1,7 +1,7 @@
 ---
 services:
   broker:
-    image: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server-native:8.0.x-latest-ubi9
+    image: confluentinc/cp-server-native:8.0.1
     container_name: broker
     hostname: broker
     ports:
