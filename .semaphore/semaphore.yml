@@ -68,9 +68,9 @@ global_job_config:
         fi
       - export DOCKER_DEV_REGISTRY="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/"
       - export DOCKER_PROD_REGISTRY="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/"
-      - export DOCKER_UPSTREAM_REGISTRY=$DOCKER_PROD_REGISTRY
+      - export DOCKER_UPSTREAM_REGISTRY=$DOCKER_DEV_REGISTRY
       - export LATEST_TAG=$BRANCH_TAG-latest
-      - export DOCKER_UPSTREAM_TAG="$LATEST_TAG"
+      - export DOCKER_UPSTREAM_TAG="dev-7.4.x-8fa813ee"
       - export DOCKER_REPOS="confluentinc/cp-server-connect confluentinc/cp-server-connect-base confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-enterprise-kafka confluentinc/cp-kafka
         confluentinc/confluent-local confluentinc/cp-server confluentinc/cp-zookeeper"
       - export COMMUNITY_DOCKER_REPOS="confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-enterprise-kafka confluentinc/cp-kafka confluentinc/confluent-local"
