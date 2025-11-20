@@ -39,7 +39,7 @@ global_job_config:
       # Check if version is complete, otherwise use the previous version
       - (aws s3 ls $PACKAGING_BUCKET$LATEST_PACKAGING_BUILD_NUMBER/deb/ && aws s3 ls $PACKAGING_BUCKET$LATEST_PACKAGING_BUILD_NUMBER/rpm/ && aws s3 ls $PACKAGING_BUCKET$LATEST_PACKAGING_BUILD_NUMBER/archive/)
         || export LATEST_PACKAGING_BUILD_NUMBER=$(aws s3 ls $PACKAGING_BUCKET --no-paginate | grep 'PRE' | awk '{print $NF}' | awk '{print substr($1, 1, length($1)-1)}' | sort -n | tail -n 2 | head -n 1)
-      - export CONFLUENT_VERSION=$(pinto get-version --build $BUILD_KEY --key confluent.version)
+      - export CONFLUENT_VERSION="7.9.4"
       - export DEFAULT_OS_TYPE="ubi"
       - export URL_CONFLUENT_VERSION=$(echo $CONFLUENT_VERSION | awk -F . '{print $1"."$2}')
       - export PACKAGES_URL="https://dev-confluent-packages-654654529379-us-west-2.s3.us-west-2.amazonaws.com/custom-build/CB-1013/rpm/7.9"
