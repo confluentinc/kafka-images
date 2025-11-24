@@ -42,7 +42,7 @@ global_job_config:
       - export CONFLUENT_VERSION="7.9.4"
       - export DEFAULT_OS_TYPE="ubi"
       - export URL_CONFLUENT_VERSION=$(echo $CONFLUENT_VERSION | awk -F . '{print $1"."$2}')
-      - export PACKAGES_URL="https://dev-confluent-packages-654654529379-us-west-2.s3.us-west-2.amazonaws.com/custom-build/CB-1013/rpm/7.9"
+      - export PACKAGES_URL="https://dev-confluent-packages-654654529379-us-west-2.s3.us-west-2.amazonaws.com/custom-build/CB-1019/rpm/7.9"
       - export PACKAGING_BUILD_NUMBER=$LATEST_PACKAGING_BUILD_NUMBER
       - >-
         if [[ $IS_BETA || $IS_HOTFIX || $IS_POST ]]; then
