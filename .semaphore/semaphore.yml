@@ -183,6 +183,10 @@ blocks:
             - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
             - docker buildx create --name s390x-builder --use || docker buildx use s390x-builder
             - docker buildx inspect --bootstrap
+            # Make buildx the default builder so 'docker build' uses buildx
+            - docker buildx install
+            # Set default platform for all docker commands
+            - export DOCKER_DEFAULT_PLATFORM=linux/s390x
             - export OS_TAG="-ubi9"
             - export DOCKER_DEV_FULL_IMAGES=$DOCKER_DEV_REGISTRY${DOCKER_REPOS// /:$DOCKER_DEV_TAG$OS_TAG $DOCKER_DEV_REGISTRY}:$DOCKER_DEV_TAG$OS_TAG
             - export S390X_DOCKER_DEV_FULL_IMAGES=${DOCKER_DEV_FULL_IMAGES// /$S390X_ARCH }$S390X_ARCH
