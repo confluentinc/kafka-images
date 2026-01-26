@@ -45,6 +45,14 @@
     <properties>
         <component.name>kafka</component.name>
         <io.confluent.kafka-images.version>8.3.0-0</io.confluent.kafka-images.version>
+        <!-- Default empty - set via CLI for cross-platform builds: -Ddocker.platform=linux/s390x -->
+        <docker.platform></docker.platform>
+        <!-- Defaults for build args that may not be set (fabric8 requires non-null values) -->
+        <CONFLUENT_VERSION>${project.version}</CONFLUENT_VERSION>
+        <CONFLUENT_PACKAGES_REPO></CONFLUENT_PACKAGES_REPO>
+        <CONFLUENT_PLATFORM_LABEL></CONFLUENT_PLATFORM_LABEL>
+        <CONFLUENT_DEB_VERSION></CONFLUENT_DEB_VERSION>
+        <ALLOW_UNSIGNED></ALLOW_UNSIGNED>
     </properties>
 
     <dependencies>
@@ -54,4 +62,82 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <!-- Override docker profile to use fabric8 plugin with buildx/platform support -->
+        <profile>
+            <id>docker</id>
+            <activation>
+                <property>
+                    <name>env.DOCKER_HOST</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- Disable inherited spotify plugin -->
+                    <plugin>
+                        <groupId>com.spotify</groupId>
+                        <artifactId>dockerfile-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>package</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- Use fabric8 plugin - references same Maven properties as spotify -->
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <version>0.43.4</version>
+                        <configuration>
+                            <images>
+                                <image>
+                                    <name>${docker.registry}confluentinc/${project.artifactId}:${docker.tag}</name>
+                                    <build>
+                                        <dockerFile>${docker.file}</dockerFile>
+                                        <contextDir>${project.basedir}</contextDir>
+                                        <!-- Disable Maven property filtering - use build args instead -->
+                                        <filter>false</filter>
+                                        <buildx>
+                                            <platforms>
+                                                <platform>${docker.platform}</platform>
+                                            </platforms>
+                                        </buildx>
+                                        <!-- Same args as spotify plugin - referencing same Maven properties -->
+                                        <args>
+                                            <ARTIFACT_ID>${project.artifactId}</ARTIFACT_ID>
+                                            <BUILD_NUMBER>${BUILD_NUMBER}</BUILD_NUMBER>
+                                            <DOCKER_REGISTRY>${docker.registry}</DOCKER_REGISTRY>
+                                            <DOCKER_TAG>${docker.tag}</DOCKER_TAG>
+                                            <DOCKER_UPSTREAM_REGISTRY>${docker.upstream-registry}</DOCKER_UPSTREAM_REGISTRY>
+                                            <DOCKER_UPSTREAM_TAG>${docker.upstream-tag}</DOCKER_UPSTREAM_TAG>
+                                            <GIT_COMMIT>${GIT_COMMIT}</GIT_COMMIT>
+                                            <PROJECT_VERSION>${project.version}</PROJECT_VERSION>
+                                            <CONFLUENT_VERSION>${CONFLUENT_VERSION}</CONFLUENT_VERSION>
+                                            <CONFLUENT_PACKAGES_REPO>${CONFLUENT_PACKAGES_REPO}</CONFLUENT_PACKAGES_REPO>
+                                            <CONFLUENT_PLATFORM_LABEL>${CONFLUENT_PLATFORM_LABEL}</CONFLUENT_PLATFORM_LABEL>
+                                            <CONFLUENT_DEB_VERSION>${CONFLUENT_DEB_VERSION}</CONFLUENT_DEB_VERSION>
+                                            <ALLOW_UNSIGNED>${ALLOW_UNSIGNED}</ALLOW_UNSIGNED>
+                                        </args>
+                                    </build>
+                                </image>
+                            </images>
+                            <skip>${docker.skip-build}</skip>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>build-image</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
