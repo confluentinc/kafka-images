@@ -47,12 +47,12 @@
         <io.confluent.kafka-images.version>8.3.0-0</io.confluent.kafka-images.version>
         <!-- Default empty - set via CLI for cross-platform builds: -Ddocker.platform=linux/s390x -->
         <docker.platform></docker.platform>
-        <!-- Defaults for build args that may not be set (fabric8 requires non-null values) -->
+        <!-- Defaults for build args (fabric8 requires non-null values, empty tags = null) -->
         <CONFLUENT_VERSION>${project.version}</CONFLUENT_VERSION>
-        <CONFLUENT_PACKAGES_REPO></CONFLUENT_PACKAGES_REPO>
-        <CONFLUENT_PLATFORM_LABEL></CONFLUENT_PLATFORM_LABEL>
-        <CONFLUENT_DEB_VERSION></CONFLUENT_DEB_VERSION>
-        <ALLOW_UNSIGNED></ALLOW_UNSIGNED>
+        <CONFLUENT_PACKAGES_REPO>https://packages.confluent.io/rpm/8.3</CONFLUENT_PACKAGES_REPO>
+        <CONFLUENT_PLATFORM_LABEL>confluent</CONFLUENT_PLATFORM_LABEL>
+        <CONFLUENT_DEB_VERSION>1</CONFLUENT_DEB_VERSION>
+        <ALLOW_UNSIGNED>false</ALLOW_UNSIGNED>
     </properties>
 
     <dependencies>
@@ -105,7 +105,7 @@
                                                 <platform>${docker.platform}</platform>
                                             </platforms>
                                         </buildx>
-                                        <!-- Same args as spotify plugin - referencing same Maven properties -->
+                                        <!-- Only args actually used in kafka-images Dockerfiles -->
                                         <args>
                                             <ARTIFACT_ID>${project.artifactId}</ARTIFACT_ID>
                                             <BUILD_NUMBER>${BUILD_NUMBER}</BUILD_NUMBER>
@@ -117,9 +117,6 @@
                                             <PROJECT_VERSION>${project.version}</PROJECT_VERSION>
                                             <CONFLUENT_VERSION>${CONFLUENT_VERSION}</CONFLUENT_VERSION>
                                             <CONFLUENT_PACKAGES_REPO>${CONFLUENT_PACKAGES_REPO}</CONFLUENT_PACKAGES_REPO>
-                                            <CONFLUENT_PLATFORM_LABEL>${CONFLUENT_PLATFORM_LABEL}</CONFLUENT_PLATFORM_LABEL>
-                                            <CONFLUENT_DEB_VERSION>${CONFLUENT_DEB_VERSION}</CONFLUENT_DEB_VERSION>
-                                            <ALLOW_UNSIGNED>${ALLOW_UNSIGNED}</ALLOW_UNSIGNED>
                                         </args>
                                     </build>
                                 </image>
