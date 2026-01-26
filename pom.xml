@@ -47,6 +47,12 @@
         <io.confluent.kafka-images.version>8.3.0-0</io.confluent.kafka-images.version>
         <!-- Default empty - set via CLI for cross-platform builds: -Ddocker.platform=linux/s390x -->
         <docker.platform></docker.platform>
+        <!-- Defaults for build args that may not be set (fabric8 requires non-null values) -->
+        <CONFLUENT_VERSION>${project.version}</CONFLUENT_VERSION>
+        <CONFLUENT_PACKAGES_REPO></CONFLUENT_PACKAGES_REPO>
+        <CONFLUENT_PLATFORM_LABEL></CONFLUENT_PLATFORM_LABEL>
+        <CONFLUENT_DEB_VERSION></CONFLUENT_DEB_VERSION>
+        <ALLOW_UNSIGNED></ALLOW_UNSIGNED>
     </properties>
 
     <dependencies>
