@@ -45,7 +45,7 @@
     <properties>
         <component.name>kafka</component.name>
         <io.confluent.kafka-images.version>8.3.0-0</io.confluent.kafka-images.version>
-        <!-- Platform for cross-architecture builds (default: empty = native) -->
+        <!-- Default empty - set via CLI for cross-platform builds: -Ddocker.platform=linux/s390x -->
         <docker.platform></docker.platform>
     </properties>
 
@@ -58,7 +58,7 @@
     </dependencies>
 
     <profiles>
-        <!-- Override the docker profile to use fabric8 plugin with buildx support -->
+        <!-- Override docker profile to use fabric8 plugin with buildx/platform support -->
         <profile>
             <id>docker</id>
             <activation>
@@ -68,7 +68,7 @@
             </activation>
             <build>
                 <plugins>
-                    <!-- Disable the inherited spotify plugin -->
+                    <!-- Disable inherited spotify plugin -->
                     <plugin>
                         <groupId>com.spotify</groupId>
                         <artifactId>dockerfile-maven-plugin</artifactId>
@@ -80,7 +80,7 @@
                         </executions>
                     </plugin>
 
-                    <!-- Use fabric8 plugin with buildx support -->
+                    <!-- Use fabric8 plugin - references same Maven properties as spotify -->
                     <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
@@ -92,11 +92,15 @@
                                     <build>
                                         <dockerFile>${docker.file}</dockerFile>
                                         <contextDir>${project.basedir}</contextDir>
+                                        <!-- Disable Maven property filtering - use build args instead -->
+                                        <filter>false</filter>
                                         <buildx>
                                             <platforms>
                                                 <platform>${docker.platform}</platform>
                                             </platforms>
+                                            <load>true</load>
                                         </buildx>
+                                        <!-- Same args as spotify plugin - referencing same Maven properties -->
                                         <args>
                                             <ARTIFACT_ID>${project.artifactId}</ARTIFACT_ID>
                                             <BUILD_NUMBER>${BUILD_NUMBER}</BUILD_NUMBER>
