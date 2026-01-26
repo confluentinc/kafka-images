@@ -98,7 +98,6 @@
                                             <platforms>
                                                 <platform>${docker.platform}</platform>
                                             </platforms>
-                                            <load>true</load>
                                         </buildx>
                                         <!-- Same args as spotify plugin - referencing same Maven properties -->
                                         <args>
