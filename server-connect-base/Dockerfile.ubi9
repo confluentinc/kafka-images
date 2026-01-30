@@ -16,9 +16,58 @@
 ARG DOCKER_REGISTRY
 ARG DOCKER_UPSTREAM_TAG=ubi9-latest
 ARG DOCKER_TAG
+ARG UBI9_VERSION
 
+# Stage 1: Get package_dedupe tool from cp-server (which already has it)
+FROM ${DOCKER_REGISTRY}confluentinc/cp-server:${DOCKER_TAG} AS tools
+
+# Stage 2: Install packages using ubi9 with dnf to /microdir
+FROM registry.access.redhat.com/ubi9:${UBI9_VERSION} AS builder
+
+ARG BUILD_NUMBER=-1
+ARG PROJECT_VERSION
+ARG ARTIFACT_ID
+ARG GIT_COMMIT
+ARG CONFLUENT_VERSION
+ARG CONFLUENT_PACKAGES_REPO
+ARG CONFLUENT_PLATFORM_LABEL
+
+RUN echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
+    && rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
+    && printf "[Confluent] \n\
+name=Confluent repository \n\
+baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
+gpgcheck=1 \n\
+gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
+enabled=1 " > /etc/yum.repos.d/confluent.repo \
+    && mkdir -p /microdir
+
+COPY --from=tools /usr/bin/package_dedupe /usr/local/bin/package_dedupe
+
+RUN echo "===> Installing packages to /microdir with dnf" \
+    && dnf install -y --installroot=/microdir --releasever=9 --setopt=install_weak_deps=False --nodocs \
+       confluent-schema-registry-${CONFLUENT_VERSION} \
+       confluent-hub-client-${CONFLUENT_VERSION} \
+    && echo "===> Deduping jars in /microdir ..." \
+    && package_dedupe /microdir/usr/share/java \
+    && echo "===> Cleaning up ..." \
+    && dnf --installroot=/microdir clean all \
+    && rm -rf /microdir/var/cache/* /microdir/var/log/dnf* /microdir/var/log/yum.* \
+    && rm -rf /etc/yum.repos.d/confluent.repo \
+    && echo "===> Removing user database files to preserve base image's appuser ..." \
+    && rm -f /microdir/etc/passwd /microdir/etc/group /microdir/etc/shadow /microdir/etc/gshadow \
+             /microdir/etc/subuid /microdir/etc/subgid \
+    && rm -rf /microdir/dev/* /microdir/proc/* /microdir/sys/*
+
+# Stage 3: Final image inheriting from cp-server
 FROM ${DOCKER_REGISTRY}confluentinc/cp-server:${DOCKER_TAG}
 
+# Default kafka-connect rest.port
+EXPOSE 8083
+
+ENV COMPONENT=kafka-connect
+
+ARG BUILD_NUMBER=-1
 ARG PROJECT_VERSION
 ARG ARTIFACT_ID
 ARG GIT_COMMIT
@@ -31,50 +80,40 @@ LABEL name=$ARTIFACT_ID
 LABEL summary="Confluent platform server connect base image."
 LABEL io.confluent.docker=true
 LABEL io.confluent.docker.git.id=$GIT_COMMIT
-ARG BUILD_NUMBER=-1
 LABEL io.confluent.docker.build.number=$BUILD_NUMBER
 LABEL io.confluent.docker.git.repo="confluentinc/kafka-images"
 
-ARG CONFLUENT_VERSION
-ARG CONFLUENT_PACKAGES_REPO
-ARG CONFLUENT_PLATFORM_LABEL
-
-ENV COMPONENT=kafka-connect
-
-# Default kafka-connect rest.port
-EXPOSE 8083
-
 USER root
 
-RUN echo "===> Installing ${COMPONENT}..." \
-    && echo "===> Adding confluent repository...${CONFLUENT_PACKAGES_REPO}" \
-    && rpm --import ${CONFLUENT_PACKAGES_REPO}/archive.key \
-    && printf "[Confluent] \n\
-name=Confluent repository \n\
-baseurl=${CONFLUENT_PACKAGES_REPO}/ \n\
-gpgcheck=1 \n\
-gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
-enabled=1 " > /etc/yum.repos.d/confluent.repo \
-    && echo "===> Installing Schema Registry (for Avro jars) ..." \
-    && microdnf install -y confluent-schema-registry-${CONFLUENT_VERSION} \
-    && echo "===> Installing Confluent Hub client ..." \
-    && microdnf install -y confluent-hub-client-${CONFLUENT_VERSION} \
-    && echo "===> Cleaning up ..."  \
-    && microdnf clean all \
-    && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo \
-    && echo "===> Setting up ${COMPONENT} dirs ..." \
+# Copy schema-registry and confluent-hub binaries
+COPY --from=builder /microdir/usr/bin/schema-registry-* /usr/bin/
+COPY --from=builder /microdir/usr/bin/kafka-*-console-* /usr/bin/
+COPY --from=builder /microdir/usr/bin/register-deks /usr/bin/
+COPY --from=builder /microdir/usr/bin/confluent-hub /usr/bin/
+
+# Copy JARs
+COPY --from=builder /microdir/usr/share/java/kafka-serde-tools/ /usr/share/java/kafka-serde-tools/
+COPY --from=builder /microdir/usr/share/java/confluent-hub-client/ /usr/share/java/confluent-hub-client/
+
+# Copy docs
+COPY --from=builder /microdir/usr/share/doc/confluent-hub-client/ /usr/share/doc/confluent-hub-client/
+
+# Copy configs
+COPY --from=builder /microdir/etc/schema-registry /etc/schema-registry
+COPY --from=builder /microdir/etc/confluent-hub-client /etc/confluent-hub-client
+
+COPY include/etc/confluent/docker/ /etc/confluent/docker/
+RUN chown -R ${APP_UID}:${APP_GID} /etc/confluent/docker
+
+RUN echo "===> Setting up ${COMPONENT} dirs ..." \
     && mkdir -p /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /usr/logs /usr/share/confluent-hub-components \
-    && chown appuser:root -R /etc/kafka /etc/${COMPONENT} /etc/schema-registry /usr/logs /usr/share/confluent-hub-components \
-    && chmod -R ug+w /etc/kafka /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /etc/schema-registry \
-    && cd /usr/share/java \
-    && package_dedupe $(pwd)
+    && chown ${APP_UID}:root -R /etc/${COMPONENT} /etc/schema-registry /usr/logs /usr/share/confluent-hub-components \
+    && chmod -R ug+w /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /etc/schema-registry /usr/share/confluent-hub-components
 
 ENV CONNECT_PLUGIN_PATH=/usr/share/java/,/usr/share/confluent-hub-components/
 
 VOLUME ["/etc/${COMPONENT}/jars", "/etc/${COMPONENT}/secrets"]
 
-COPY --chown=appuser:appuser include/etc/confluent/docker /etc/confluent/docker
-
-USER appuser
+USER ${APP_UID}
 
 CMD ["/etc/confluent/docker/run"]
