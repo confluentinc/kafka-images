@@ -118,7 +118,7 @@ COPY --from=builder /microdir/etc/confluent-rebalancer /etc/confluent-rebalancer
 COPY include/etc/confluent/docker/ /etc/confluent/docker/
 RUN chown -R ${APP_UID}:${APP_GID} /etc/confluent/docker
 
-RUN mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
+RUN mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets /var/log/kafka /var/log/confluent \
     && chown -R ${APP_UID}:root /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /etc/${COMPONENT}/secrets \
     && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets /var/log/kafka
 
