@@ -64,5 +64,11 @@
 },
 {
   "name":"java.lang.OutOfMemoryError"
+},
+{
+  "name":"jdk.internal.misc.ScopedMemoryAccess",
+  "methods":[
+    {"name":"closeScope0"}
+  ]
 }
 ]
