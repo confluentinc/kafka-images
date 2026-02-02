@@ -92,11 +92,10 @@ COPY --from=builder /microdir/usr/bin/register-deks /usr/bin/
 COPY --from=builder /microdir/usr/bin/confluent-hub /usr/bin/
 
 # Copy JARs
-COPY --from=builder /microdir/usr/share/java/kafka-serde-tools/ /usr/share/java/kafka-serde-tools/
-COPY --from=builder /microdir/usr/share/java/confluent-hub-client/ /usr/share/java/confluent-hub-client/
+COPY --from=builder /microdir/usr/share/java/ /usr/share/java/
 
 # Copy docs
-COPY --from=builder /microdir/usr/share/doc/confluent-hub-client/ /usr/share/doc/confluent-hub-client/
+COPY --from=builder /microdir/usr/share/doc/ /usr/share/doc/
 
 # Copy configs
 COPY --from=builder /microdir/etc/schema-registry /etc/schema-registry
