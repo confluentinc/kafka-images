@@ -124,7 +124,6 @@ RUN microdnf install -y zip unzip && \
 RUN mkdir /app/kafka; \
     native-image --no-fallback -H:-CheckToolchain --enable-http \
                                                     --enable-https \
-                                                    --enable-preview \
                                                     --add-exports org.graalvm.nativeimage.builder/com.oracle.svm.core.configure=ALL-UNNAMED \
                                                     --add-exports org.graalvm.nativeimage/org.graalvm.nativeimage.impl=ALL-UNNAMED \
                                                     --allow-incomplete-classpath \
