@@ -104,8 +104,12 @@ RUN microdnf install -y zip unzip && \
         mkdir -p /tmp/jar_unpack && cd /tmp/jar_unpack && \
         unzip -q "$jar"; \
         if find META-INF/native-image -name "native-image.properties" | grep -q .; then \
-          echo "Replacing --initialize-at-build-time with --initialize-at-run-time"; \
-          find META-INF/native-image -name "native-image.properties" -exec sed -i 's/--initialize-at-build-time/--initialize-at-run-time/g' {} \;; \
+          echo "Normalizing native-image.properties class init flags"; \
+          find META-INF/native-image -name "native-image.properties" -exec sed -i \
+            -e 's/--initialize-at-build-time/--initialize-at-run-time/g' \
+            -e 's/io\\.netty:build_time/io.netty:run_time/g' \
+            -e 's/jdk\\.internal\\.misc\\.ScopedMemoryAccess:build_time/jdk.internal.misc.ScopedMemoryAccess:run_time/g' \
+            {} \;; \
           zip -q -r /tmp/cleaned.jar .; \
           mv -f /tmp/cleaned.jar "$jar"; \
           echo "Updated $jar"; \
@@ -128,7 +132,6 @@ RUN mkdir /app/kafka; \
                                                     --report-unsupported-elements-at-runtime \
                                                     --install-exit-handlers \
                                                     --initialize-at-run-time=io.netty \
-                                                    --trace-class-initialization=jdk.internal.misc.ScopedMemoryAccess \
                                                     --enable-monitoring=jmxserver,jmxclient,heapdump,jvmstat \
                                                     -H:+ReportExceptionStackTraces \
                                                     -H:+PrintClassInitialization \
