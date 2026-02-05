@@ -116,7 +116,9 @@ RUN microdnf install -y zip unzip && \
       else \
         echo "Skipping $jarname"; \
       fi; \
-    done
+    done && \
+    echo "Removing jline FFM classes to prevent ForeignFunctionsRuntime error on ARM..." && \
+    find /usr/share/java -name "jline*.jar" -exec zip -d {} 'org/jline/terminal/impl/ffm/*' \; 2>/dev/null || true
 
 # Build native image for the Kafka application
 RUN mkdir /app/kafka; \
