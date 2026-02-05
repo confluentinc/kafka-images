@@ -78,7 +78,7 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
 VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
 
 # Stage 2: GraalVM for native-image
-FROM ghcr.io/graalvm/graalvm-community:21 AS build-native-image
+FROM ghcr.io/graalvm/graalvm-community:25 AS build-native-image
 
 WORKDIR /app
 ARG COMPONENT=kafka
@@ -116,12 +116,9 @@ RUN microdnf install -y zip unzip && \
       else \
         echo "Skipping $jarname"; \
       fi; \
-    done && \
-    echo "Removing jline FFM classes to prevent ForeignFunctionsRuntime error on ARM..." && \
-    find /usr/share/java -name "jline*.jar" -exec zip -d {} 'org/jline/terminal/impl/ffm/*' \; 2>/dev/null || true
+    done
 
 # Build native image for the Kafka application
-# jline FFM classes removed above to prevent ForeignFunctionsRuntime error (GraalVM 21 FFM limitation)
 RUN mkdir /app/kafka; \
     native-image --no-fallback -H:-CheckToolchain --enable-http \
                                                     --enable-https \
@@ -131,6 +128,8 @@ RUN mkdir /app/kafka; \
                                                     --report-unsupported-elements-at-runtime \
                                                     --install-exit-handlers \
                                                     --initialize-at-run-time=io.netty \
+                                                    -H:+UnlockExperimentalVMOptions \
+                                                    -H:+SharedArenaSupport \
                                                     --enable-monitoring=jmxserver,jmxclient,heapdump,jvmstat \
                                                     -H:+ReportExceptionStackTraces \
                                                     -H:+PrintClassInitialization \
