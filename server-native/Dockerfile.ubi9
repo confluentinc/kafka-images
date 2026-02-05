@@ -129,6 +129,7 @@ RUN mkdir /app/kafka; \
                                                     --install-exit-handlers \
                                                     --initialize-at-run-time=io.netty \
                                                     --initialize-at-run-time=jdk.internal.misc.ScopedMemoryAccess \
+                                                    --trace-class-initialization=jdk.internal.misc.ScopedMemoryAccess \
                                                     --enable-monitoring=jmxserver,jmxclient,heapdump,jvmstat \
                                                     -H:+ReportExceptionStackTraces \
                                                     -H:+PrintClassInitialization \
