@@ -99,7 +99,7 @@ RUN microdnf install -y zip unzip && \
     echo "Scanning for JARs to clean..." && \
     find /usr/share/java -name "*.jar" | while read jar; do \
       jarname=$(basename "$jar"); \
-      if [[ "$jarname" == azure-core*.jar || "$jarname" =~ ^gax-[0-9]+\.[0-9]+\.[0-9]+\.jar$ || "$jarname" == netty-codec-http-*.jar || "$jarname" == grpc-netty-shaded-*.jar ]]; then \
+      if [[ "$jarname" == azure-core*.jar || "$jarname" =~ ^gax-[0-9]+\.[0-9]+\.[0-9]+\.jar$ ]]; then \
         echo "Modifying $jarname"; \
         mkdir -p /tmp/jar_unpack && cd /tmp/jar_unpack && \
         unzip -q "$jar"; \
@@ -128,6 +128,7 @@ RUN mkdir /app/kafka; \
                                                     --report-unsupported-elements-at-runtime \
                                                     --install-exit-handlers \
                                                     --initialize-at-run-time=io.netty \
+                                                    --initialize-at-run-time=jdk.internal.misc \
                                                     --enable-monitoring=jmxserver,jmxclient,heapdump,jvmstat \
                                                     -H:+ReportExceptionStackTraces \
                                                     -H:+PrintClassInitialization \
