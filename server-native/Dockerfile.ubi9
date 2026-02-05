@@ -128,8 +128,8 @@ RUN mkdir /app/kafka; \
                                                     --report-unsupported-elements-at-runtime \
                                                     --install-exit-handlers \
                                                     --initialize-at-run-time=io.netty \
-                                                    -H:+UnlockExperimentalVMOptions \
-                                                    -H:+SharedArenaSupport \
+                                                    # -H:+UnlockExperimentalVMOptions \
+                                                    # -H:+SharedArenaSupport \
                                                     --enable-monitoring=jmxserver,jmxclient,heapdump,jvmstat \
                                                     -H:+ReportExceptionStackTraces \
                                                     -H:+PrintClassInitialization \
