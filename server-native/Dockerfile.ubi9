@@ -128,7 +128,7 @@ RUN mkdir /app/kafka; \
                                                     --report-unsupported-elements-at-runtime \
                                                     --install-exit-handlers \
                                                     --initialize-at-run-time=io.netty \
-                                                    --initialize-at-build-time=jdk.internal.misc.ScopedMemoryAccess \
+                                                    --initialize-at-run-time=jdk.internal.misc.ScopedMemoryAccess \
                                                     --enable-monitoring=jmxserver,jmxclient,heapdump,jvmstat \
                                                     -H:+ReportExceptionStackTraces \
                                                     -H:+PrintClassInitialization \
