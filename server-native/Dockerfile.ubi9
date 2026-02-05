@@ -78,7 +78,7 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
 VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
 
 # Stage 2: GraalVM for native-image
-FROM ghcr.io/graalvm/graalvm-community:24 AS build-native-image
+FROM ghcr.io/graalvm/graalvm-community:21 AS build-native-image
 
 WORKDIR /app
 ARG COMPONENT=kafka
@@ -122,6 +122,7 @@ RUN microdnf install -y zip unzip && \
 RUN mkdir /app/kafka; \
     native-image --no-fallback -H:-CheckToolchain --enable-http \
                                                     --enable-https \
+                                                    --enable-preview \
                                                     --add-exports org.graalvm.nativeimage.builder/com.oracle.svm.core.configure=ALL-UNNAMED \
                                                     --add-exports org.graalvm.nativeimage/org.graalvm.nativeimage.impl=ALL-UNNAMED \
                                                     --allow-incomplete-classpath \
