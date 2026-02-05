@@ -78,7 +78,7 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
 VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
 
 # Stage 2: GraalVM for native-image
-FROM ghcr.io/graalvm/graalvm-community:21 AS build-native-image
+FROM ghcr.io/graalvm/graalvm-community:24 AS build-native-image
 
 WORKDIR /app
 ARG COMPONENT=kafka
@@ -99,17 +99,13 @@ RUN microdnf install -y zip unzip && \
     echo "Scanning for JARs to clean..." && \
     find /usr/share/java -name "*.jar" | while read jar; do \
       jarname=$(basename "$jar"); \
-      if [[ "$jarname" == azure-core*.jar || "$jarname" =~ ^gax-[0-9]+\.[0-9]+\.[0-9]+\.jar$ || "$jarname" == netty-codec-http-*.jar || "$jarname" == grpc-netty-shaded-*.jar ]]; then \
+      if [[ "$jarname" == azure-core*.jar || "$jarname" =~ ^gax-[0-9]+\.[0-9]+\.[0-9]+\.jar$ ]]; then \
         echo "Modifying $jarname"; \
         mkdir -p /tmp/jar_unpack && cd /tmp/jar_unpack && \
         unzip -q "$jar"; \
         if find META-INF/native-image -name "native-image.properties" | grep -q .; then \
-          echo "Normalizing native-image.properties class init flags"; \
-          find META-INF/native-image -name "native-image.properties" -exec sed -i \
-            -e 's/--initialize-at-build-time/--initialize-at-run-time/g' \
-            -e 's/io\\.netty:build_time/io.netty:run_time/g' \
-            -e 's/jdk\\.internal\\.misc\\.ScopedMemoryAccess:build_time/jdk.internal.misc.ScopedMemoryAccess:run_time/g' \
-            {} \;; \
+          echo "Replacing --initialize-at-build-time with --initialize-at-run-time"; \
+          find META-INF/native-image -name "native-image.properties" -exec sed -i 's/--initialize-at-build-time/--initialize-at-run-time/g' {} \;; \
           zip -q -r /tmp/cleaned.jar .; \
           mv -f /tmp/cleaned.jar "$jar"; \
           echo "Updated $jar"; \
