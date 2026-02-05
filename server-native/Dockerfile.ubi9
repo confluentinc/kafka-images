@@ -121,9 +121,18 @@ RUN microdnf install -y zip unzip && \
     find /usr/share/java -name "jline*.jar" -exec zip -d {} 'org/jline/terminal/impl/ffm/*' \; 2>/dev/null || true
 
 # Build native image for the Kafka application
+# GraalVM 21 limitation: FFM (Foreign Function & Memory) API is NOT supported on ARM64.
+# - AMD64 needs --enable-preview to fix ScopedMemoryAccess.closeScope0 linker error
+# - ARM64 cannot use --enable-preview (triggers unsupported ForeignFunctionsRuntime)
+# - jline FFM classes removed above to prevent FFM code paths on ARM
 RUN mkdir /app/kafka; \
+    ARCH=$(uname -m); \
+    PREVIEW_FLAG=""; \
+    if [ "$ARCH" = "x86_64" ]; then PREVIEW_FLAG="--enable-preview"; fi; \
+    echo "Detected architecture: $ARCH, PREVIEW_FLAG: $PREVIEW_FLAG"; \
     native-image --no-fallback -H:-CheckToolchain --enable-http \
                                                     --enable-https \
+                                                    $PREVIEW_FLAG \
                                                     --add-exports org.graalvm.nativeimage.builder/com.oracle.svm.core.configure=ALL-UNNAMED \
                                                     --add-exports org.graalvm.nativeimage/org.graalvm.nativeimage.impl=ALL-UNNAMED \
                                                     --allow-incomplete-classpath \
