@@ -121,7 +121,10 @@ RUN microdnf install -y zip unzip && \
 # Build native image for the Kafka application
 RUN mkdir /app/kafka; \
     native-image --no-fallback -H:-CheckToolchain --enable-http \
+                                                    --exclude-config ".*jline.*\.jar" "META-INF/native-image/org.jline/jline-terminal-ffm/.*" \
+                                                    --initialize-at-run-time=org.jline.terminal.impl.ffm \
                                                     --enable-https \
+                                                    --enable-preview \
                                                     --add-exports org.graalvm.nativeimage.builder/com.oracle.svm.core.configure=ALL-UNNAMED \
                                                     --add-exports org.graalvm.nativeimage/org.graalvm.nativeimage.impl=ALL-UNNAMED \
                                                     --allow-incomplete-classpath \
