@@ -78,7 +78,7 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
 VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
 
 # Stage 2: GraalVM for native-image
-FROM ghcr.io/graalvm/graalvm-community:21 AS build-native-image
+FROM ghcr.io/graalvm/graalvm-community:25 AS build-native-image
 
 WORKDIR /app
 ARG COMPONENT=kafka
