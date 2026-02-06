@@ -48,12 +48,6 @@ RUN echo "===> Installing packages to /microdir with dnf" \
        confluent-server-${CONFLUENT_VERSION} \
        confluent-rebalancer-${CONFLUENT_VERSION} \
        confluent-security-${CONFLUENT_VERSION} \
-    # && echo "===> Removing extra directories installed in confluent-security ..." \
-    # && rm -rf /microdir/usr/share/java/confluent-security/schema-registry \
-    #           /microdir/usr/share/java/confluent-security/connect \
-    #           /microdir/usr/share/java/confluent-security/kafka-rest \
-    #           /microdir/usr/share/java/confluent-security/ksql \
-    #           /microdir/usr/share/java/confluent-security/schema-validator \
     && echo "===> Deduping jars in /microdir ..." \
     && package_dedupe /microdir/usr/share/java \
     && echo "===> Cleaning up ..." \
