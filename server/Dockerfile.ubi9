@@ -14,7 +14,7 @@
 # limitations under the License.
 
 ARG DOCKER_UPSTREAM_REGISTRY
-ARG DOCKER_UPSTREAM_TAG
+ARG DOCKER_UPSTREAM_TAG=ubi9-latest
 ARG UBI9_VERSION
 
 # Stage 1: Get package_dedupe tool from base image
