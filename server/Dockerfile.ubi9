@@ -43,14 +43,10 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
 
 COPY --from=tools /usr/bin/package_dedupe /usr/local/bin/package_dedupe
 
-RUN echo "===> Installing confluent-server ..." \
+RUN echo "===> Installing confluent-server, confluent-rebalancer, confluent-security ..." \
     && dnf install -y --installroot=/microdir --releasever=9 --setopt=install_weak_deps=False --nodocs \
        confluent-server-${CONFLUENT_VERSION} \
-    && echo "===> Installing confluent-rebalancer ..." \
-    && dnf install -y --installroot=/microdir --releasever=9 --setopt=install_weak_deps=False --nodocs \
        confluent-rebalancer-${CONFLUENT_VERSION} \
-    && echo "===> Installing confluent-security ..." \
-    && dnf install -y --installroot=/microdir --releasever=9 --setopt=install_weak_deps=False --nodocs \
        confluent-security-${CONFLUENT_VERSION} \
     && echo "===> Deduping jars in /microdir ..." \
     && package_dedupe /microdir/usr/share/java \
