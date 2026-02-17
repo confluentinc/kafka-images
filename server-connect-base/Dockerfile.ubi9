@@ -88,9 +88,9 @@ LABEL io.confluent.docker.git.repo="confluentinc/kafka-images"
 USER root
 
 # Copy schema-registry and confluent-hub binaries
-COPY --from=builder /microdir/usr/bin/schema-registry-* /usr/bin/
+COPY --from=builder /microdir/usr/bin/schema-* /usr/bin/
 COPY --from=builder /microdir/usr/bin/kafka-*-console-* /usr/bin/
-COPY --from=builder /microdir/usr/bin/register-deks /usr/bin/
+COPY --from=builder /microdir/usr/bin/*-deks /usr/bin/
 COPY --from=builder /microdir/usr/bin/confluent-hub /usr/bin/
 
 # Copy JARs
