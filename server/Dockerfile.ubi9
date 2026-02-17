@@ -43,10 +43,14 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
 
 COPY --from=tools /usr/bin/package_dedupe /usr/local/bin/package_dedupe
 
-RUN echo "===> Installing packages to /microdir with dnf" \
+RUN echo "===> Installing confluent-server ..." \
     && dnf install -y --installroot=/microdir --releasever=9 --setopt=install_weak_deps=False --nodocs \
        confluent-server-${CONFLUENT_VERSION} \
+    && echo "===> Installing confluent-rebalancer ..." \
+    && dnf install -y --installroot=/microdir --releasever=9 --setopt=install_weak_deps=False --nodocs \
        confluent-rebalancer-${CONFLUENT_VERSION} \
+    && echo "===> Installing confluent-security ..." \
+    && dnf install -y --installroot=/microdir --releasever=9 --setopt=install_weak_deps=False --nodocs \
        confluent-security-${CONFLUENT_VERSION} \
     && echo "===> Deduping jars in /microdir ..." \
     && package_dedupe /microdir/usr/share/java \
@@ -99,20 +103,25 @@ COPY --from=builder /microdir/usr/bin/trogdor /usr/bin/
 COPY --from=builder /microdir/usr/bin/security-plugins-run-class /usr/bin/
 COPY --from=builder /microdir/usr/bin/sr-acl-cli /usr/bin/
 
+# Copy JARs
 COPY --from=builder /microdir/usr/share/java/ /usr/share/java/
 
+# Copy docs
 COPY --from=builder /microdir/usr/share/doc/ /usr/share/doc/
 
+# Copy filestream connectors
 COPY --from=builder /microdir/usr/share/filestream-connectors/ /usr/share/filestream-connectors/
 
 # /etc - only Confluent-specific directories (not system configs)
 COPY --from=builder /microdir/etc/kafka /etc/kafka
 COPY --from=builder /microdir/etc/confluent-rebalancer /etc/confluent-rebalancer
 
+# Copy docker runtime scripts
 COPY include/etc/confluent/docker/ /etc/confluent/docker/
 RUN chown -R ${APP_UID}:${APP_GID} /etc/confluent/docker
 
-RUN mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets /var/log/kafka /var/log/confluent \
+RUN echo "===> Setting up ${COMPONENT} dirs ..." \
+    && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets /var/log/kafka /var/log/confluent \
     && chown -R ${APP_UID}:root /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /etc/${COMPONENT}/secrets \
     && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets /var/log/kafka
 

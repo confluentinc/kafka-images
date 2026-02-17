@@ -44,9 +44,11 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
 
 COPY --from=tools /usr/bin/package_dedupe /usr/local/bin/package_dedupe
 
-RUN echo "===> Installing packages to /microdir with dnf" \
+RUN echo "===> Installing Schema Registry (for Avro jars) ..." \
     && dnf install -y --installroot=/microdir --releasever=9 --setopt=install_weak_deps=False --nodocs \
        confluent-schema-registry-${CONFLUENT_VERSION} \
+    && echo "===> Installing Confluent Hub client ..." \
+    && dnf install -y --installroot=/microdir --releasever=9 --setopt=install_weak_deps=False --nodocs \
        confluent-hub-client-${CONFLUENT_VERSION} \
     && echo "===> Deduping jars in /microdir ..." \
     && package_dedupe /microdir/usr/share/java \
@@ -101,6 +103,7 @@ COPY --from=builder /microdir/usr/share/doc/ /usr/share/doc/
 COPY --from=builder /microdir/etc/schema-registry /etc/schema-registry
 COPY --from=builder /microdir/etc/confluent-hub-client /etc/confluent-hub-client
 
+# Copy docker runtime scripts
 COPY include/etc/confluent/docker/ /etc/confluent/docker/
 RUN chown -R ${APP_UID}:${APP_GID} /etc/confluent/docker
 
