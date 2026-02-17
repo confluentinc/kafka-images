@@ -44,11 +44,9 @@ enabled=1 " > /etc/yum.repos.d/confluent.repo \
 
 COPY --from=tools /usr/bin/package_dedupe /usr/local/bin/package_dedupe
 
-RUN echo "===> Installing Schema Registry (for Avro jars) ..." \
+RUN echo "===> Installing Schema Registry (for Avro jars) and Confluent Hub client ..." \
     && dnf install -y --installroot=/microdir --releasever=9 --setopt=install_weak_deps=False --nodocs \
        confluent-schema-registry-${CONFLUENT_VERSION} \
-    && echo "===> Installing Confluent Hub client ..." \
-    && dnf install -y --installroot=/microdir --releasever=9 --setopt=install_weak_deps=False --nodocs \
        confluent-hub-client-${CONFLUENT_VERSION} \
     && echo "===> Deduping jars in /microdir ..." \
     && package_dedupe /microdir/usr/share/java \
