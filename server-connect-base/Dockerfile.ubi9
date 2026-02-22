@@ -85,25 +85,19 @@ LABEL io.confluent.docker.git.repo="confluentinc/kafka-images"
 
 USER root
 
-# Copy schema-registry and confluent-hub binaries
-COPY --from=builder /microdir/usr/bin/schema-* /usr/bin/
-COPY --from=builder /microdir/usr/bin/kafka-*-console-* /usr/bin/
-COPY --from=builder /microdir/usr/bin/*-deks /usr/bin/
-COPY --from=builder /microdir/usr/bin/confluent-hub /usr/bin/
+# Consolidate COPY --from=builder into a single layer to reduce image layer count.
+# RedHat certification check "LayerCountAcceptable" requires < 40 layers.
+RUN --mount=type=bind,from=builder,source=/microdir,target=/mnt/builder \
+    cp -a /mnt/builder/usr/bin/schema-* /usr/bin/ && \
+    cp -a /mnt/builder/usr/bin/kafka-*-console-* /usr/bin/ && \
+    cp -a /mnt/builder/usr/bin/*-deks /usr/bin/ && \
+    cp -a /mnt/builder/usr/bin/confluent-hub /usr/bin/ && \
+    cp -a /mnt/builder/usr/share/java /usr/share/ && \
+    cp -a /mnt/builder/usr/share/doc /usr/share/ && \
+    cp -a /mnt/builder/etc/schema-registry /etc/ && \
+    cp -a /mnt/builder/etc/confluent-hub-client /etc/
 
-# Copy JARs
-COPY --from=builder /microdir/usr/share/java/ /usr/share/java/
-
-# Copy docs
-COPY --from=builder /microdir/usr/share/doc/ /usr/share/doc/
-
-# Copy configs
-COPY --from=builder /microdir/etc/schema-registry /etc/schema-registry
-COPY --from=builder /microdir/etc/confluent-hub-client /etc/confluent-hub-client
-
-# Copy docker runtime scripts
-COPY include/etc/confluent/docker/ /etc/confluent/docker/
-RUN chown -R ${APP_UID}:${APP_GID} /etc/confluent/docker
+COPY --chown=${APP_UID}:${APP_GID} include/etc/confluent/docker/ /etc/confluent/docker/
 
 RUN echo "===> Setting up ${COMPONENT} dirs ..." \
     && mkdir -p /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /usr/logs /usr/share/confluent-hub-components \
