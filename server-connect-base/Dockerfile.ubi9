@@ -85,17 +85,13 @@ LABEL io.confluent.docker.git.repo="confluentinc/kafka-images"
 
 USER root
 
-# Consolidate COPY --from=builder into a single layer to reduce image layer count.
+# Consolidate /usr/bin/ COPYs into a single layer to reduce image layer count.
 # RedHat certification check "LayerCountAcceptable" requires < 40 layers.
-RUN --mount=type=bind,from=builder,source=/microdir,target=/mnt/builder \
-    cp -a /mnt/builder/usr/bin/schema-* /usr/bin/ && \
-    cp -a /mnt/builder/usr/bin/kafka-*-console-* /usr/bin/ && \
-    cp -a /mnt/builder/usr/bin/*-deks /usr/bin/ && \
-    cp -a /mnt/builder/usr/bin/confluent-hub /usr/bin/ && \
-    cp -a /mnt/builder/usr/share/java /usr/share/ && \
-    cp -a /mnt/builder/usr/share/doc /usr/share/ && \
-    cp -a /mnt/builder/etc/schema-registry /etc/ && \
-    cp -a /mnt/builder/etc/confluent-hub-client /etc/
+COPY --from=builder /microdir/usr/bin/schema-* /microdir/usr/bin/kafka-*-console-* /microdir/usr/bin/*-deks /microdir/usr/bin/confluent-hub /usr/bin/
+COPY --from=builder /microdir/usr/share/java /usr/share/java
+COPY --from=builder /microdir/usr/share/doc /usr/share/doc
+COPY --from=builder /microdir/etc/schema-registry /etc/schema-registry
+COPY --from=builder /microdir/etc/confluent-hub-client /etc/confluent-hub-client
 
 COPY --chown=${APP_UID}:${APP_GID} include/etc/confluent/docker/ /etc/confluent/docker/
 
