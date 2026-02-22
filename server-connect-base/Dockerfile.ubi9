@@ -93,7 +93,8 @@ COPY --from=builder /microdir/usr/share/doc /usr/share/doc
 COPY --from=builder /microdir/etc/schema-registry /etc/schema-registry
 COPY --from=builder /microdir/etc/confluent-hub-client /etc/confluent-hub-client
 
-COPY --chown=${APP_UID}:${APP_GID} include/etc/confluent/docker/ /etc/confluent/docker/
+COPY include/etc/confluent/docker/ /etc/confluent/docker/
+RUN chown -R ${APP_UID}:${APP_GID} /etc/confluent/docker
 
 RUN echo "===> Setting up ${COMPONENT} dirs ..." \
     && mkdir -p /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /usr/logs /usr/share/confluent-hub-components \
