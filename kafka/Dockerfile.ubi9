@@ -100,8 +100,8 @@ RUN chown -R ${APP_UID}:${APP_GID} /etc/confluent/docker
 
 RUN echo "===> Setting up ${COMPONENT} dirs ..." \
     && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets /var/log/kafka /var/log/confluent \
-    && chown -R ${APP_UID}:root /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /etc/${COMPONENT}/secrets \
-    && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT} /etc/${COMPONENT}/secrets /var/log/kafka /var/log/confluent
+    && chown -R ${APP_UID}:root /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /etc/${COMPONENT}/secrets /var/lib/${COMPONENT} /etc/${COMPONENT} \
+    && chmod -R ug+w /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /var/lib/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}
 
 VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
 
