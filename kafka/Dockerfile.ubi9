@@ -87,7 +87,6 @@ LABEL io.confluent.docker.git.repo="confluentinc/kafka-images"
 
 USER root
 
-# Community kafka does not include enterprise-only binaries (*confluent*, security-plugins-run-class, sr-acl-cli)
 COPY --from=builder /microdir/usr/bin/*kafka* /usr/bin/
 COPY --from=builder /microdir/usr/bin/*connect* /usr/bin/
 COPY --from=builder /microdir/usr/bin/trogdor /usr/bin/
