@@ -18,7 +18,7 @@ ARG DOCKER_UPSTREAM_TAG=ubi9-latest
 ARG DOCKER_TAG
 ARG UBI9_VERSION
 
-# Stage 1: Get package_dedupe tool from cp-kafka (which already has it)
+# Stage 1: Get package_dedupe tool from cp-kafka
 FROM ${DOCKER_REGISTRY}confluentinc/cp-kafka:${DOCKER_TAG} AS tools
 
 # Stage 2: Install packages using ubi9 with dnf to /microdir
@@ -85,29 +85,21 @@ LABEL io.confluent.docker.git.repo="confluentinc/kafka-images"
 
 USER root
 
-# Copy schema-registry and confluent-hub binaries
 COPY --from=builder /microdir/usr/bin/schema-* /usr/bin/
 COPY --from=builder /microdir/usr/bin/kafka-*-console-* /usr/bin/
 COPY --from=builder /microdir/usr/bin/*-deks /usr/bin/
 COPY --from=builder /microdir/usr/bin/confluent-hub /usr/bin/
-
-# Copy JARs
 COPY --from=builder /microdir/usr/share/java/ /usr/share/java/
-
-# Copy docs
 COPY --from=builder /microdir/usr/share/doc/ /usr/share/doc/
-
-# Copy configs
 COPY --from=builder /microdir/etc/schema-registry /etc/schema-registry
 COPY --from=builder /microdir/etc/confluent-hub-client /etc/confluent-hub-client
 
-# Copy docker runtime scripts
 COPY include/etc/confluent/docker/ /etc/confluent/docker/
 RUN chown -R ${APP_UID}:${APP_GID} /etc/confluent/docker
 
 RUN echo "===> Setting up ${COMPONENT} dirs ..." \
     && mkdir -p /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /usr/logs /usr/share/confluent-hub-components \
-    && chown ${APP_UID}:root -R /etc/${COMPONENT} /etc/schema-registry /usr/logs /usr/share/confluent-hub-components \
+    && chown ${APP_UID}:root -R /etc/kafka /etc/${COMPONENT} /etc/schema-registry /usr/logs /usr/share/confluent-hub-components \
     && chmod -R ug+w /etc/${COMPONENT} /etc/${COMPONENT}/secrets /etc/${COMPONENT}/jars /etc/schema-registry /usr/share/confluent-hub-components
 
 ENV CONNECT_PLUGIN_PATH=/usr/share/java/,/usr/share/confluent-hub-components/
