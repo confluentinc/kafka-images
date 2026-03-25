@@ -17,10 +17,7 @@ ARG DOCKER_UPSTREAM_REGISTRY
 ARG DOCKER_UPSTREAM_TAG=ubi9-latest
 ARG UBI9_VERSION
 
-# Stage 1: Get package_dedupe tool from base image
-FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-java-micro:${DOCKER_UPSTREAM_TAG} AS tools
-
-# Stage 2: Install packages using ubi9 with dnf to /microdir
+# Stage 1: Install packages using ubi9 with dnf to /microdir
 FROM registry.access.redhat.com/ubi9:${UBI9_VERSION} AS builder
 
 ARG BUILD_NUMBER=-1
@@ -41,13 +38,9 @@ gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
 enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && mkdir -p /microdir
 
-COPY --from=tools /usr/bin/package_dedupe /usr/local/bin/package_dedupe
-
 RUN echo "===> Installing confluent-kafka ..." \
     && dnf install -y --installroot=/microdir --releasever=9 --setopt=install_weak_deps=False --nodocs \
        confluent-kafka-${CONFLUENT_VERSION} \
-    && echo "===> Deduping jars in /microdir ..." \
-    && package_dedupe /microdir/usr/share/java \
     && echo "===> Cleaning up ..." \
     && dnf --installroot=/microdir clean all \
     && rm -rf /microdir/var/cache/* /microdir/var/log/dnf* /microdir/var/log/yum.* \
@@ -57,7 +50,7 @@ RUN echo "===> Installing confluent-kafka ..." \
              /microdir/etc/subuid /microdir/etc/subgid \
     && rm -rf /microdir/dev/* /microdir/proc/* /microdir/sys/*
 
-# Stage 3: Final image using cp-base-java-micro
+# Stage 2: Final image using cp-base-java-micro
 FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-java-micro:${DOCKER_UPSTREAM_TAG}
 
 EXPOSE 9092
