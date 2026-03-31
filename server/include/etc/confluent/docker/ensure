@@ -20,24 +20,10 @@ export KAFKA_DATA_DIRS=${KAFKA_DATA_DIRS:-"/var/lib/kafka/data"}
 echo "===> Check if $KAFKA_DATA_DIRS is writable ..."
 dub path "$KAFKA_DATA_DIRS" writable
 
-if [[ -n "${KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE-}" ]] && [[ $KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE == "true" ]]
-then
-    echo "===> Skipping Zookeeper health check for SSL connections..."
-elif [[ -n "${KAFKA_PROCESS_ROLES-}" ]]
-then 
-    echo "===> Running in KRaft mode, skipping Zookeeper health check..."
-else
-    echo "===> Check if Zookeeper is healthy ..."
-    cub zk-ready "$KAFKA_ZOOKEEPER_CONNECT" "${KAFKA_CUB_ZK_TIMEOUT:-40}"
-fi
+# Required step: Format the storage directory with provided cluster ID unless it already exists.
+echo "===> Using provided cluster id $CLUSTER_ID ..."
 
-# KRaft required step: Format the storage directory with provided cluster ID unless it already exists.
-if [[ -n "${KAFKA_PROCESS_ROLES-}" ]]
-then
-    echo "===> Using provided cluster id $CLUSTER_ID ..."
-    
-    # A bit of a hack to not error out if the storage is already formatted.  Need storage-tool to support this
-    result=$(kafka-storage format --cluster-id=$CLUSTER_ID -c /etc/kafka/kafka.properties 2>&1) || \
-        echo $result | grep -i "already formatted" || \
-        { echo $result && (exit 1) }
-fi
+# A bit of a hack to not error out if the storage is already formatted.  Need storage-tool to support this
+result=$(kafka-storage format --cluster-id=$CLUSTER_ID -c /etc/kafka/kafka.properties 2>&1) || \
+    echo $result | grep -i "already formatted" || \
+    { echo $result && (exit 1) }

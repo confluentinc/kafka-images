@@ -53,5 +53,5 @@ dub path /etc/"${COMPONENT}"/ writable
 
 dub template "/etc/confluent/docker/${COMPONENT}.properties.template" "/etc/${COMPONENT}/${COMPONENT}.properties"
 
-# The connect-distributed script expects the log4j config at /etc/kafka/connect-log4j.properties.
-dub template "/etc/confluent/docker/log4j.properties.template" "/etc/kafka/connect-log4j.properties"
+# The connect-distributed script expects the log4j2 config at /etc/kafka/connect-log4j2.yaml.
+dub template "/etc/confluent/docker/log4j2.yaml.template" "/etc/kafka/connect-log4j2.yaml"

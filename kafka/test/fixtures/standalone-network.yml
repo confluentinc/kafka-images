@@ -1,5 +1,4 @@
 ---
-version: '2'
 networks:
   zk:
     driver: bridge
