@@ -1,1 +1,3 @@
 *	@confluentinc/kafka-eng
+.semaphore/	@confluentinc/kafka-eng @confluentinc/cp-build-and-release-team
+service.yml	@confluentinc/kafka-eng @confluentinc/cp-build-and-release-team
