@@ -45,7 +45,7 @@ USER root
 
 RUN echo "===> Installing ${COMPONENT}..." \
     && echo "===> Cleaning up ..." \
-    && yum clean all \
+    && microdnf clean all \
     && rm -rf /tmp/*
 
 USER appuser

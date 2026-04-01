@@ -16,7 +16,7 @@
 ARG DOCKER_UPSTREAM_REGISTRY
 ARG DOCKER_UPSTREAM_TAG=ubi9-latest
 
-FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-new:${DOCKER_UPSTREAM_TAG}
+FROM ${DOCKER_UPSTREAM_REGISTRY}confluentinc/cp-base-java:${DOCKER_UPSTREAM_TAG}
 
 ARG PROJECT_VERSION
 ARG ARTIFACT_ID
@@ -62,18 +62,20 @@ gpgcheck=1 \n\
 gpgkey=${CONFLUENT_PACKAGES_REPO}/archive.key \n\
 enabled=1 " > /etc/yum.repos.d/confluent.repo \
     && echo "===> installing ${COMPONENT}..." \
-    && yum install -y confluent-server-${CONFLUENT_VERSION} \
+    && microdnf install -y confluent-server-${CONFLUENT_VERSION} \
     && echo "===> installing confluent-rebalancer ..." \
-    && yum install -y confluent-rebalancer-${CONFLUENT_VERSION} \
+    && microdnf install -y confluent-rebalancer-${CONFLUENT_VERSION} \
     && echo "===> installing confluent-security ..." \
-    && yum install -y confluent-security-${CONFLUENT_VERSION} \
+    && microdnf install -y confluent-security-${CONFLUENT_VERSION} \
     && echo "===> clean up ..."  \
-    && yum clean all \
+    && microdnf clean all \
     && rm -rf /tmp/* /etc/yum.repos.d/confluent.repo \
     && echo "===> Setting up ${COMPONENT} dirs" \
     && mkdir -p /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets \
     && chown -R appuser:root /etc/kafka /var/log/kafka /var/log/confluent /var/lib/kafka /etc/${COMPONENT}/secrets \
-    && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets /var/log/kafka
+    && chmod -R ug+w /etc/kafka /var/lib/${COMPONENT}/data /etc/${COMPONENT}/secrets /var/log/kafka \
+    && cd /usr/share/java \
+    && package_dedupe $(pwd)
 
 VOLUME ["/var/lib/${COMPONENT}/data", "/etc/${COMPONENT}/secrets"]
 
