@@ -631,7 +631,14 @@ blocks:
           commands:
             - export DOCKER_PROD_IMAGE_NAME=$DOCKER_PROD_REGISTRY${DOCKER_REPOS// / $DOCKER_PROD_REGISTRY}
             - ci-tools ci-update-version --direct-pom-edit
-            - ci-tools ci-push-tag
+            # Skip ci-push-tag for release builds. Without this guard, -rc and -cp builds also push
+            # tags via this line — for -rc builds the tags are in a different format which is
+            # unexpected and unused, and for -cp builds it pushes the same tags as nightly which is
+            # also not the intended behavior.
+            - |-
+              if [[ ! $IS_RELEASE ]]; then
+                ci-tools ci-push-tag
+              fi
             - |-
               if [[ ! $IS_RELEASE && ! $IS_PREVIEW ]]; then
                 mvn -Dmaven.wagon.http.retryHandler.count=3 --batch-mode -P jenkins,docker -DaltDeploymentRepository=confluent-codeartifact-internal::default::https://confluent-519856050701.d.codeartifact.us-west-2.amazonaws.com/maven/maven-snapshots/ -DrepositoryId=confluent-codeartifact-internal deploy -DskipTests -Ddocker.skip-build=true -Ddocker.skip-test=true  $MAVEN_EXTRA_ARGS
