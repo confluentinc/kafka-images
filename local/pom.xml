@@ -19,7 +19,7 @@
    <parent>
       <groupId>io.confluent.kafka-images</groupId>
       <artifactId>kafka-images-parent</artifactId>
-      <version>8.2.1-0</version>
+      <version>8.3.0-0</version>
    </parent>
    <groupId>io.confluent.kafka-images</groupId>
    <artifactId>confluent-local</artifactId>
@@ -104,6 +104,32 @@
    </dependencies>
    <build>
       <plugins>
+         <plugin>
+            <groupId>com.spotify</groupId>
+            <artifactId>dockerfile-maven-plugin</artifactId>
+            <configuration>
+               <buildArgs>
+                  <UBI9_VERSION>${ubi9.image.version}</UBI9_VERSION>
+               </buildArgs>
+            </configuration>
+         </plugin>
+
+         <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <configuration>
+               <images>
+                  <image>
+                     <build>
+                        <args>
+                           <UBI9_VERSION>${ubi9.image.version}</UBI9_VERSION>
+                        </args>
+                     </build>
+                  </image>
+               </images>
+            </configuration>
+         </plugin>
+
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-jar-plugin</artifactId>
