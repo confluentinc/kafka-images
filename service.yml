@@ -1,6 +1,6 @@
 name: kafka-images
-lang: unknown
-lang_version: unknown
+lang: java
+lang_version: "17"
 git:
   enable: true
 codeowners:
