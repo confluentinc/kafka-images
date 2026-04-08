@@ -94,7 +94,10 @@ semaphore:
           description: 'Skip publishing community docker images'
           options:
             - 'True'
-            - 'False'    
+            - 'False'
+cp_dockerfile:
+  s390x_docker_repos: ['confluentinc/cp-server', 'confluentinc/cp-kafka', 'confluentinc/confluent-local', 'confluentinc/cp-kafka-connect-base', 'confluentinc/cp-kafka-connect', 'confluentinc/cp-server-connect-base', 'confluentinc/cp-server-connect']
+  s390x_maven_modules: ['server', 'kafka', 'local', 'kafka-connect-base', 'kafka-connect', 'server-connect-base', 'server-connect']
 code_artifact:
   enable: true
   package_paths:
