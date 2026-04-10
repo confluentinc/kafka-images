@@ -45,7 +45,6 @@
     <properties>
         <component.name>kafka</component.name>
         <io.confluent.kafka-images.version>8.2.1-0</io.confluent.kafka-images.version>
-        <docker.imagePullPolicy>Never</docker.imagePullPolicy>
     </properties>
 
     <dependencies>
