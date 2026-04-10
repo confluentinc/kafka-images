@@ -47,24 +47,6 @@
         <io.confluent.kafka-images.version>8.2.1-0</io.confluent.kafka-images.version>
     </properties>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>io.fabric8</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <configuration>
-                    <images>
-                        <image>
-                            <build>
-                                <imagePullPolicy>Never</imagePullPolicy>
-                            </build>
-                        </image>
-                    </images>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
