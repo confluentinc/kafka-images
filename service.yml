@@ -1,6 +1,6 @@
 name: kafka-images
-lang: unknown
-lang_version: unknown
+lang: java
+lang_version: 17
 git:
   enable: true
 codeowners:
@@ -70,7 +70,7 @@ semaphore:
           description: 'Skip building community docker images'
           options:
             - 'True'
-            - 'False'  
+            - 'False'
     - name: cp-dockerfile-promote
       branch: master
       pipeline_file: .semaphore/cp_dockerfile_promote.yml
@@ -95,7 +95,7 @@ semaphore:
           description: 'Skip publishing community docker images'
           options:
             - 'True'
-            - 'False'    
+            - 'False'
 code_artifact:
   enable: true
   package_paths:
