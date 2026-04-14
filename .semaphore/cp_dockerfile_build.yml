@@ -7,7 +7,7 @@ version: v1.0
 name: build-test-release
 agent:
   machine:
-    type: s1-prod-ubuntu20-04-amd64-1
+    type: s1-prod-ubuntu24-04-amd64-1
 
 fail_fast:
   cancel:
@@ -379,7 +379,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu20-04-arm64-1
+          type: s1-prod-ubuntu24-04-arm64-1
       jobs:
         - name: Build & Test ubi8
           commands:
@@ -407,7 +407,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu20-04-arm64-1
+          type: s1-prod-ubuntu24-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-server-connect ubi8
           commands:
@@ -437,7 +437,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu20-04-arm64-1
+          type: s1-prod-ubuntu24-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-server-connect-base ubi8
           commands:
@@ -467,7 +467,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu20-04-arm64-1
+          type: s1-prod-ubuntu24-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-kafka-connect ubi8
           commands:
@@ -497,7 +497,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu20-04-arm64-1
+          type: s1-prod-ubuntu24-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-kafka-connect-base ubi8
           commands:
@@ -527,7 +527,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu20-04-arm64-1
+          type: s1-prod-ubuntu24-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-enterprise-kafka ubi8
           commands:
@@ -557,7 +557,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu20-04-arm64-1
+          type: s1-prod-ubuntu24-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-kafka ubi8
           commands:
@@ -587,7 +587,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu20-04-arm64-1
+          type: s1-prod-ubuntu24-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/confluent-local ubi8
           commands:
@@ -617,7 +617,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu20-04-arm64-1
+          type: s1-prod-ubuntu24-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-server ubi8
           commands:
@@ -647,7 +647,7 @@ blocks:
     task:
       agent:
         machine:
-          type: s1-prod-ubuntu20-04-arm64-1
+          type: s1-prod-ubuntu24-04-arm64-1
       jobs:
         - name: Deploy ARM confluentinc/cp-zookeeper ubi8
           commands:
@@ -714,7 +714,7 @@ after_pipeline:
   task:
     agent:
       machine:
-        type: s1-prod-ubuntu20-04-arm64-0
+        type: s1-prod-ubuntu24-04-arm64-0
     jobs:
       - name: Metrics
         commands:
