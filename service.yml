@@ -95,6 +95,9 @@ semaphore:
           options:
             - 'True'
             - 'False'    
+cp_dockerfile:
+  s390x_docker_repos: ['confluentinc/cp-server', 'confluentinc/cp-server-connect-base', 'confluentinc/cp-server-connect']
+  s390x_maven_modules: ['server', 'server-connect-base', 'server-connect']
 code_artifact:
   enable: true
   package_paths:
