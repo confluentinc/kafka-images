@@ -84,11 +84,10 @@ global_job_config:
       - export DOCKER_UPSTREAM_REGISTRY=$DOCKER_PROD_REGISTRY
       - export LATEST_TAG=$BRANCH_TAG-latest
       - export DOCKER_UPSTREAM_TAG="$LATEST_TAG"
-      - export DOCKER_REPOS="confluentinc/cp-server-connect confluentinc/cp-server-connect-base confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-kafka 
-        confluentinc/confluent-local confluentinc/cp-server"
-      - export COMMUNITY_DOCKER_REPOS="confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-kafka confluentinc/confluent-local"
-      - export S390X_DOCKER_REPOS="confluentinc/cp-server confluentinc/cp-server-connect-base confluentinc/cp-server-connect"
-      - export S390X_MAVEN_MODULES="server server-connect-base server-connect"
+      - export DOCKER_REPOS="confluentinc/cp-server-connect confluentinc/cp-kafka-connect confluentinc/cp-kafka confluentinc/confluent-local confluentinc/cp-server"
+      - export COMMUNITY_DOCKER_REPOS="confluentinc/cp-kafka-connect confluentinc/cp-kafka confluentinc/confluent-local"
+      - export S390X_DOCKER_REPOS="confluentinc/cp-server confluentinc/cp-server-connect"
+      - export S390X_MAVEN_MODULES="server server-connect"
       - |
         export COMMUNITY_MVN_PL_ARGS=""
         export S390X_MVN_PL_ARGS="-pl ${S390X_MAVEN_MODULES// /,} -am"
@@ -97,7 +96,7 @@ global_job_config:
           DOCKER_REPOS=$(comm -23 <(echo "$DOCKER_REPOS" | tr ' ' '\n' | sort) <(echo "$COMMUNITY_DOCKER_REPOS" | tr ' ' '\n' | sort) | tr '\n' ' ' | xargs)
           export DOCKER_REPOS
           echo "DOCKER_REPOS after skipping community images - $DOCKER_REPOS"
-          export COMMUNITY_MVN_PL_ARGS="-pl !kafka-connect,!kafka-connect-base,!kafka,!local"
+          export COMMUNITY_MVN_PL_ARGS="-pl !kafka-connect,!kafka,!local"
 
           # Check if current DOCKER_IMAGE is in community repos, skip job execution
           for skip_repo in $COMMUNITY_DOCKER_REPOS; do
@@ -113,7 +112,7 @@ global_job_config:
           echo "S390X_DOCKER_REPOS after skipping community images - $S390X_DOCKER_REPOS"
 
           # Build s390x Maven args: include s390x modules, exclude community modules
-          export S390X_MVN_PL_ARGS="-pl ${S390X_MAVEN_MODULES// /,},!kafka-connect,!kafka-connect-base,!kafka,!local -am"
+          export S390X_MVN_PL_ARGS="-pl ${S390X_MAVEN_MODULES// /,},!kafka-connect,!kafka,!local -am"
         fi
       - export DOCKER_DEV_TAG="dev-$BRANCH_TAG-$BUILD_NUMBER"
       - export AMD_ARCH=.amd64

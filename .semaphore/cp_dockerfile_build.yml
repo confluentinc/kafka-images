@@ -91,11 +91,10 @@ global_job_config:
       - export DOCKER_UPSTREAM_REGISTRY=$DOCKER_PROD_REGISTRY
       - export LATEST_TAG=$BRANCH_TAG-latest
       - export DOCKER_UPSTREAM_TAG="$LATEST_TAG"
-      - export DOCKER_REPOS="confluentinc/cp-server-connect confluentinc/cp-server-connect-base confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-kafka 
-        confluentinc/confluent-local confluentinc/cp-server"
-      - export COMMUNITY_DOCKER_REPOS="confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-kafka confluentinc/confluent-local"
-      - export S390X_DOCKER_REPOS="confluentinc/cp-server confluentinc/cp-server-connect-base confluentinc/cp-server-connect"
-      - export S390X_MAVEN_MODULES="server server-connect-base server-connect"
+      - export DOCKER_REPOS="confluentinc/cp-server-connect confluentinc/cp-kafka-connect confluentinc/cp-kafka confluentinc/confluent-local confluentinc/cp-server"
+      - export COMMUNITY_DOCKER_REPOS="confluentinc/cp-kafka-connect confluentinc/cp-kafka confluentinc/confluent-local"
+      - export S390X_DOCKER_REPOS="confluentinc/cp-server confluentinc/cp-server-connect"
+      - export S390X_MAVEN_MODULES="server server-connect"
       - |
         export COMMUNITY_MVN_PL_ARGS=""
         export S390X_MVN_PL_ARGS="-pl ${S390X_MAVEN_MODULES// /,} -am"
@@ -104,7 +103,7 @@ global_job_config:
           DOCKER_REPOS=$(comm -23 <(echo "$DOCKER_REPOS" | tr ' ' '\n' | sort) <(echo "$COMMUNITY_DOCKER_REPOS" | tr ' ' '\n' | sort) | tr '\n' ' ' | xargs)
           export DOCKER_REPOS
           echo "DOCKER_REPOS after skipping community images - $DOCKER_REPOS"
-          export COMMUNITY_MVN_PL_ARGS="-pl !kafka-connect,!kafka-connect-base,!kafka,!local"
+          export COMMUNITY_MVN_PL_ARGS="-pl !kafka-connect,!kafka,!local"
 
           # Check if current DOCKER_IMAGE is in community repos, skip job execution
           for skip_repo in $COMMUNITY_DOCKER_REPOS; do
@@ -120,7 +119,7 @@ global_job_config:
           echo "S390X_DOCKER_REPOS after skipping community images - $S390X_DOCKER_REPOS"
 
           # Build s390x Maven args: include s390x modules, exclude community modules
-          export S390X_MVN_PL_ARGS="-pl ${S390X_MAVEN_MODULES// /,},!kafka-connect,!kafka-connect-base,!kafka,!local -am"
+          export S390X_MVN_PL_ARGS="-pl ${S390X_MAVEN_MODULES// /,},!kafka-connect,!kafka,!local -am"
         fi
       - export DOCKER_DEV_TAG="dev-$BRANCH_TAG-$BUILD_NUMBER"
       - export AMD_ARCH=.amd64
@@ -198,36 +197,6 @@ blocks:
             - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$AMD_ARCH
             - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
             - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-  - name: Deploy AMD confluentinc/cp-server-connect-base
-    dependencies: ["Build, Test, & Scan AMD"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
-    task:
-      jobs:
-        - name: Deploy AMD confluentinc/cp-server-connect-base ubi9
-          env_vars:
-            - name: DOCKER_IMAGE
-              value: confluentinc/cp-server-connect-base
-          commands:
-            - export OS_TAG="-ubi9"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-server-connect-base
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$AMD_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-server-connect-base:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
   - name: Deploy AMD confluentinc/cp-kafka-connect
     dependencies: ["Build, Test, & Scan AMD"]
     run:
@@ -244,36 +213,6 @@ blocks:
             - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$AMD_ARCH
             - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$AMD_ARCH
             - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-kafka-connect:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$AMD_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-  - name: Deploy AMD confluentinc/cp-kafka-connect-base
-    dependencies: ["Build, Test, & Scan AMD"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
-    task:
-      jobs:
-        - name: Deploy AMD confluentinc/cp-kafka-connect-base ubi9
-          env_vars:
-            - name: DOCKER_IMAGE
-              value: confluentinc/cp-kafka-connect-base
-          commands:
-            - export OS_TAG="-ubi9"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-kafka-connect-base
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$AMD_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$AMD_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-kafka-connect-base:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
             - docker pull $DEV_IMAGE_FULL
             - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
             - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
@@ -441,39 +380,6 @@ blocks:
             - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$ARM_ARCH
             - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
             - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-  - name: Deploy ARM confluentinc/cp-server-connect-base
-    dependencies: ["Build & Test ARM"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
-    task:
-      agent:
-        machine:
-          type: s1-prod-ubuntu24-04-arm64-1
-      jobs:
-        - name: Deploy ARM confluentinc/cp-server-connect-base ubi9
-          env_vars:
-            - name: DOCKER_IMAGE
-              value: confluentinc/cp-server-connect-base
-          commands:
-            - export OS_TAG="-ubi9"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-server-connect-base
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$ARM_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-server-connect-base:$DOCKER_DEV_TAG$OS_TAG$ARM_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
   - name: Deploy ARM confluentinc/cp-kafka-connect
     dependencies: ["Build & Test ARM"]
     run:
@@ -493,39 +399,6 @@ blocks:
             - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$ARM_ARCH
             - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$ARM_ARCH
             - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-kafka-connect:$DOCKER_DEV_TAG$OS_TAG$ARM_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$ARM_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-  - name: Deploy ARM confluentinc/cp-kafka-connect-base
-    dependencies: ["Build & Test ARM"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
-    task:
-      agent:
-        machine:
-          type: s1-prod-ubuntu24-04-arm64-1
-      jobs:
-        - name: Deploy ARM confluentinc/cp-kafka-connect-base ubi9
-          env_vars:
-            - name: DOCKER_IMAGE
-              value: confluentinc/cp-kafka-connect-base
-          commands:
-            - export OS_TAG="-ubi9"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-kafka-connect-base
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$ARM_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$ARM_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-kafka-connect-base:$DOCKER_DEV_TAG$OS_TAG$ARM_ARCH
             - docker pull $DEV_IMAGE_FULL
             - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
             - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
@@ -697,33 +570,6 @@ blocks:
             - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$S390X_ARCH
             - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
             - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-  - name: Deploy s390x confluentinc/cp-server-connect-base
-    dependencies: ["Build & Test s390x"]
-    run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
-    task:
-      jobs:
-        - name: Deploy s390x confluentinc/cp-server-connect-base ubi9
-          commands:
-            - export OS_TAG="-ubi9"
-            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-server-connect-base
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$S390X_ARCH
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$S390X_ARCH
-            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-server-connect-base:$DOCKER_DEV_TAG$OS_TAG$S390X_ARCH
-            - docker pull $DEV_IMAGE_FULL
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - sign-images $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
-            - sign-images $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
-            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$S390X_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - sign-images $PROD_IMAGE_NAME:$PACKAGE_TAG
-            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$S390X_ARCH
-            - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
-            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
   - name: Deploy s390x confluentinc/cp-server-connect
     dependencies: ["Build & Test s390x"]
     run:
@@ -752,10 +598,9 @@ blocks:
             - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
             - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
   - name: Create Manifest and Maven Deploy
-    dependencies: ["Deploy AMD confluentinc/cp-server-connect", "Deploy AMD confluentinc/cp-server-connect-base", "Deploy AMD confluentinc/cp-kafka-connect", "Deploy AMD confluentinc/cp-kafka-connect-base",
-      "Deploy AMD confluentinc/cp-kafka", "Deploy AMD confluentinc/confluent-local", "Deploy AMD confluentinc/cp-server", "Deploy ARM confluentinc/cp-server-connect", "Deploy ARM confluentinc/cp-server-connect-base",
-      "Deploy ARM confluentinc/cp-kafka-connect", "Deploy ARM confluentinc/cp-kafka-connect-base", "Deploy ARM confluentinc/cp-kafka", "Deploy ARM confluentinc/confluent-local", "Deploy ARM confluentinc/cp-server",
-      "Deploy s390x confluentinc/cp-server", "Deploy s390x confluentinc/cp-server-connect-base", "Deploy s390x confluentinc/cp-server-connect"]
+    dependencies: ["Deploy AMD confluentinc/cp-server-connect", "Deploy AMD confluentinc/cp-kafka-connect", "Deploy AMD confluentinc/cp-kafka", "Deploy AMD confluentinc/confluent-local", "Deploy AMD confluentinc/cp-server",
+      "Deploy ARM confluentinc/cp-server-connect", "Deploy ARM confluentinc/cp-kafka-connect", "Deploy ARM confluentinc/cp-kafka", "Deploy ARM confluentinc/confluent-local", "Deploy ARM confluentinc/cp-server",
+      "Deploy s390x confluentinc/cp-server", "Deploy s390x confluentinc/cp-server-connect"]
     run:
       when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
