@@ -81,9 +81,13 @@ global_job_config:
         fi
       - export DOCKER_DEV_REGISTRY="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/"
       - export DOCKER_PROD_REGISTRY="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/"
-      - export DOCKER_UPSTREAM_REGISTRY=$DOCKER_PROD_REGISTRY
+      # POC-only override for CPBR-3841 jmx_prometheus_javaagent 1.6.0 testing - builds against
+      # common-docker PR #2343's base image instead of the real published one. Revert before merge;
+      # this PR is not meant to be merged. Per Copilot's review on schema-registry-images#219, only
+      # DOCKER_UPSTREAM_TAG is overridden (not LATEST_TAG), since LATEST_TAG feeds deploy-tag computation.
+      - export DOCKER_UPSTREAM_REGISTRY=$DOCKER_DEV_REGISTRY
       - export LATEST_TAG=$BRANCH_TAG-latest
-      - export DOCKER_UPSTREAM_TAG="$LATEST_TAG"
+      - export DOCKER_UPSTREAM_TAG="dev-master-7fec7693"
       - export DOCKER_REPOS="confluentinc/cp-server-connect confluentinc/cp-kafka-connect confluentinc/cp-kafka confluentinc/confluent-local confluentinc/cp-server"
       - export COMMUNITY_DOCKER_REPOS="confluentinc/cp-kafka-connect confluentinc/cp-kafka confluentinc/confluent-local"
       - export S390X_DOCKER_REPOS="confluentinc/cp-server confluentinc/cp-server-connect"
@@ -137,11 +141,15 @@ blocks:
         - name: Build, Test, & Scan ubi9
           commands:
             - export OS_TAG="-ubi9"
-            - export DOCKER_UPSTREAM_TAG="${DOCKER_UPSTREAM_TAG}${OS_TAG}"
+            # POC-only: our dev base image tag is arch-suffixed (not a multi-arch manifest), unlike
+            # the real prod tag - append the arch suffix here too. Revert before merge.
+            - export DOCKER_UPSTREAM_TAG="${DOCKER_UPSTREAM_TAG}${OS_TAG}${AMD_ARCH}"
             - export DOCKER_DEV_FULL_IMAGES=$DOCKER_DEV_REGISTRY${DOCKER_REPOS// /:$DOCKER_DEV_TAG$OS_TAG $DOCKER_DEV_REGISTRY}:$DOCKER_DEV_TAG$OS_TAG
             - export AMD_DOCKER_DEV_FULL_IMAGES=${DOCKER_DEV_FULL_IMAGES// /$AMD_ARCH }$AMD_ARCH
             - ci-tools ci-update-version --direct-pom-edit
-            - export OS_PACKAGES_URL=$(echo "$PACKAGES_URL" | sed "s/PACKAGE_TYPE/rpm/g")
+            # POC-only: use the stable public repo instead of the dev packaging snapshot, keeping the
+            # real dynamically-resolved version. Revert before merge.
+            - export OS_PACKAGES_URL="https://packages.confluent.io/rpm/$URL_CONFLUENT_VERSION"
             - export PACKAGING_BUILD_ARGS="$PACKAGING_BUILD_ARGS -DCONFLUENT_PACKAGES_REPO=$OS_PACKAGES_URL"
             - mvn -Dmaven.wagon.http.retryHandler.count=3 --batch-mode -P jenkins,docker-fabric8 clean verify dependency:analyze validate -U -Ddocker.registry=$DOCKER_DEV_REGISTRY 
               -Ddocker.upstream-registry=$DOCKER_UPSTREAM_REGISTRY -DBUILD_NUMBER=$BUILD_NUMBER -DGIT_COMMIT=$GIT_COMMIT -Ddocker.tag=$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH 
