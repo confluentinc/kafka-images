@@ -88,8 +88,10 @@ global_job_config:
         fi
       - export DOCKER_DEV_REGISTRY="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/dev/"
       - export DOCKER_PROD_REGISTRY="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/"
-      - export DOCKER_UPSTREAM_REGISTRY=$DOCKER_PROD_REGISTRY
-      - export LATEST_TAG=$BRANCH_TAG-latest
+      # POC-only override for CPBR-3841 jmx_prometheus_javaagent 1.6.0 test:
+      # build against common-docker's 8.4-jmx-test-v2 dev image instead of prod.
+      - export DOCKER_UPSTREAM_REGISTRY=$DOCKER_DEV_REGISTRY
+      - export LATEST_TAG="dev-8.4-jmx-test-v2-$PACKAGING_BUILD_NUMBER"
       - export DOCKER_UPSTREAM_TAG="$LATEST_TAG"
       - export DOCKER_REPOS="confluentinc/cp-server-connect confluentinc/cp-kafka-connect confluentinc/cp-kafka confluentinc/confluent-local confluentinc/cp-server"
       - export COMMUNITY_DOCKER_REPOS="confluentinc/cp-kafka-connect confluentinc/cp-kafka confluentinc/confluent-local"
@@ -121,7 +123,9 @@ global_job_config:
           # Build s390x Maven args: include s390x modules, exclude community modules
           export S390X_MVN_PL_ARGS="-pl ${S390X_MAVEN_MODULES// /,},!kafka-connect,!kafka,!local -am"
         fi
-      - export DOCKER_DEV_TAG="dev-$BRANCH_TAG-$BUILD_NUMBER"
+      # POC-only (CPBR-3841): use PACKAGING_BUILD_NUMBER instead of this run's own
+      # BUILD_NUMBER, so the dev tag is deterministic and matches common-docker's.
+      - export DOCKER_DEV_TAG="dev-$BRANCH_TAG-$PACKAGING_BUILD_NUMBER"
       - export AMD_ARCH=.amd64
       - export ARM_ARCH=.arm64
       - export S390X_ARCH=.s390x
@@ -145,7 +149,7 @@ blocks:
         - name: Build, Test, & Scan ubi9
           commands:
             - export OS_TAG="-ubi9"
-            - export DOCKER_UPSTREAM_TAG="${DOCKER_UPSTREAM_TAG}${OS_TAG}"
+            - export DOCKER_UPSTREAM_TAG="${DOCKER_UPSTREAM_TAG}${OS_TAG}${AMD_ARCH}"
             - export DOCKER_DEV_FULL_IMAGES=$DOCKER_DEV_REGISTRY${DOCKER_REPOS// /:$DOCKER_DEV_TAG$OS_TAG $DOCKER_DEV_REGISTRY}:$DOCKER_DEV_TAG$OS_TAG
             - export AMD_DOCKER_DEV_FULL_IMAGES=${DOCKER_DEV_FULL_IMAGES// /$AMD_ARCH }$AMD_ARCH
             - ci-tools ci-update-version --direct-pom-edit
@@ -330,7 +334,7 @@ blocks:
         - name: Build & Test ubi9
           commands:
             - export OS_TAG="-ubi9"
-            - export DOCKER_UPSTREAM_TAG="${DOCKER_UPSTREAM_TAG}${OS_TAG}"
+            - export DOCKER_UPSTREAM_TAG="${DOCKER_UPSTREAM_TAG}${OS_TAG}${ARM_ARCH}"
             - export DOCKER_DEV_FULL_IMAGES=$DOCKER_DEV_REGISTRY${DOCKER_REPOS// /:$DOCKER_DEV_TAG$OS_TAG $DOCKER_DEV_REGISTRY}:$DOCKER_DEV_TAG$OS_TAG
             - export ARM_DOCKER_DEV_FULL_IMAGES=${DOCKER_DEV_FULL_IMAGES// /$ARM_ARCH }$ARM_ARCH
             - export OS_PACKAGES_URL=$(echo "$PACKAGES_URL" | sed "s/PACKAGE_TYPE/rpm/g")
@@ -522,7 +526,7 @@ blocks:
         - name: Build & Test s390x ubi9
           commands:
             - export OS_TAG="-ubi9"
-            - export DOCKER_UPSTREAM_TAG="${DOCKER_UPSTREAM_TAG}${OS_TAG}"
+            - export DOCKER_UPSTREAM_TAG="${DOCKER_UPSTREAM_TAG}${OS_TAG}${S390X_ARCH}"
             - ci-tools ci-update-version --direct-pom-edit
             - export OS_PACKAGES_URL=$(echo "$PACKAGES_URL" | sed "s/PACKAGE_TYPE/rpm/g")
             - export PACKAGING_BUILD_ARGS="$PACKAGING_BUILD_ARGS -DCONFLUENT_PACKAGES_REPO=$OS_PACKAGES_URL"
