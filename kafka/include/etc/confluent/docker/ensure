@@ -23,7 +23,24 @@ ub path "$KAFKA_DATA_DIRS" writable
 # Required step: Format the storage directory with provided cluster ID unless it already exists.
 echo "===> Using provided cluster id $CLUSTER_ID ..."
 
-# A bit of a hack to not error out if the storage is already formatted.  Need storage-tool to support this
-result=$(kafka-storage format --cluster-id=$CLUSTER_ID -c /etc/kafka/kafka.properties 2>&1) || \
-    echo $result | grep -i "already formatted" || \
-    { echo $result && (exit 1) }
+# --ignore-formatted skips log directories that are already formatted instead of failing, so this is
+# safe to re-run on every start.
+format_args=(--cluster-id="$CLUSTER_ID" -c /etc/kafka/kafka.properties --ignore-formatted)
+
+# IS_DYNAMIC_QUORUM tells the storage tool that this cluster's controller quorum membership is
+# managed dynamically (KIP-853) rather than by a static controller.quorum.voters list.  Only set it
+# to true AFTER the cluster has completed the migration to a dynamic quorum; setting it on a cluster
+# that still uses a static voter set will format a node that cannot join the quorum.
+case "${IS_DYNAMIC_QUORUM:-false}" in
+    [Tt][Rr][Uu][Ee])
+        echo "===> IS_DYNAMIC_QUORUM is true, formatting without an initial controller set ..."
+        format_args+=(--no-initial-controllers)
+        ;;
+    [Ff][Aa][Ll][Ss][Ee]) ;;
+    *)
+        echo "IS_DYNAMIC_QUORUM must be true or false, got '$IS_DYNAMIC_QUORUM'"
+        exit 1
+        ;;
+esac
+
+kafka-storage format "${format_args[@]}"
