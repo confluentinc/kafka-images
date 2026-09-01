@@ -91,7 +91,7 @@ global_job_config:
       # POC-only override for CPBR-3841 jmx_prometheus_javaagent 1.6.0 test:
       # build against common-docker's 8.4-jmx-test-v2 dev image instead of prod.
       - export DOCKER_UPSTREAM_REGISTRY=$DOCKER_DEV_REGISTRY
-      - export LATEST_TAG="dev-8.4-jmx-test-v2-$PACKAGING_BUILD_NUMBER"
+      - export LATEST_TAG="8.4.0-8.4-jmx-test-v2-$PACKAGING_BUILD_NUMBER"
       - export DOCKER_UPSTREAM_TAG="$LATEST_TAG"
       - export DOCKER_REPOS="confluentinc/cp-server-connect confluentinc/cp-kafka-connect confluentinc/cp-kafka confluentinc/confluent-local confluentinc/cp-server"
       - export COMMUNITY_DOCKER_REPOS="confluentinc/cp-kafka-connect confluentinc/cp-kafka confluentinc/confluent-local"
@@ -125,7 +125,7 @@ global_job_config:
         fi
       # POC-only (CPBR-3841): use PACKAGING_BUILD_NUMBER instead of this run's own
       # BUILD_NUMBER, so the dev tag is deterministic and matches common-docker's.
-      - export DOCKER_DEV_TAG="dev-$BRANCH_TAG-$PACKAGING_BUILD_NUMBER"
+      - export DOCKER_DEV_TAG="8.4.0-$BRANCH_TAG-$PACKAGING_BUILD_NUMBER"
       - export AMD_ARCH=.amd64
       - export ARM_ARCH=.arm64
       - export S390X_ARCH=.s390x
