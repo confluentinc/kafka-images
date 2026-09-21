@@ -2,7 +2,7 @@
 
 Docker image for deploying and running Kafka Connect. 
 
-_Functionally, the `cp-server-connect` and the `cp-server-connect-base` images are identical. Prior to Confluent Platform 6.0 the `cp-server-connect` image included several connectors pre-installed, but **this is no longer the case**._
+_Prior to Confluent Platform 6.0 the `cp-server-connect` image included several connectors pre-installed, but **this is no longer the case**._
 
 ## What is Kafka Connect?
 

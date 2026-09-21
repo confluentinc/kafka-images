@@ -22,7 +22,7 @@
     <parent>
         <groupId>io.confluent</groupId>
         <artifactId>common-docker</artifactId>
-        <version>[8.3.3-0, 8.3.4-0)</version>
+        <version>[8.4.0-0, 8.4.1-0)</version>
     </parent>
 
     <groupId>io.confluent.kafka-images</groupId>
@@ -30,21 +30,19 @@
     <packaging>pom</packaging>
     <name>Kafka and CE Kafka Docker Images</name>
     <description>Build files for Confluent's Kafka Docker images</description>
-    <version>8.3.3-0</version>
+    <version>8.4.0-0</version>
 
     <modules>
         <module>server</module>
         <module>kafka</module>
         <module>local</module>
-        <module>kafka-connect-base</module>
         <module>kafka-connect</module>
-        <module>server-connect-base</module>
         <module>server-connect</module>
     </modules>
 
     <properties>
         <component.name>kafka</component.name>
-        <io.confluent.kafka-images.version>8.3.3-0</io.confluent.kafka-images.version>
+        <io.confluent.kafka-images.version>8.4.0-0</io.confluent.kafka-images.version>
     </properties>
 
     <dependencies>

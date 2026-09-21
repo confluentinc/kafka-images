@@ -93,7 +93,7 @@ USER root
 # Consolidate /usr/bin/ COPYs into a single layer to reduce image layer count.
 # RedHat certification check "LayerCountAcceptable" requires < 40 layers.
 # The deeply nested base image chain (ubi9-micro -> cp-base-java-micro -> cp-server ->
-# cp-server-connect-base -> cp-enterprise-replicator) accumulates layers at each level.
+# cp-server-connect -> cp-enterprise-replicator) accumulates layers at each level.
 COPY --from=builder /microdir/usr/bin/*kafka* /microdir/usr/bin/*connect* /microdir/usr/bin/*confluent* /microdir/usr/bin/trogdor /microdir/usr/bin/security-plugins-run-class /microdir/usr/bin/sr-acl-cli /usr/bin/
 COPY --from=builder /microdir/usr/share/java /usr/share/java
 COPY --from=builder /microdir/usr/share/doc /usr/share/doc
