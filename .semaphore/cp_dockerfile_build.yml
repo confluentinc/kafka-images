@@ -322,7 +322,9 @@ blocks:
   - name: "Inject License AMD"
     dependencies: ["Build, Test, & Scan AMD"]
     run:
-      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
+      # TEMPORARY, dummy-test-only: also run on this PR so inject-license + dev-ECR push can be
+      # exercised for real here. Drop the "or pull_request" clause once this stops being a design demo.
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$' or pull_request =~ '.*'"
     task:
       jobs:
         - name: Inject License AMD confluentinc/cp-server ubi9
