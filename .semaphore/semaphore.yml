@@ -177,7 +177,7 @@ blocks:
             # of the normal pinned CodeArtifact install -- remove this once depot#1011 merges and a
             # real cp-devtools release picks it up.
             - git clone --branch nitsingh/cp-devtools-license-injection --depth 1 https://github.com/confluentinc/depot.git /tmp/depot-pr-1011
-            - cd /tmp/depot-pr-1011 && bazel build //python/cp_devtools:cp_devtools
+            - cd /tmp/depot-pr-1011 && bazel build --config=release //python/cp_devtools:cp_devtools
             - pip install /tmp/depot-pr-1011/bazel-bin/python/cp_devtools/cp_devtools-*.whl --force-reinstall
             - cd -
             - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-server:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
