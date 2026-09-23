@@ -176,7 +176,12 @@ blocks:
             # doesn't exist on any real CI agent. Build the wheel straight from the PR branch instead
             # of the normal pinned CodeArtifact install -- remove this once depot#1011 merges and a
             # real cp-devtools release picks it up.
-            - git clone --branch nitsingh/cp-devtools-license-injection --depth 1 https://github.com/confluentinc/depot.git /tmp/depot-pr-1011
+            # Full clone (not shallow): depot's tools/stamp.sh needs `git describe
+            # --tags` to find a real tag for Bazel's --config=release stamping --
+            # a shallow clone has no tags reachable, which the script's own exit-code
+            # check fails to catch (a pipe-to-sed bug swallows git describe's real
+            # failure), producing an invalid empty/partial version string.
+            - git clone --branch nitsingh/cp-devtools-license-injection https://github.com/confluentinc/depot.git /tmp/depot-pr-1011
             - cd /tmp/depot-pr-1011 && bazel build --config=release //python/cp_devtools:cp_devtools
             - pip install /tmp/depot-pr-1011/bazel-bin/python/cp_devtools/cp_devtools-*.whl --force-reinstall
             - cd -
