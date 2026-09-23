@@ -233,26 +233,53 @@ blocks:
           commands:
             - export OS_TYPE="ubi9"
             - export DOCKER_REPO="confluentinc/cp-server"
+            - export ICR_REPO="icr.io/cp/confluentinc/cp-server"
+            - export ICR_SUFFIX="icr"
             - export OS_TAG="-$OS_TYPE"
-            - export INTERNAL_IMAGE_TAG="$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$AMD_ARCH-icr"
+            - export INTERNAL_IMAGE_TAG="$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$AMD_ARCH-$ICR_SUFFIX"
             - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG$AMD_ARCH"
             - export PROD_IMAGE_ICR=$DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG
-            - export ICR_TAG="icr.io/cp/$DOCKER_REPO:$PROMOTED_TAG"
             - . vault-get-secret --secret-key=key --save-as=/tmp/icr_key cpbr/ibm_icr_prod_entitled_api_key
             - cat /tmp/icr_key | docker login -u iamapikey --password-stdin icr.io
             - rm -f /tmp/icr_key
             - docker pull $PROD_IMAGE_ICR
-            - docker tag $PROD_IMAGE_ICR $ICR_TAG
-            - docker push $ICR_TAG
+            - docker tag $PROD_IMAGE_ICR $ICR_REPO:$PROMOTED_TAG
+            - docker push $ICR_REPO:$PROMOTED_TAG
+            - >-
+              if [[ ! "$OS_TYPE" ]] || [[ "$OS_TYPE" =~ ubi* ]]; then
+                  export APPLY_TAG=$CONFLUENT_VERSION$AMD_ARCH
+                  docker tag $PROD_IMAGE_ICR $ICR_REPO:$APPLY_TAG
+                  docker push $ICR_REPO:$APPLY_TAG
+                  export APPLIED="true"
+              fi
+            - >-
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
+                  if [[ $APPLIED ]]; then
+                  docker tag $ICR_REPO:$PROMOTED_TAG $ICR_REPO:latest$AMD_ARCH
+                  docker push $ICR_REPO:latest$AMD_ARCH
+                  fi
+                  docker tag $ICR_REPO:$PROMOTED_TAG $ICR_REPO:latest-$OS_TYPE$AMD_ARCH
+                  docker push $ICR_REPO:latest-$OS_TYPE$AMD_ARCH
+              fi
   - name: "Create ICR Manifest"
     dependencies: ["Push ICR AMD"]
     task:
       jobs:
         - name: Create ICR Manifest confluentinc/cp-server
           commands:
-            - export ICR_TAG="icr.io/cp/confluentinc/cp-server:$PROMOTED_TAG_PREFIX-ubi9"
-            - docker manifest create $ICR_TAG $ICR_TAG$AMD_ARCH
-            - docker manifest push $ICR_TAG
+            - export ICR_REPO="icr.io/cp/confluentinc/cp-server"
+            - export OS_TAG="-ubi9"
+            - docker manifest create $ICR_REPO:$PROMOTED_TAG_PREFIX$OS_TAG $ICR_REPO:$PROMOTED_TAG_PREFIX$OS_TAG$AMD_ARCH $ICR_REPO:$PROMOTED_TAG_PREFIX$OS_TAG$ARM_ARCH
+            - docker manifest push $ICR_REPO:$PROMOTED_TAG_PREFIX$OS_TAG
+            - docker manifest create $ICR_REPO:$CONFLUENT_VERSION $ICR_REPO:$CONFLUENT_VERSION$AMD_ARCH $ICR_REPO:$CONFLUENT_VERSION$ARM_ARCH
+            - docker manifest push $ICR_REPO:$CONFLUENT_VERSION
+            - >-
+              if [[ $UPDATE_LATEST_TAG == "True" ]]; then
+                  docker manifest create $ICR_REPO:latest $ICR_REPO:latest$AMD_ARCH $ICR_REPO:latest$ARM_ARCH
+                  docker manifest push $ICR_REPO:latest
+                  docker manifest create $ICR_REPO:latest$OS_TAG $ICR_REPO:latest$OS_TAG$AMD_ARCH $ICR_REPO:latest$OS_TAG$ARM_ARCH
+                  docker manifest push $ICR_REPO:latest$OS_TAG
+              fi
   # --- END DUMMY ---
 
   - name: Promote ARM

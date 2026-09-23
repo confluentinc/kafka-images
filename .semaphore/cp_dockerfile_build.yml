@@ -329,8 +329,9 @@ blocks:
         - name: Inject License AMD confluentinc/cp-server ubi9
           commands:
             - export OS_TAG="-ubi9"
+            - export ICR_SUFFIX="icr"
             - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-server:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
-            - inject-license --image $DEV_IMAGE_FULL --tag-suffix icr --push
+            - inject-license --image $DEV_IMAGE_FULL --tag-suffix $ICR_SUFFIX --push
   - name: "Deploy AMD confluentinc/cp-server (ICR)"
     dependencies: ["Inject License AMD"]
     run:
@@ -343,15 +344,22 @@ blocks:
               value: confluentinc/cp-server
           commands:
             - export OS_TAG="-ubi9"
+            - export ICR_SUFFIX="icr"
             - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-server
-            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$AMD_ARCH-icr
-            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$AMD_ARCH-icr
-            - export DEV_IMAGE_FULL_ICR=${DOCKER_DEV_REGISTRY}confluentinc/cp-server:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH-icr
+            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$AMD_ARCH-$ICR_SUFFIX
+            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$AMD_ARCH-$ICR_SUFFIX
+            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$AMD_ARCH-$ICR_SUFFIX
+            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$AMD_ARCH-$ICR_SUFFIX
+            - export DEV_IMAGE_FULL_ICR=${DOCKER_DEV_REGISTRY}confluentinc/cp-server:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH-$ICR_SUFFIX
             - docker pull $DEV_IMAGE_FULL_ICR
             - docker tag $DEV_IMAGE_FULL_ICR $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
             - docker tag $DEV_IMAGE_FULL_ICR $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
+            - docker tag $DEV_IMAGE_FULL_ICR $PROD_IMAGE_NAME:$PACKAGE_TAG
+            - docker tag $DEV_IMAGE_FULL_ICR $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
             - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
             - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
+            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
+            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
   # --- END DUMMY ---
 
   - name: Build & Test ARM
