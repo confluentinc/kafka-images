@@ -155,6 +155,35 @@ blocks:
             - . publish-test-results
             - artifact push workflow target/test-results
             - artifact push workflow target --destination target-AMD
+
+  # --- DUMMY / DO NOT MERGE: ICR pipeline design demo, cp-server/AMD only ---
+  # Ported here from .semaphore/cp_dockerfile_build.yml (a manually-triggered task, not this repo's
+  # PR pipeline) so inject-license + dev-ECR push can actually be exercised by a normal PR build.
+  # This file has no prod-push block at all, so there is nothing downstream this could unblock.
+  # Remove once depot#1011 merges and this design demo is done -- and note ServiceBot regenerates
+  # this file nightly, so this addition won't survive past that regardless.
+  - name: "Inject License AMD"
+    dependencies: ["Build, Test, & Scan AMD"]
+    run:
+      when: "pull_request =~ '.*'"
+    task:
+      jobs:
+        - name: Inject License AMD confluentinc/cp-server ubi9
+          commands:
+            - export OS_TAG="-ubi9"
+            - export ICR_SUFFIX="icr"
+            # TEMPORARY, dummy-test-only: depot#1011 hasn't merged/published yet, so inject-license
+            # doesn't exist on any real CI agent. Build the wheel straight from the PR branch instead
+            # of the normal pinned CodeArtifact install -- remove this once depot#1011 merges and a
+            # real cp-devtools release picks it up.
+            - git clone --branch nitsingh/cp-devtools-license-injection --depth 1 https://github.com/confluentinc/depot.git /tmp/depot-pr-1011
+            - cd /tmp/depot-pr-1011 && bazel build //python/cp_devtools:cp_devtools
+            - pip install /tmp/depot-pr-1011/bazel-bin/python/cp_devtools/cp_devtools-*.whl --force-reinstall
+            - cd -
+            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-server:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
+            - inject-license --image $DEV_IMAGE_FULL --tag-suffix $ICR_SUFFIX --push
+  # --- END DUMMY ---
+
   - name: Build & Test ARM
     dependencies: ["Validation"]
     run:
