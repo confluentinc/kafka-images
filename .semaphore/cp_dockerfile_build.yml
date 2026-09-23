@@ -345,6 +345,8 @@ blocks:
             - git clone --branch nitsingh/cp-devtools-license-injection https://github.com/confluentinc/depot.git /tmp/depot-pr-1011
             - 'sed -i "s|version = \"{BUILD_VERSION}\"|version = \"0.0.0.dev0\"|" /tmp/depot-pr-1011/python/cp_devtools/BUILD.bazel'
             - cd /tmp/depot-pr-1011 && bazel build //python/cp_devtools:cp_devtools
+            # cp-devtools requires Python >=3.11; this agent's default pip/python is 3.10.
+            - sem-version python 3.11
             - pip install /tmp/depot-pr-1011/bazel-bin/python/cp_devtools/cp_devtools-*.whl --force-reinstall
             - cd -
             - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-server:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
