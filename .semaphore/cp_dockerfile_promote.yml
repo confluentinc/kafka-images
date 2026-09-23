@@ -221,6 +221,40 @@ blocks:
                   docker push $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
               fi
 
+  # --- DUMMY / DO NOT MERGE: ICR pipeline design demo, cp-server/AMD only ---
+  # dependencies references a block that doesn't exist so Semaphore refuses
+  # to schedule this pipeline at all -- see depot#1011 for the real cp_devtools
+  # license-injection module this would call.
+  - name: "Push ICR AMD"
+    dependencies: ["DOES_NOT_EXIST_YET_2"]
+    task:
+      jobs:
+        - name: Push ICR AMD confluentinc/cp-server
+          commands:
+            - export OS_TYPE="ubi9"
+            - export DOCKER_REPO="confluentinc/cp-server"
+            - export OS_TAG="-$OS_TYPE"
+            - export INTERNAL_IMAGE_TAG="$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$AMD_ARCH-icr"
+            - export PROMOTED_TAG="$PROMOTED_TAG_PREFIX$OS_TAG$AMD_ARCH"
+            - export PROD_IMAGE_ICR=$DOCKER_PROD_REGISTRY$DOCKER_REPO:$INTERNAL_IMAGE_TAG
+            - export ICR_TAG="icr.io/cp/$DOCKER_REPO:$PROMOTED_TAG"
+            - . vault-get-secret --secret-key=key --save-as=/tmp/icr_key cpbr/ibm_icr_prod_entitled_api_key
+            - cat /tmp/icr_key | docker login -u iamapikey --password-stdin icr.io
+            - rm -f /tmp/icr_key
+            - docker pull $PROD_IMAGE_ICR
+            - docker tag $PROD_IMAGE_ICR $ICR_TAG
+            - docker push $ICR_TAG
+  - name: "Create ICR Manifest"
+    dependencies: ["Push ICR AMD"]
+    task:
+      jobs:
+        - name: Create ICR Manifest confluentinc/cp-server
+          commands:
+            - export ICR_TAG="icr.io/cp/confluentinc/cp-server:$PROMOTED_TAG_PREFIX-ubi9"
+            - docker manifest create $ICR_TAG $ICR_TAG$AMD_ARCH
+            - docker manifest push $ICR_TAG
+  # --- END DUMMY ---
+
   - name: Promote ARM
     dependencies: []
     task:
