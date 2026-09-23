@@ -176,20 +176,27 @@ blocks:
             # doesn't exist on any real CI agent. Build the wheel straight from the PR branch instead
             # of the normal pinned CodeArtifact install -- remove this once depot#1011 merges and a
             # real cp-devtools release picks it up.
-            # depot's tools/stamp.sh stamps BUILD_VERSION via `git describe --tags`, but this PR
-            # branch forked before/around depot's real 2026.XX tags and never merged them back in --
-            # none of those tags are ancestors of this branch, full clone or not, so git describe
-            # always fails here. --config=release's own --workspace_status_command="tools/stamp.sh"
-            # kept winning even when a --workspace_status_command override was appended after it on
-            # the same line, so avoid --config=release entirely: pass its two underlying flags
-            # (-c opt --stamp) directly ourselves, with no competing definition to lose to.
+            # Bazel's --workspace_status_command mechanism (stamp.sh or our own override) never
+            # actually reaches py_wheel's version substitution -- confirmed locally: wheelmaker
+            # receives the literal, unsubstituted '{BUILD_VERSION}' string regardless of what the
+            # volatile-status file contains. This is a rules_python/wheelmaker behavior, not fixable
+            # via any --workspace_status_command flag. So skip stamping entirely: sed the version
+            # attribute in the cloned BUILD.bazel to a literal string, then a plain (unstamped) build.
             - git clone --branch nitsingh/cp-devtools-license-injection https://github.com/confluentinc/depot.git /tmp/depot-pr-1011
-            - 'printf "#!/bin/sh\necho BUILD_VERSION 0.0.0-dummy\n" > /tmp/dummy-stamp.sh && chmod +x /tmp/dummy-stamp.sh'
-            - cd /tmp/depot-pr-1011 && bazel build -c opt --stamp --workspace_status_command=/tmp/dummy-stamp.sh //python/cp_devtools:cp_devtools
+            - 'sed -i "s|version = \"{BUILD_VERSION}\"|version = \"0.0.0.dev0\"|" /tmp/depot-pr-1011/python/cp_devtools/BUILD.bazel'
+            - cd /tmp/depot-pr-1011 && bazel build //python/cp_devtools:cp_devtools
             - pip install /tmp/depot-pr-1011/bazel-bin/python/cp_devtools/cp_devtools-*.whl --force-reinstall
             - cd -
             - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-server:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
-            - inject-license --image $DEV_IMAGE_FULL --tag-suffix $ICR_SUFFIX --push
+            - docker pull $DEV_IMAGE_FULL
+            # inject-license needs a tag with a real major.minor version to resolve a CASE/license --
+            # this PR's own dev tag (dev-pull-request-539-<hash>) has none (only a real release
+            # branch's own name, e.g. 8.4.x, would). Re-tag+push under an explicit version-bearing
+            # tag first so inject-license has something real to resolve against.
+            - export DEV_IMAGE_VERSIONED=${DOCKER_DEV_REGISTRY}confluentinc/cp-server:8.3.0-dummy$OS_TAG$AMD_ARCH
+            - docker tag $DEV_IMAGE_FULL $DEV_IMAGE_VERSIONED
+            - docker push $DEV_IMAGE_VERSIONED
+            - inject-license --image $DEV_IMAGE_VERSIONED --tag-suffix $ICR_SUFFIX --push
   # --- END DUMMY ---
 
   - name: Build & Test ARM
