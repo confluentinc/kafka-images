@@ -339,11 +339,13 @@ blocks:
             # depot's tools/stamp.sh stamps BUILD_VERSION via `git describe --tags`, but this PR
             # branch forked before/around depot's real 2026.XX tags and never merged them back in --
             # none of those tags are ancestors of this branch, full clone or not, so git describe
-            # always fails here. Skip stamp.sh entirely: pass our own --workspace_status_command
-            # that just emits a fixed valid version, overriding depot's script for this build only.
+            # always fails here. --config=release's own --workspace_status_command="tools/stamp.sh"
+            # kept winning even when a --workspace_status_command override was appended after it on
+            # the same line, so avoid --config=release entirely: pass its two underlying flags
+            # (-c opt --stamp) directly ourselves, with no competing definition to lose to.
             - git clone --branch nitsingh/cp-devtools-license-injection https://github.com/confluentinc/depot.git /tmp/depot-pr-1011
             - 'printf "#!/bin/sh\necho BUILD_VERSION 0.0.0-dummy\n" > /tmp/dummy-stamp.sh && chmod +x /tmp/dummy-stamp.sh'
-            - cd /tmp/depot-pr-1011 && bazel build --config=release --workspace_status_command=/tmp/dummy-stamp.sh //python/cp_devtools:cp_devtools
+            - cd /tmp/depot-pr-1011 && bazel build -c opt --stamp --workspace_status_command=/tmp/dummy-stamp.sh //python/cp_devtools:cp_devtools
             - pip install /tmp/depot-pr-1011/bazel-bin/python/cp_devtools/cp_devtools-*.whl --force-reinstall
             - cd -
             - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-server:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
