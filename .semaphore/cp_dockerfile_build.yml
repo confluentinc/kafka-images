@@ -317,11 +317,10 @@ blocks:
             - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
 
   # --- DUMMY / DO NOT MERGE: ICR pipeline design demo, cp-server/AMD only ---
-  # dependencies references a block that doesn't exist so Semaphore refuses
-  # to schedule this pipeline at all -- see depot#1011 for the real cp_devtools
-  # license-injection module these blocks would call.
+  # Prod-ECR push stays blocked (see the broken dependency on the Deploy
+  # (ICR) block below) -- only license-inject + dev-ECR push is live here.
   - name: "Inject License AMD"
-    dependencies: ["Build, Test, & Scan AMD", "DOES_NOT_EXIST_YET"]
+    dependencies: ["Build, Test, & Scan AMD"]
     run:
       when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
@@ -330,10 +329,19 @@ blocks:
           commands:
             - export OS_TAG="-ubi9"
             - export ICR_SUFFIX="icr"
+            # TEMPORARY, dummy-test-only: depot#1011 hasn't merged/published yet,
+            # so inject-license doesn't exist on any real CI agent. Build the
+            # wheel straight from the PR branch instead of the normal pinned
+            # CodeArtifact install -- remove this whole block once depot#1011
+            # merges and a real cp-devtools release picks it up.
+            - git clone --branch nitsingh/cp-devtools-license-injection --depth 1 https://github.com/confluentinc/depot.git /tmp/depot-pr-1011
+            - cd /tmp/depot-pr-1011 && bazel build //python/cp_devtools:cp_devtools
+            - pip install /tmp/depot-pr-1011/bazel-bin/python/cp_devtools/cp_devtools-*.whl --force-reinstall
+            - cd -
             - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-server:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
             - inject-license --image $DEV_IMAGE_FULL --tag-suffix $ICR_SUFFIX --push
   - name: "Deploy AMD confluentinc/cp-server (ICR)"
-    dependencies: ["Inject License AMD"]
+    dependencies: ["Inject License AMD", "DOES_NOT_EXIST_YET"]
     run:
       when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
     task:
