@@ -315,6 +315,71 @@ blocks:
             - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$AMD_ARCH
             - docker tag $DEV_IMAGE_FULL $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
             - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
+
+  # --- DUMMY / DO NOT MERGE: ICR pipeline design demo, cp-server/AMD only ---
+  # Prod-ECR push stays blocked (see the broken dependency on the Deploy
+  # (ICR) block below) -- only license-inject + dev-ECR push is live here.
+  - name: "Inject License AMD"
+    dependencies: ["Build, Test, & Scan AMD"]
+    run:
+      # TEMPORARY, dummy-test-only: also run on this PR so inject-license + dev-ECR push can be
+      # exercised for real here. Drop the "or pull_request" clause once this stops being a design demo.
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$' or pull_request =~ '.*'"
+    task:
+      jobs:
+        - name: Inject License AMD confluentinc/cp-server ubi9
+          commands:
+            - export OS_TAG="-ubi9"
+            - export ICR_SUFFIX="icr"
+            # TEMPORARY, dummy-test-only: depot#1011 hasn't merged/published yet,
+            # so inject-license doesn't exist on any real CI agent. Build the
+            # wheel straight from the PR branch instead of the normal pinned
+            # CodeArtifact install -- remove this whole block once depot#1011
+            # merges and a real cp-devtools release picks it up.
+            # depot's tools/stamp.sh stamps BUILD_VERSION via `git describe --tags`, but this PR
+            # branch forked before/around depot's real 2026.XX tags and never merged them back in --
+            # none of those tags are ancestors of this branch, full clone or not, so git describe
+            # always fails here. --config=release's own --workspace_status_command="tools/stamp.sh"
+            # kept winning even when a --workspace_status_command override was appended after it on
+            # the same line, so avoid --config=release entirely: pass its two underlying flags
+            # (-c opt --stamp) directly ourselves, with no competing definition to lose to.
+            - git clone --branch nitsingh/cp-devtools-license-injection https://github.com/confluentinc/depot.git /tmp/depot-pr-1011
+            - 'printf "#!/bin/sh\necho BUILD_VERSION 0.0.0-dummy\n" > /tmp/dummy-stamp.sh && chmod +x /tmp/dummy-stamp.sh'
+            - cd /tmp/depot-pr-1011 && bazel build -c opt --stamp --workspace_status_command=/tmp/dummy-stamp.sh //python/cp_devtools:cp_devtools
+            - pip install /tmp/depot-pr-1011/bazel-bin/python/cp_devtools/cp_devtools-*.whl --force-reinstall
+            - cd -
+            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-server:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
+            - inject-license --image $DEV_IMAGE_FULL --tag-suffix $ICR_SUFFIX --push
+  - name: "Deploy AMD confluentinc/cp-server (ICR)"
+    dependencies: ["Inject License AMD", "DOES_NOT_EXIST_YET"]
+    run:
+      when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$'"
+    task:
+      jobs:
+        - name: Deploy AMD confluentinc/cp-server (ICR) ubi9
+          env_vars:
+            - name: DOCKER_IMAGE
+              value: confluentinc/cp-server
+          commands:
+            - export OS_TAG="-ubi9"
+            - export ICR_SUFFIX="icr"
+            - export PROD_IMAGE_NAME=${DOCKER_PROD_REGISTRY}confluentinc/cp-server
+            - export GIT_COMMIT_TAG=$GIT_COMMIT$OS_TAG$AMD_ARCH-$ICR_SUFFIX
+            - export BRANCH_BUILD_TAG=$BRANCH_TAG-$BUILD_NUMBER$OS_TAG$AMD_ARCH-$ICR_SUFFIX
+            - export PACKAGE_TAG=$BRANCH_TAG-$PACKAGING_BUILD_NUMBER$OS_TAG$AMD_ARCH-$ICR_SUFFIX
+            - export LATEST_PUSH_TAG=$LATEST_TAG$OS_TAG$AMD_ARCH-$ICR_SUFFIX
+            - export DEV_IMAGE_FULL_ICR=${DOCKER_DEV_REGISTRY}confluentinc/cp-server:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH-$ICR_SUFFIX
+            - docker pull $DEV_IMAGE_FULL_ICR
+            - docker tag $DEV_IMAGE_FULL_ICR $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
+            - docker tag $DEV_IMAGE_FULL_ICR $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
+            - docker tag $DEV_IMAGE_FULL_ICR $PROD_IMAGE_NAME:$PACKAGE_TAG
+            - docker tag $DEV_IMAGE_FULL_ICR $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
+            - docker push $PROD_IMAGE_NAME:$GIT_COMMIT_TAG
+            - docker push $PROD_IMAGE_NAME:$BRANCH_BUILD_TAG
+            - docker push $PROD_IMAGE_NAME:$PACKAGE_TAG
+            - docker push $PROD_IMAGE_NAME:$LATEST_PUSH_TAG
+  # --- END DUMMY ---
+
   - name: Build & Test ARM
     dependencies: ["Validation"]
     run:
