@@ -322,6 +322,8 @@ blocks:
   - name: "Inject License AMD"
     dependencies: ["Build, Test, & Scan AMD"]
     run:
+      # DUMMY TRIGGER 2026-09-24T04:32:33Z: re-run to pick up depot#1011's latest
+      # (li_aliases flattening + open_images) -- no-op, safe to drop on any real edit.
       # TEMPORARY, dummy-test-only: also run on this PR so inject-license + dev-ECR push can be
       # exercised for real here. Drop the "or pull_request" clause once this stops being a design demo.
       when: "branch = 'master' or branch =~ '^[0-9]+\\.[0-9]+\\.x$' or branch =~ '^[0-9]+\\.[0-9]+\\.[0-9]+(-cp[0-9]+)?(-rc[0-9]+)?$' or pull_request =~ '.*'"
