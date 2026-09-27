@@ -126,7 +126,7 @@ blocks:
             - (aws s3 ls $PACKAGING_BUCKET$LATEST_PACKAGING_BUILD_NUMBER/deb/ && aws s3 ls $PACKAGING_BUCKET$LATEST_PACKAGING_BUILD_NUMBER/rpm/ && aws s3 ls $PACKAGING_BUCKET$LATEST_PACKAGING_BUILD_NUMBER/archive/) || export LATEST_PACKAGING_BUILD_NUMBER=$(aws s3 ls $PACKAGING_BUCKET --no-paginate | grep 'PRE' | awk '{print $NF}' | awk '{print substr($1, 1, length($1)-1)}' | sort -n | tail -n 2 | head -n 1)
             - export CONFLUENT_VERSION=$(pinto get-version --build $BUILD_KEY --key confluent.version)
             - export URL_CONFLUENT_VERSION=$(echo $CONFLUENT_VERSION | awk -F . '{print $1"."$2}')
-            - export PACKAGES_URL="https://s3-us-west-2.amazonaws.com/dev-confluent-packages-654654529379-us-west-2/$BRANCH_TAG/$LATEST_PACKAGING_BUILD_NUMBER/PACKAGE_TYPE/$URL_CONFLUENT_VERSION"
+            - export PACKAGES_URL="https://s3.us-west-2.amazonaws.com/dev-confluent-packages-654654529379-us-west-2/$BRANCH_TAG/$LATEST_PACKAGING_BUILD_NUMBER/PACKAGE_TYPE/$URL_CONFLUENT_VERSION"
             - export PACKAGING_BUILD_NUMBER=$LATEST_PACKAGING_BUILD_NUMBER
             # Guard -D flags: fabric8 fails when build args resolve to null from empty -D values (e.g. -DCONFLUENT_VERSION=)
             - |
