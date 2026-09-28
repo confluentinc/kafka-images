@@ -128,6 +128,12 @@ blocks:
             - export URL_CONFLUENT_VERSION=$(echo $CONFLUENT_VERSION | awk -F . '{print $1"."$2}')
             - export PACKAGES_URL="https://s3.us-west-2.amazonaws.com/dev-confluent-packages-654654529379-us-west-2/$BRANCH_TAG/$LATEST_PACKAGING_BUILD_NUMBER/PACKAGE_TYPE/$URL_CONFLUENT_VERSION"
             - export PACKAGING_BUILD_NUMBER=$LATEST_PACKAGING_BUILD_NUMBER
+            # s390x packages share the build number under their own s390x/ tree; empty when that build has no s390x rpm repo
+            - |
+              export S390X_PACKAGES_URL=""
+              if aws s3 ls "s3://dev-confluent-packages-654654529379-us-west-2/s390x/$BRANCH_TAG/$PACKAGING_BUILD_NUMBER/rpm/$URL_CONFLUENT_VERSION/repodata/repomd.xml"; then
+                export S390X_PACKAGES_URL="https://s3.us-west-2.amazonaws.com/dev-confluent-packages-654654529379-us-west-2/s390x/$BRANCH_TAG/$PACKAGING_BUILD_NUMBER/PACKAGE_TYPE/$URL_CONFLUENT_VERSION"
+              fi
             # Guard -D flags: fabric8 fails when build args resolve to null from empty -D values (e.g. -DCONFLUENT_VERSION=)
             - |
               export PACKAGING_BUILD_ARGS=""
@@ -143,6 +149,7 @@ blocks:
                 echo "export CONFLUENT_VERSION='$CONFLUENT_VERSION'"
                 echo "export URL_CONFLUENT_VERSION='$URL_CONFLUENT_VERSION'"
                 echo "export PACKAGES_URL='$PACKAGES_URL'"
+                echo "export S390X_PACKAGES_URL='$S390X_PACKAGES_URL'"
                 echo "export PACKAGING_BUILD_NUMBER='$PACKAGING_BUILD_NUMBER'"
                 echo "export PACKAGING_BUILD_ARGS='$PACKAGING_BUILD_ARGS'"
               } > env_vars.sh
@@ -230,7 +237,12 @@ blocks:
             - source env_vars.sh
             - export OS_TAG="-ubi9"
             - export DOCKER_UPSTREAM_TAG="${DOCKER_UPSTREAM_TAG}${OS_TAG}"
-            - export OS_PACKAGES_URL=$(echo "$PACKAGES_URL" | sed "s/PACKAGE_TYPE/rpm/g")
+            - |
+              if [ -z "$S390X_PACKAGES_URL" ]; then
+                echo "No s390x rpm repo for packaging build $PACKAGING_BUILD_NUMBER"
+                exit 1
+              fi
+            - export OS_PACKAGES_URL=$(echo "$S390X_PACKAGES_URL" | sed "s/PACKAGE_TYPE/rpm/g")
             - export PACKAGING_BUILD_ARGS="$PACKAGING_BUILD_ARGS -DCONFLUENT_PACKAGES_REPO=$OS_PACKAGES_URL"
             - mvn -Dmaven.wagon.http.retryHandler.count=3 --batch-mode -P jenkins,docker-fabric8 clean verify dependency:analyze validate -U $S390X_MVN_PL_ARGS -Ddocker.registry=$DOCKER_DEV_REGISTRY 
               -Ddocker.upstream-registry=$DOCKER_UPSTREAM_REGISTRY -DBUILD_NUMBER=$BUILD_NUMBER -DGIT_COMMIT=$GIT_COMMIT -Ddocker.tag=$DOCKER_DEV_TAG$OS_TAG$S390X_ARCH 
