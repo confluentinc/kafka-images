@@ -155,6 +155,52 @@ blocks:
             - . publish-test-results
             - artifact push workflow target/test-results
             - artifact push workflow target --destination target-AMD
+
+  # --- DUMMY / DO NOT MERGE: ICR pipeline design demo, cp-server/AMD only ---
+  # Ported here from .semaphore/cp_dockerfile_build.yml (a manually-triggered task, not this repo's
+  # PR pipeline) so inject-license + dev-ECR push can actually be exercised by a normal PR build.
+  # This file has no prod-push block at all, so there is nothing downstream this could unblock.
+  # Remove once depot#1011 merges and this design demo is done -- and note ServiceBot regenerates
+  # this file nightly, so this addition won't survive past that regardless.
+  - name: "Inject License AMD"
+    dependencies: ["Build, Test, & Scan AMD"]
+    run:
+      when: "pull_request =~ '.*'"
+    task:
+      jobs:
+        - name: Inject License AMD confluentinc/cp-server ubi9
+          commands:
+            - export OS_TAG="-ubi9"
+            - export ICR_SUFFIX="icr"
+            # TEMPORARY, dummy-test-only: depot#1011 hasn't merged/published yet, so inject-license
+            # doesn't exist on any real CI agent. Build the wheel straight from the PR branch instead
+            # of the normal pinned CodeArtifact install -- remove this once depot#1011 merges and a
+            # real cp-devtools release picks it up.
+            # Bazel's --workspace_status_command mechanism (stamp.sh or our own override) never
+            # actually reaches py_wheel's version substitution -- confirmed locally: wheelmaker
+            # receives the literal, unsubstituted '{BUILD_VERSION}' string regardless of what the
+            # volatile-status file contains. This is a rules_python/wheelmaker behavior, not fixable
+            # via any --workspace_status_command flag. So skip stamping entirely: sed the version
+            # attribute in the cloned BUILD.bazel to a literal string, then a plain (unstamped) build.
+            - git clone --branch nitsingh/cp-devtools-license-injection https://github.com/confluentinc/depot.git /tmp/depot-pr-1011
+            - 'sed -i "s|version = \"{BUILD_VERSION}\"|version = \"0.0.0.dev0\"|" /tmp/depot-pr-1011/python/cp_devtools/BUILD.bazel'
+            - cd /tmp/depot-pr-1011 && bazel build //python/cp_devtools:cp_devtools
+            # cp-devtools requires Python >=3.11; this agent's default pip/python is 3.10.
+            - sem-version python 3.11
+            - pip install /tmp/depot-pr-1011/bazel-bin/python/cp_devtools/cp_devtools-*.whl --force-reinstall
+            - cd -
+            - export DEV_IMAGE_FULL=${DOCKER_DEV_REGISTRY}confluentinc/cp-server:$DOCKER_DEV_TAG$OS_TAG$AMD_ARCH
+            - docker pull $DEV_IMAGE_FULL
+            # inject-license needs a tag with a real major.minor version to resolve a CASE/license --
+            # this PR's own dev tag (dev-pull-request-539-<hash>) has none (only a real release
+            # branch's own name, e.g. 8.4.x, would). Re-tag+push under an explicit version-bearing
+            # tag first so inject-license has something real to resolve against.
+            - export DEV_IMAGE_VERSIONED=${DOCKER_DEV_REGISTRY}confluentinc/cp-server:8.3.0-dummy$OS_TAG$AMD_ARCH
+            - docker tag $DEV_IMAGE_FULL $DEV_IMAGE_VERSIONED
+            - docker push $DEV_IMAGE_VERSIONED
+            - inject-license --image $DEV_IMAGE_VERSIONED --tag-suffix $ICR_SUFFIX --push
+  # --- END DUMMY ---
+
   - name: Build & Test ARM
     dependencies: ["Validation"]
     run:
