@@ -12,32 +12,17 @@ sonarqube:
 semaphore:
   enable: true
   pipeline_type: cp-dockerfile
-  docker_repos: [
-    'confluentinc/cp-server-connect',
-    'confluentinc/cp-kafka-connect',
-    'confluentinc/cp-kafka',
-    'confluentinc/confluent-local',
-    'confluentinc/cp-server'
-  ]
-  community_docker_repos: [
-    'confluentinc/cp-kafka-connect',
-    'confluentinc/cp-kafka',
-    'confluentinc/confluent-local'
-  ]
-  community_maven_modules: [
-    'kafka-connect',
-    'kafka',
-    'local'
-  ]
-  maven_phase: 'verify'
+  docker_repos: [confluentinc/cp-server-connect, confluentinc/cp-kafka-connect, confluentinc/cp-kafka, confluentinc/confluent-local, confluentinc/cp-server]
+  community_docker_repos: [confluentinc/cp-kafka-connect, confluentinc/cp-kafka, confluentinc/confluent-local]
+  community_maven_modules: [kafka-connect, kafka, local]
+  maven_phase: verify
   maven_skip_deploy: true
   build_arm: true
-  os_types: ['ubi9']
+  os_types: [ubi9]
   nano_version: true
   use_packages: true
   cp_images: true
   sign_images: true
-  pip_install_package: 'tox==3.28.0'
   push_latest: true
   tasks:
     - name: cp-dockerfile-build
@@ -64,10 +49,10 @@ semaphore:
         - name: SKIP_COMMUNITY
           required: false
           default_value: 'False'
-          description: 'Skip building community docker images'
+          description: Skip building community docker images
           options:
             - 'True'
-            - 'False'  
+            - 'False'
     - name: cp-dockerfile-promote
       branch: master
       pipeline_file: .semaphore/cp_dockerfile_promote.yml
@@ -84,18 +69,19 @@ semaphore:
         - name: PROMOTE_OS_TYPE
           required: true
           options:
-            - 'deb'
-            - 'ubi'
+            - deb
+            - ubi
         - name: SKIP_COMMUNITY
           required: false
           default_value: 'False'
-          description: 'Skip publishing community docker images'
+          description: Skip publishing community docker images
           options:
             - 'True'
-            - 'False'    
+            - 'False'
+  pip_install_packages: tox==3.28.0
 cp_dockerfile:
-  s390x_docker_repos: ['confluentinc/cp-server', 'confluentinc/cp-server-connect']
-  s390x_maven_modules: ['server', 'server-connect']
+  s390x_docker_repos: [confluentinc/cp-server, confluentinc/cp-server-connect]
+  s390x_maven_modules: [server, server-connect]
 code_artifact:
   enable: true
   package_paths:
