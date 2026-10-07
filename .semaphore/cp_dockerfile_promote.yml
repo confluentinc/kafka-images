@@ -504,7 +504,6 @@ blocks:
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
                   docker push $DOCKER_REPO:latest-$OS_TYPE$ARM_ARCH
               fi
-
   - name: Create Manifest
     dependencies: ["Promote AMD", "Promote ARM"]
     task:
