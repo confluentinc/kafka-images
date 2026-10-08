@@ -34,15 +34,26 @@ global_job_config:
       - export BRANCH_TAG=$(echo $SEMAPHORE_GIT_BRANCH | tr / -)
       - export DEFAULT_OS_TYPE="ubi"
       # For PR Builds using Packaging
-      - if [ $BRANCH_TAG == "master" ]; then export BUILD_KEY=$(pinto get-master-version); else export BUILD_KEY=$BRANCH_TAG; fi
-      - export PACKAGING_BUCKET="s3://dev-confluent-packages-654654529379-us-west-2/$BRANCH_TAG/"
-      - export LATEST_PACKAGING_BUILD_NUMBER=$(aws s3 ls $PACKAGING_BUCKET --no-paginate | grep 'PRE' | awk '{print $NF}' | awk '{print substr($1, 1, length($1)-1)}' | sort -n | tail -n 1)
-      # Check if version is complete, otherwise use the previous version
-      - (aws s3 ls $PACKAGING_BUCKET$LATEST_PACKAGING_BUILD_NUMBER/deb/ && aws s3 ls $PACKAGING_BUCKET$LATEST_PACKAGING_BUILD_NUMBER/rpm/ && aws s3 ls $PACKAGING_BUCKET$LATEST_PACKAGING_BUILD_NUMBER/archive/) || export LATEST_PACKAGING_BUILD_NUMBER=$(aws s3 ls $PACKAGING_BUCKET --no-paginate | grep 'PRE' | awk '{print $NF}' | awk '{print substr($1, 1, length($1)-1)}' | sort -n | tail -n 2 | head -n 1)
-      - export CONFLUENT_VERSION=$(pinto get-version --build $BUILD_KEY --key confluent.version)
-      - export URL_CONFLUENT_VERSION=$(echo $CONFLUENT_VERSION | awk -F . '{print $1"."$2}')
-      - export PACKAGES_URL="https://s3.us-west-2.amazonaws.com/dev-confluent-packages-654654529379-us-west-2/$BRANCH_TAG/$LATEST_PACKAGING_BUILD_NUMBER/PACKAGE_TYPE/$URL_CONFLUENT_VERSION"
-      - export PACKAGING_BUILD_NUMBER=$LATEST_PACKAGING_BUILD_NUMBER
+      # Use the latest packaging build of the branch, or the one before it while the latest has not yet published deb, rpm and archive
+      - |
+        if [[ $BRANCH_TAG == "master" ]]; then
+          export BUILD_KEY=$(pinto get-master-version)
+        else
+          export BUILD_KEY=$BRANCH_TAG
+        fi
+        export PACKAGING_BUCKET="s3://dev-confluent-packages-654654529379-us-west-2/$BRANCH_TAG/"
+        packaging_builds=$(aws s3 ls "$PACKAGING_BUCKET" --no-paginate | awk '/PRE/ { sub("/$", "", $NF); print $NF }' | sort -n)
+        export LATEST_PACKAGING_BUILD_NUMBER=$(echo "$packaging_builds" | tail -n 1)
+        for package_type in deb rpm archive; do
+          if ! aws s3 ls "$PACKAGING_BUCKET$LATEST_PACKAGING_BUILD_NUMBER/$package_type/"; then
+            export LATEST_PACKAGING_BUILD_NUMBER=$(echo "$packaging_builds" | tail -n 2 | head -n 1)
+            break
+          fi
+        done
+        export PACKAGING_BUILD_NUMBER=$LATEST_PACKAGING_BUILD_NUMBER
+        export CONFLUENT_VERSION=$(pinto get-version --build "$BUILD_KEY" --key confluent.version)
+        export URL_CONFLUENT_VERSION=$(echo "$CONFLUENT_VERSION" | awk -F . '{ print $1"."$2 }')
+        export PACKAGES_URL="https://s3.us-west-2.amazonaws.com/dev-confluent-packages-654654529379-us-west-2/$BRANCH_TAG/$PACKAGING_BUILD_NUMBER/PACKAGE_TYPE/$URL_CONFLUENT_VERSION"
       - >-
         if [[ $IS_BETA || $IS_HOTFIX || $IS_POST ]]; then
             export PLATFORM_LABEL=$(echo $BRANCH_TAG | awk -F - '{print "~"$2}')
