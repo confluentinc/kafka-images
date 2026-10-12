@@ -525,6 +525,7 @@ blocks:
           commands:
             - export OS_TAG="-ubi9"
             - export DOCKER_UPSTREAM_TAG="${DOCKER_UPSTREAM_TAG}${OS_TAG}"
+            # s390x agents have no ci-tools, so the s390x images build from the pom's own version instead of the nano version
             - export OS_PACKAGES_URL=$(echo "$S390X_PACKAGES_URL" | sed "s/PACKAGE_TYPE/rpm/g")
             - export PACKAGING_BUILD_ARGS="$PACKAGING_BUILD_ARGS -DCONFLUENT_PACKAGES_REPO=$OS_PACKAGES_URL"
             - mvn -Dmaven.wagon.http.retryHandler.count=3 --batch-mode -P jenkins,docker-fabric8 clean verify dependency:analyze validate -U $S390X_MVN_PL_ARGS -Ddocker.registry=$DOCKER_DEV_REGISTRY -Ddocker.upstream-registry=$DOCKER_UPSTREAM_REGISTRY -DBUILD_NUMBER=$BUILD_NUMBER -DGIT_COMMIT=$GIT_COMMIT -Ddocker.tag=$DOCKER_DEV_TAG$OS_TAG$S390X_ARCH -Ddocker.upstream-tag=$DOCKER_UPSTREAM_TAG -Darch.type=$S390X_ARCH -Ddocker.os_type=ubi9 $PACKAGING_BUILD_ARGS -Ddependency.check.skip=true
