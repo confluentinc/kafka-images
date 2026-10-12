@@ -139,13 +139,16 @@ blocks:
               export CONFLUENT_VERSION=$(pinto get-version --build "$BUILD_KEY" --key confluent.version)
               export URL_CONFLUENT_VERSION=$(echo "$CONFLUENT_VERSION" | awk -F . '{ print $1"."$2 }')
               export PACKAGES_URL="https://s3.us-west-2.amazonaws.com/dev-confluent-packages-654654529379-us-west-2/$BRANCH_TAG/$PACKAGING_BUILD_NUMBER/PACKAGE_TYPE/$URL_CONFLUENT_VERSION"
-            # s390x packages share the build number under their own s390x/ tree; builds without an s390x rpm repo fall back to the noarch packages
+            # s390x packages share the build number under their own s390x/ tree; builds whose s390x tree lacks the CP package for any package type the s390x jobs install fall back to the noarch packages
             - |
               s390x_packages_path="dev-confluent-packages-654654529379-us-west-2/s390x/$BRANCH_TAG/$PACKAGING_BUILD_NUMBER"
-              export S390X_PACKAGES_URL=$PACKAGES_URL
-              if aws s3 ls "s3://$s390x_packages_path/rpm/$URL_CONFLUENT_VERSION/repodata/repomd.xml"; then
-                export S390X_PACKAGES_URL="https://s3.us-west-2.amazonaws.com/$s390x_packages_path/PACKAGE_TYPE/$URL_CONFLUENT_VERSION"
-              fi
+              export S390X_PACKAGES_URL="https://s3.us-west-2.amazonaws.com/$s390x_packages_path/PACKAGE_TYPE/$URL_CONFLUENT_VERSION"
+              for cp_package_path in rpm/$URL_CONFLUENT_VERSION/confluent-platform-; do
+                if ! aws s3 ls "s3://$s390x_packages_path/$cp_package_path"; then
+                  export S390X_PACKAGES_URL=$PACKAGES_URL
+                  break
+                fi
+              done
             # Guard -D flags: fabric8 fails when build args resolve to null from empty -D values (e.g. -DCONFLUENT_VERSION=)
             - |
               export PACKAGING_BUILD_ARGS=""
@@ -234,6 +237,7 @@ blocks:
             - source env_vars.sh
             - export OS_TAG="-ubi9"
             - export DOCKER_UPSTREAM_TAG="${DOCKER_UPSTREAM_TAG}${OS_TAG}"
+            # s390x agents have no ci-tools, so the s390x images build from the pom's own version instead of the nano version
             - export OS_PACKAGES_URL=$(echo "$S390X_PACKAGES_URL" | sed "s/PACKAGE_TYPE/rpm/g")
             - export PACKAGING_BUILD_ARGS="$PACKAGING_BUILD_ARGS -DCONFLUENT_PACKAGES_REPO=$OS_PACKAGES_URL"
             - mvn -Dmaven.wagon.http.retryHandler.count=3 --batch-mode -P jenkins,docker-fabric8 clean verify dependency:analyze validate -U $S390X_MVN_PL_ARGS -Ddocker.registry=$DOCKER_DEV_REGISTRY -Ddocker.upstream-registry=$DOCKER_UPSTREAM_REGISTRY -DBUILD_NUMBER=$BUILD_NUMBER -DGIT_COMMIT=$GIT_COMMIT -Ddocker.tag=$DOCKER_DEV_TAG$OS_TAG$S390X_ARCH -Ddocker.upstream-tag=$DOCKER_UPSTREAM_TAG -Darch.type=$S390X_ARCH -Ddocker.os_type=ubi9 $PACKAGING_BUILD_ARGS -Ddependency.check.skip=true
