@@ -1,3 +1,5 @@
+# $schema: https://raw.githubusercontent.com/semaphoreio/semaphore/98bb4752c79049d36324e8c76451cd704c7924f3/plumber/spec/priv/v1.0.yml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/semaphoreio/semaphore/98bb4752c79049d36324e8c76451cd704c7924f3/plumber/spec/priv/v1.0.yml
 # This file is managed by ServiceBot plugin - Semaphore. The content in this file is created using a common
 # template and configurations in service.yml.
 # Any modifications made to ths file will be overwritten by the generated content in nightly runs.
@@ -42,8 +44,8 @@ global_job_config:
       - export BRANCH_TAG=$(echo $SEMAPHORE_GIT_BRANCH | tr / -)
       - export DOCKER_PROD_REGISTRY="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/"
       - export PROMOTED_TAG_PREFIX="$CONFLUENT_VERSION-$IMAGE_REVISION"
-      - if [[ ! "$PACKAGING_BUILD_NUMBER" ]]; then export $PACKAGING_BUILD_NUMBER="latest"; fi
-      - docker login --username $DOCKERHUB_USER --password $DOCKERHUB_APIKEY
+      - if [[ ! "$PACKAGING_BUILD_NUMBER" ]]; then export PACKAGING_BUILD_NUMBER="latest"; fi
+      - . get-auth-token dockerhub
       - export AMD_ARCH=.amd64
       - export ARM_ARCH=.arm64
       - export COMMUNITY_DOCKER_REPOS="confluentinc/cp-kafka-connect confluentinc/cp-kafka-connect-base confluentinc/cp-enterprise-kafka confluentinc/cp-kafka confluentinc/confluent-local"
@@ -57,8 +59,8 @@ global_job_config:
             fi
           done
         fi
-
 blocks:
+
   - name: Promote AMD
     dependencies: []
     task:
@@ -342,6 +344,7 @@ blocks:
                   docker tag $DOCKER_REPO:$PROMOTED_TAG $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
                   docker push $DOCKER_REPO:latest-$OS_TYPE$AMD_ARCH
               fi
+
   - name: Promote ARM
     dependencies: []
     task:
