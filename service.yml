@@ -46,6 +46,9 @@ semaphore:
           required: true
         - name: PACKAGES_URL
           required: true
+        - name: S390X_PACKAGES_URL
+          required: false
+          description: 'rpm repo for the s390x images, with PACKAGE_TYPE as a placeholder like PACKAGES_URL'
         - name: PACKAGES_MAVEN_URL
           required: true
         - name: PACKAGING_BUILD_NUMBER
