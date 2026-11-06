@@ -33,6 +33,8 @@ semaphore:
           required: true
         - name: PACKAGES_URL
           required: true
+        - name: S390X_PACKAGES_URL
+          required: false
         - name: PACKAGES_MAVEN_URL
           required: true
         - name: PACKAGING_BUILD_NUMBER
