@@ -15,9 +15,10 @@ Configuration:
         - ref: STDOUT
 
     Logger:
-{{- $defaultLoggersStr := printf "%s,%s,%s,%s,%s,%s,%s,%s" 
+{{- $defaultLoggersStr := printf "%s,%s,%s,%s,%s,%s,%s,%s,%s" 
     "kafka=INFO"
     "kafka.network.RequestChannel$=WARN"
+    "org.apache.kafka.network.Request=WARN"
     "kafka.producer.async.DefaultEventHandler=DEBUG"
     "kafka.request.logger=WARN"
     "kafka.controller=TRACE"
