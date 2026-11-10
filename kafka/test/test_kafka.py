@@ -188,6 +188,10 @@ class ConfigTest(unittest.TestCase):
                     level: WARN
                     AppenderRef:
                       ref: STDOUT
+                  - name: org.apache.kafka.network.Request
+                    level: WARN
+                    AppenderRef:
+                      ref: STDOUT
                   - name: kafka.request.logger
                     level: WARN
                     AppenderRef:
@@ -272,6 +276,10 @@ class ConfigTest(unittest.TestCase):
                     AppenderRef:
                       ref: STDOUT
                   - name: kafka.network.RequestChannel$
+                    level: WARN
+                    AppenderRef:
+                      ref: STDOUT
+                  - name: org.apache.kafka.network.Request
                     level: WARN
                     AppenderRef:
                       ref: STDOUT
