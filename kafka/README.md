@@ -7,6 +7,12 @@ Docker image for deploying and running the Community Version of Kafka packaged w
 * [Notes on using the image](https://docs.confluent.io/platform/current/installation/docker/installation.html) 
 * [Configuration Reference](https://docs.confluent.io/platform/current/installation/docker/config-reference.html#confluent-ak-configuration)
 
+### `IS_DYNAMIC_QUORUM`
+
+Optional boolean (`true` or `false`, defaults to `false`) that controls how the image formats the storage directory at container start. When set to `true`, the image passes `--no-initial-controllers` to `kafka-storage format`, so the node joins the existing controller quorum instead of writing its own initial voter set.
+
+**Only set `IS_DYNAMIC_QUORUM=true` after the cluster has completed migration to a dynamic controller quorum ([KIP-853](https://cwiki.apache.org/confluence/display/KAFKA/KIP-853%3A+KRaft+Controller+Membership+Changes)).** Until that migration is complete the quorum membership is still static (`controller.quorum.voters`), and formatting without an initial controller set produces a node that cannot join the quorum. Leave the variable unset or `false` on clusters that have not migrated.
+
 ## Resources
 
 * [Docker Quick Start for Apache Kafka using Confluent Platform](https://docs.confluent.io/platform/current/quickstart/ce-docker-quickstart.html#ce-docker-quickstart)
