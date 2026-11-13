@@ -1,3 +1,5 @@
+[![Try Confluent Cloud - The Data Streaming Platform](https://images.ctfassets.net/8vofjvai1hpv/10bgcSfn5MzmvS4nNqr94J/af43dd2336e3f9e0c0ca4feef4398f6f/confluent-banner-v2.svg)](https://confluent.cloud/signup?utm_source=github&utm_medium=banner&utm_campaign=oss-repos&utm_term=kafka-images)
+
 # Docker images for Apache Kafka
 
 This repo provides build files for [Apache Kafka](https://www.confluent.io/what-is-apache-kafka/) and Confluent Docker images. The images can be found on [Docker Hub](https://hub.docker.com/u/confluentinc/), and sample Docker Compose files [here](examples).
