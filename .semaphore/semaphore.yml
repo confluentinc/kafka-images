@@ -138,7 +138,7 @@ blocks:
               export PACKAGING_BUILD_NUMBER=$LATEST_PACKAGING_BUILD_NUMBER
               export CONFLUENT_VERSION=$(pinto get-version --build "$BUILD_KEY" --key confluent.version)
               export URL_CONFLUENT_VERSION=$(echo "$CONFLUENT_VERSION" | awk -F . '{ print $1"."$2 }')
-              export PACKAGES_URL="https://s3.us-west-2.amazonaws.com/dev-confluent-packages-654654529379-us-west-2/$BRANCH_TAG/$PACKAGING_BUILD_NUMBER/PACKAGE_TYPE/$URL_CONFLUENT_VERSION"
+              export PACKAGES_URL="https://dev-confluent-packages-654654529379-us-west-2.s3.us-west-2.amazonaws.com/custom-build/CB-18023/rpm/8.5"
             # s390x packages share the build number under their own s390x/ tree; builds whose s390x tree lacks the CP package for any package type the s390x jobs install fall back to the noarch packages
             - |
               s390x_packages_path="dev-confluent-packages-654654529379-us-west-2/s390x/$BRANCH_TAG/$PACKAGING_BUILD_NUMBER"
